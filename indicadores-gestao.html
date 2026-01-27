@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <script src="auth-check.js?v=27.12"></script>
+    <script src="auth-check.js?v=27.33"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Gestor | Mar Brasil</title>
 
@@ -17,7 +17,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="Favicon.png">
-    <script src="version.js?v=27.12"></script>
+    <script src="version.js?v=27.80"></script>
 
     <style>
         :root {
@@ -325,19 +325,114 @@
             -webkit-filter: blur(10px);
         }
 
-        @media (max-width: 992px) {
-            .dashboard-header {
-                grid-template-columns: 1fr auto;
-                padding: 15px 20px;
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
             }
 
-            .header-info {
-                display: none;
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Culture Carousel (Mural de Cultura v27.61) --- */
+        .culture-section {
+            width: 100%;
+            padding: 20px 0;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .culture-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 25px;
+            overflow-x: hidden;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .culture-scroll-container {
+            display: flex;
+            gap: 25px;
+            animation: cultureScroll 80s linear infinite;
+            padding-right: 25px;
+        }
+
+        .culture-scroll-container:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes cultureScroll {
+            0% {
+                transform: translateX(0);
             }
 
-            .main-container {
-                padding: 100px 20px 20px;
+            100% {
+                transform: translateX(-50%);
             }
+        }
+
+        .culture-glass-card {
+            background: rgba(242, 145, 27, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(242, 145, 27, 0.2);
+            border-left: 5px solid var(--primary);
+            border-radius: 20px;
+            padding: 40px;
+            min-width: 650px;
+            max-width: 650px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 350px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .culture-glass-card:hover {
+            background: rgba(242, 145, 27, 0.15);
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(242, 145, 27, 0.2);
+        }
+
+        .culture-phrase {
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 600;
+            line-height: 1.3;
+            font-style: italic;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .culture-tag {
+            font-size: 2.4rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-weight: 900;
+            margin-bottom: 25px;
+            opacity: 1;
+            line-height: 1;
+        }
+
+        .culture-watermark {
+            position: absolute;
+            bottom: 0px;
+            right: 15px;
+            font-size: 8rem;
+            color: rgba(255, 255, 255, 0.04);
+            pointer-events: none;
+            z-index: 1;
         }
     </style>
 </head>
@@ -397,7 +492,15 @@
                     <!-- Cards populated by JS -->
                 </div>
             </div>
-        </section>
+            <!-- Carrossel de Cultura (v27.61) -->
+            <section class="culture-section">
+                <div class="section-title">Valores & Cultura Mar Brasil</div>
+                <div class="culture-grid">
+                    <div class="culture-scroll-container" id="cultureCarousel">
+                        <!-- Cards Gerados por JS -->
+                    </div>
+                </div>
+            </section>
     </main>
 
     <div id="appVersionDisplay"
@@ -406,13 +509,49 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="indicadores-gestao.js?v=27.12"></script>
+    <script src="indicadores-gestao.js?v=27.62"></script>
     <script>
+        // Carrossel de Cultura - Engrenagem v27.61
+        const FRASES_CULTURA = [
+            { tag: "Missão", texto: "Nossa missão é promover a Climatização com Autossuficiência Energética em Escolas Públicas do Brasil." },
+            { tag: "Propósito", texto: "A Mar Brasil só prospera quando cuida de vidas reais." },
+            { tag: "Eficiência", texto: "O ar que sua empresa respira deve levar saúde, segurança e eficiência a cada cliente." },
+            { tag: "Segurança", texto: "Segurança é absoluta e inegociável." },
+            { tag: "Valores", texto: "Respeito, Disciplina, Técnica, Limpeza e Segurança orientam cada ação." },
+            { tag: "Pessoas", texto: "Valorizar pessoas, impulsionar talentos e crescer juntos com empatia e propósito." },
+            { tag: "Compromisso", texto: "Lealdade, fidelidade e transparência não são valores declarados, são compromissos diários." },
+            { tag: "Excelência", texto: "Excelência técnica sempre dentro das normas e regulamentos." },
+            { tag: "Risco Zero", texto: "Zero tolerância a práticas que coloquem vidas em risco." },
+            { tag: "Qualidade", texto: "Nosso compromisso é com a qualidade do ar que você respira." }
+        ];
+
+        function initCultureCarousel() {
+            const container = document.getElementById('cultureCarousel');
+            if (!container) return;
+
+            // Duplicar para scroll infinito
+            const carrosselItems = [...FRASES_CULTURA, ...FRASES_CULTURA];
+
+            carrosselItems.forEach((item, i) => {
+                const card = document.createElement('div');
+                card.className = 'culture-glass-card';
+
+                card.innerHTML = `
+                    <div class="culture-tag">${item.tag}</div>
+                    <div class="culture-phrase">“${item.texto}”</div>
+                    <div class="culture-watermark"><i class="bi bi-quote"></i></div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
         // Version Updater
         document.addEventListener('DOMContentLoaded', () => {
             if (window.APP_VERSION) {
                 document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION;
             }
+            initCultureCarousel();
         });
     </script>
 </body>

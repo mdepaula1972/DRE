@@ -412,6 +412,13 @@ document.addEventListener('DOMContentLoaded', () => {
             resumo: {}
         };
 
+        // CORREÇÃO: Prioriza o contexto específico da página (ex: PeopleBoard)
+        if (typeof window.getPageContext === 'function') {
+            const pageCtx = window.getPageContext();
+            Object.assign(context, pageCtx);
+            return context;
+        }
+
         // 1. Detect Page Type
         if (document.getElementById('dreTable')) context.pageType = 'DRE';
         else if (document.getElementById('indicatorsContainer')) context.pageType = 'INDICADORES';
@@ -548,8 +555,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Context
         const context = getDashboardContext();
 
-        if (context.indicadores.length === 0 && (!context.csvData || context.csvData.length === 0)) {
-            addMessage('bot', "Não encontrei dados na tela. Por favor, carregue um arquivo CSV primeiro.");
+        // CORREÇÃO: Permite análise se houver indicadores, dossiê de funcionário ou CSV
+        const hasData = (context.indicadores && context.indicadores.length > 0) ||
+            (context.csvData && context.csvData.length > 0) ||
+            (context.activeEmployee) ||
+            (context.totalEmployees > 0);
+
+        if (!hasData) {
+            addMessage('bot', "Não encontrei dados na tela. Por favor, carregue um arquivo CSV ou abra um perfil para análise.");
             currentController = null;
             return;
         }

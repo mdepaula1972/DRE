@@ -18,7 +18,7 @@
     <!-- Bootstrap 5 CSS -->
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="Favicon.png">
-    <script src="version.js?v=27.12"></script>
+    <script src="version.js?v=27.82"></script>
 
     <style>
         :root {
@@ -91,10 +91,28 @@
         }
 
         /* --- Satellites (Buttons) --- */
-        .satellite {
+        .satellite-wrapper {
             position: absolute;
+            width: 0;
+            height: 0;
+            top: 50%;
+            left: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: orbitalMove 60s linear infinite;
+            z-index: 20;
+        }
+
+        .satellite-wrapper:hover {
+            animation-play-state: paused;
+            z-index: 100;
+        }
+
+        .satellite {
             width: 160px;
             height: 160px;
+            flex-shrink: 0;
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -106,17 +124,11 @@
             justify-content: center;
             text-decoration: none;
             color: white;
-            transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            z-index: 20;
-            cursor: pointer;
             text-align: center;
             padding: 15px;
-            animation: orbitalMove 60s linear infinite;
-            top: 50%;
-            left: 50%;
-            margin-top: -80px;
-            margin-left: -80px;
+            cursor: pointer;
         }
 
         @keyframes orbitalMove {
@@ -127,6 +139,27 @@
             to {
                 transform: rotate(calc(var(--start-angle) + 360deg)) translateY(-275px) rotate(calc(-1 * (var(--start-angle) + 360deg)));
             }
+        }
+
+        .satellite:hover {
+            background: var(--primary);
+            border-color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 60px rgba(242, 145, 27, 0.9);
+            color: #000 !important;
+        }
+
+        .satellite i {
+            display: block;
+            margin: 0 auto 8px;
+            font-size: 2.5rem;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .satellite:hover i {
+            color: #000 !important;
+            transform: translateY(-5px) scale(1.1);
         }
 
         .satellite span {
@@ -333,53 +366,69 @@
         </div>
 
         <!-- Orbs -->
-        <a href="dre.html" class="satellite sat-1">
-            <i class="bi bi-graph-up-arrow"></i>
-            <span>DRE Gerencial</span>
-            <p>Visão Financeira</p>
-        </a>
+        <div class="satellite-wrapper sat-1">
+            <a href="dre.html" class="satellite">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>DRE Gerencial</span>
+                <p>Visão Financeira</p>
+            </a>
+        </div>
 
-        <a href="analise-setorial.html" class="satellite sat-2">
-            <i class="bi bi-pie-chart-fill"></i>
-            <span>Análise Setorial</span>
-            <p>Custos por Área</p>
-        </a>
+        <div class="satellite-wrapper sat-2">
+            <a href="analise-setorial.html" class="satellite">
+                <i class="bi bi-pie-chart-fill"></i>
+                <span>Análise Setorial</span>
+                <p>Custos por Área</p>
+            </a>
+        </div>
 
-        <a href="parcelamentos.html" class="satellite sat-3">
-            <i class="bi bi-credit-card-2-front"></i>
-            <span>Parcelamentos</span>
-            <p>Controle de Dívidas</p>
-        </a>
+        <div class="satellite-wrapper sat-3">
+            <a href="parcelamentos.html" class="satellite">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Parcelamentos</span>
+                <p>Controle de Dívidas</p>
+            </a>
+        </div>
 
-        <a href="seguros.html" class="satellite sat-4">
-            <i class="bi bi-shield-check"></i>
-            <span>Seguros</span>
-            <p>Gestão de Apólices</p>
-        </a>
+        <div class="satellite-wrapper sat-4">
+            <a href="seguros.html" class="satellite">
+                <i class="bi bi-shield-check"></i>
+                <span>Seguros</span>
+                <p>Gestão de Apólices</p>
+            </a>
+        </div>
 
-        <a href="indicadores_v2.html" class="satellite sat-5">
-            <i class="bi bi-speedometer2"></i>
-            <span>Indicadores</span>
-            <p>KPIs Estratégicos</p>
-        </a>
+        <div class="satellite-wrapper sat-5">
+            <a href="indicadores_v2.html" class="satellite">
+                <i class="bi bi-speedometer2"></i>
+                <span>Indicadores</span>
+                <p>KPIs Estratégicos</p>
+            </a>
+        </div>
 
-        <a href="contratos.html" class="satellite sat-6">
-            <i class="bi bi-file-earmark-text-fill"></i>
-            <span>Contratos</span>
-            <p>Vínculo Faturamento</p>
-        </a>
+        <div class="satellite-wrapper sat-6">
+            <a href="contratos.html" class="satellite">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span>Contratos</span>
+                <p>Vínculo Faturamento</p>
+            </a>
+        </div>
 
-        <a href="comissoes.html" class="satellite sat-7">
-            <i class="bi bi-person-badge-fill"></i>
-            <span>Comissões</span>
-            <p>Divisão Equipe</p>
-        </a>
+        <div class="satellite-wrapper sat-7">
+            <a href="comissoes.html" class="satellite">
+                <i class="bi bi-person-badge-fill"></i>
+                <span>Comissões</span>
+                <p>Divisão Equipe</p>
+            </a>
+        </div>
 
-        <a href="people.html" class="satellite sat-8">
-            <i class="bi bi-people-fill"></i>
-            <span>PeopleBoard</span>
-            <p>Gestão de RH</p>
-        </a>
+        <div class="satellite-wrapper sat-8">
+            <a href="people.html" class="satellite">
+                <i class="bi bi-people-fill"></i>
+                <span>PeopleBoard</span>
+                <p>Gestão de RH</p>
+            </a>
+        </div>
     </div>
 
     <div class="hud-info">
@@ -388,7 +437,7 @@
     </div>
 
     <div class="hud-version">
-        v<span id="appVersionDisplay">0.0</span>
+        v<span class="appVersionText">0.0</span>
     </div>
 
     <!-- Login Overlay -->
@@ -413,17 +462,19 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js?v=27.12"></script>
+    <script src="script.js?v=27.44"></script>
 
-    <div id="appVersionDisplay"
+    <div id="footerVersionDisplay" class="appVersionText"
         style="position: fixed; bottom: 10px; right: 10px; font-size: 0.65rem; color: rgba(255,255,255,0.3); z-index: 1000;">
-        v0.0 (Deploy: 23/01 17:45)
+        v0.0
     </div>
     <script>
         // Version Updater
         document.addEventListener('DOMContentLoaded', () => {
             if (window.APP_VERSION) {
-                document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION;
+                document.querySelectorAll('.appVersionText').forEach(el => {
+                    el.textContent = 'v' + window.APP_VERSION;
+                });
             }
         });
         // Existing Auth Script
