@@ -18,7 +18,8 @@
     <!-- Bootstrap 5 CSS -->
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="Favicon.png">
-    <script src="version.js?v=27.88"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="version.js?v=17.0"></script>
 
     <style>
         :root {
@@ -439,29 +440,9 @@
         v<span class="appVersionText">0.0</span>
     </div>
 
-    <!-- Login Overlay -->
-    <div id="loginOverlay"
-        style="position: fixed; top:0; left:0; width:100%; height:100%; background: #0d0d0d; z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px);">
-        <div
-            style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; text-align: center;">
-            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Logo" style="width: 150px; margin-bottom: 20px;">
-            <h2 style="font-size: 1.5rem; margin-bottom: 20px;">Acesso Restrito</h2>
-            <div style="position: relative; margin-bottom: 15px;">
-                <input type="password" id="dashboardPass" placeholder="Digite a senha de acesso"
-                    style="width: 100%; padding: 12px; padding-right: 45px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; outline: none;">
-                <i class="bi bi-eye-slash" id="togglePass"
-                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-size: 1.2rem;"></i>
-            </div>
-            <button onclick="checkAuth()"
-                style="width: 100%; padding: 12px; border-radius: 8px; background: var(--primary); border: none; color: white; font-weight: 600; cursor: pointer;">Entrar</button>
-            <p id="authError" style="color: #ff4d4d; font-size: 0.8rem; margin-top: 15px; display: none;">Senha
-                incorreta. Tente novamente.</p>
-        </div>
-    </div>
-
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js?v=27.44"></script>
+    <script src="auth.js?v=17.0"></script>
 
     <div id="footerVersionDisplay" class="appVersionText"
         style="position: fixed; bottom: 10px; right: 10px; font-size: 0.65rem; color: rgba(255,255,255,0.3); z-index: 1000;">
@@ -476,59 +457,8 @@
                 });
             }
         });
-        // Existing Auth Script
-        async function checkAuth() {
-            const pass = document.getElementById('dashboardPass').value;
-            const errorEl = document.getElementById('authError');
-
-            try {
-                const response = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: pass.trim() })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    sessionStorage.setItem('dashboard_auth', 'true');
-                    document.getElementById('loginOverlay').style.display = 'none';
-                } else {
-                    console.error('Falha na auth:', response.status);
-                    errorEl.textContent = data.error || 'Senha incorreta. Tente novamente.';
-                    errorEl.style.display = 'block';
-                }
-            } catch (err) {
-                console.error('Erro de fetch:', err);
-                alert('Erro de conexão com o servidor de segurança. Verifique o console.');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('dashboard_auth') === 'true') {
-                document.getElementById('loginOverlay').style.display = 'none';
-            }
-
-            if (window.APP_VERSION) {
-                document.getElementById('appVersionDisplay').textContent = window.APP_VERSION;
-            }
-
-            // Toggle Password Visibility
-            const togglePass = document.getElementById('togglePass');
-            const passwordInput = document.getElementById('dashboardPass');
-
-            togglePass.addEventListener('click', () => {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                togglePass.classList.toggle('bi-eye');
-                togglePass.classList.toggle('bi-eye-slash');
-            });
-
-            // Enter key trigger
-            document.getElementById('dashboardPass').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') checkAuth();
-            });
-        });
     </script>
 
 </body>
+
+</html>
