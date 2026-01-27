@@ -4,72 +4,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empréstimos | PeopleBoard v27.80</title>
+    <title>Empréstimos - Mar Brasil | Gestão Financeira</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <!-- Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Libraries -->
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <link rel="stylesheet" href="people.css?v=27.84">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css?v=27.88">
+    <link rel="stylesheet" href="custom-fixes.css?v=27.88">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Favicon.png">
+    <script src="version.js?v=27.87"></script>
+
     <style>
-        .loan-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
+        .loan-indicator {
+            background: white;
+            border-radius: 12px;
             padding: 20px;
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .loan-card:hover {
-            transform: translateY(-5px);
+        .loan-indicator i {
+            font-size: 1.8rem;
+            opacity: 0.15;
         }
 
-        .loan-card i {
-            font-size: 2rem;
-            opacity: 0.3;
-        }
-
-        .loan-card .value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--secondary);
-        }
-
-        .loan-card .label {
-            font-size: 0.8rem;
-            color: #666;
+        .loan-indicator .label {
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            color: #666;
+        }
+
+        .loan-indicator .value {
+            font-size: 1.4rem;
+            font-weight: 700;
         }
 
         .projection-table thead th {
-            background: var(--header-bg);
+            background: #1a1a1a;
             color: white;
-            font-family: 'Orbitron', sans-serif;
             font-size: 0.7rem;
             text-transform: uppercase;
-            padding: 12px;
+            padding: 10px;
         }
 
         .projection-table tbody td {
-            font-size: 0.85rem;
-            padding: 10px;
+            font-size: 0.8rem;
+            padding: 8px;
             vertical-align: middle;
         }
 
-        .month-col {
-            min-width: 100px;
-            text-align: center;
+        .projection-table tbody tr:hover {
             background: rgba(242, 145, 27, 0.05);
-            font-weight: 600;
         }
 
         .active-row {
@@ -77,91 +80,106 @@
         }
 
         .closed-row {
-            opacity: 0.6;
-            filter: grayscale(1);
+            opacity: 0.5;
+        }
+
+        .month-col {
+            text-align: center;
+            font-weight: 600;
+            background: rgba(242, 145, 27, 0.03);
         }
     </style>
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="Favicon.png">
-    <script src="version.js?v=27.84"></script>
 </head>
 
 <body>
 
-    <!-- Sidebar de Navegação -->
+    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Logo" class="img-fluid" style="max-height: 40px;">
-            <button class="sidebar-toggle-btn" id="sidebarToggleClose">
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" class="img-fluid"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+            <span class="fw-bold fs-4 ms-2" style="display:none; color: #F2911B;">Filtros</span>
+            <button class="sidebar-toggle-btn ms-auto" id="sidebarToggle">
                 <i class="bi bi-chevron-left"></i>
             </button>
         </div>
 
-        <div class="sidebar-content mt-4">
-            <h6 class="text-uppercase text-white-50 small mb-3"><i class="bi bi-menu-button-wide me-2"></i>Navegação
-            </h6>
-            <nav class="nav flex-column gap-2">
-                <a href="people.html" class="nav-link text-white-50 p-2 rounded hover-bg-dark">
-                    <i class="bi bi-people me-2"></i>PeopleBoard
-                </a>
-                <a href="emprestimos.html" class="nav-link text-white active p-2 rounded bg-primary">
-                    <i class="bi bi-bank me-2"></i>Empréstimos
-                </a>
-                <a href="index.html" class="nav-link text-white-50 p-2 rounded hover-bg-dark">
-                    <i class="bi bi-speedometer2 me-2"></i>DRE Geral
-                </a>
-            </nav>
+        <div class="sidebar-content">
+            <div class="filters-section">
+                <h6 class="text-uppercase text-white-50 mb-3"><i class="bi bi-funnel me-2"></i>Filtros</h6>
 
-            <h6 class="text-uppercase text-white-50 small mb-3 mt-5"><i class="bi bi-funnel me-2"></i>Filtros
-                Financeiros</h6>
-            <div class="mb-3">
-                <label class="form-label text-white-50 small">Empresa</label>
-                <select id="filterCompany" class="form-select form-select-sm bg-dark text-white border-secondary"
-                    onchange="renderDashboard()">
-                    <option value="">Todas</option>
-                    <option value="MarBR">MarBR</option>
-                    <option value="DZM">DZM</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label text-white-50 small">Vínculo</label>
-                <select id="filterType" class="form-select form-select-sm bg-dark text-white border-secondary"
-                    onchange="renderDashboard()">
-                    <option value="">Todos</option>
-                    <option value="CLT">CLT</option>
-                    <option value="Estagiário">Estagiário</option>
-                    <option value="PJ">PJ</option>
-                </select>
+                <div class="mb-3">
+                    <label class="form-label text-white">Empresa</label>
+                    <select class="form-select form-select-sm" id="filterCompany" onchange="renderDashboard()">
+                        <option value="">Todas</option>
+                        <option value="MarBR">MarBR</option>
+                        <option value="DZM">DZM</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Vínculo</label>
+                    <select class="form-select form-select-sm" id="filterType" onchange="renderDashboard()">
+                        <option value="">Todos</option>
+                        <option value="CLT">CLT</option>
+                        <option value="Estagiário">Estagiário</option>
+                        <option value="PJ">PJ</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Status</label>
+                    <select class="form-select form-select-sm" id="filterStatus" onchange="renderDashboard()">
+                        <option value="">Todos</option>
+                        <option value="ativo">Ativos</option>
+                        <option value="quitado">Quitados</option>
+                    </select>
+                </div>
+
+                <button id="btnClearFilters" class="btn btn-outline-light btn-sm w-100 mt-2" onclick="clearFilters()">
+                    <i class="bi bi-x-circle me-2"></i>Limpar
+                </button>
+
+                <div class="mt-4 pt-4 border-top border-secondary text-white-50 text-center small">
+                    <small>Versão: <span id="appVersionDisplay">v0.0</span></small>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Botão de Reabrir Sidebar -->
-    <button id="sidebarToggleOpen" class="sidebar-open-btn">
-        <i class="bi bi-chevron-right"></i>
-    </button>
-
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
 
-        <header class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-            <div>
-                <h1 class="h3 fw-bold text-dark mb-0">Gestão de Empréstimos <span
-                        class="badge bg-warning-subtle text-warning ms-2" style="font-size: 0.6rem;">v27.80</span></h1>
-                <p class="text-muted small mb-0">Consolidação e Projeção de Parcelas</p>
+        <!-- Header -->
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" style="max-height: 120px;">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-0">Empréstimos</h1>
+                    <p class="text-muted mb-0">Consolidação e Projeção de Parcelas</p>
+                </div>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary" onclick="exportLoansPDF()">
-                    <i class="bi bi-file-earmark-pdf me-2"></i>Exportar Relatório
+            <div class="d-flex gap-2 align-items-center">
+                <a href="people.html" class="btn btn-outline-dark">
+                    <i class="bi bi-people me-1"></i>
+                    <span class="d-none d-md-inline">PeopleBoard</span>
+                </a>
+                <a href="landing.html" class="btn btn-secondary text-white">
+                    <i class="bi bi-house-door me-1"></i>
+                    <span class="d-none d-md-inline">Voltar ao Início</span>
+                </a>
+                <button class="btn btn-outline-danger" onclick="exportLoansPDF()">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>
+                    <span class="d-none d-md-inline">Exportar PDF</span>
                 </button>
             </div>
         </header>
 
-        <!-- Cards de Indicadores -->
+        <!-- KPI Cards -->
+        <h6 class="text-uppercase text-muted mb-3 small fw-bold">Indicadores Financeiros</h6>
         <div class="row g-3 mb-4">
             <div class="col-md-3">
-                <div class="loan-card d-flex justify-content-between align-items-center">
+                <div class="loan-indicator d-flex justify-content-between align-items-center">
                     <div>
                         <div class="label">Total Emprestado</div>
                         <div class="value text-primary" id="cardTotalLent">R$ 0,00</div>
@@ -170,7 +188,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="loan-card d-flex justify-content-between align-items-center"
+                <div class="loan-indicator d-flex justify-content-between align-items-center"
                     style="border-left-color: #00477A;">
                     <div>
                         <div class="label">Saldo em Aberto</div>
@@ -180,7 +198,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="loan-card d-flex justify-content-between align-items-center"
+                <div class="loan-indicator d-flex justify-content-between align-items-center"
                     style="border-left-color: #28a745;">
                     <div>
                         <div class="label">Recebível no Mês</div>
@@ -190,7 +208,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="loan-card d-flex justify-content-between align-items-center"
+                <div class="loan-indicator d-flex justify-content-between align-items-center"
                     style="border-left-color: #6f42c1;">
                     <div>
                         <div class="label">Contratos Ativos</div>
@@ -202,51 +220,43 @@
         </div>
 
         <!-- Projeção Mensal -->
+        <h6 class="text-uppercase text-muted mb-3 small fw-bold">Projeção de Recebimentos (12 Meses)</h6>
         <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-dark text-white p-3">
-                <h6 class="mb-0 hud-font small"><i class="bi bi-calendar3 me-2"></i>PROJEÇÃO DE RECEBIMENTOS (PRÓXIMOS
-                    12 MESES)</h6>
-            </div>
-            <div class="card-body p-0 overflow-auto">
-                <table class="table mb-0 projection-table text-nowrap">
-                    <thead id="projectionHeader">
-                        <!-- Gerado via JS -->
-                    </thead>
-                    <tbody id="projectionBody">
-                        <!-- Gerado via JS -->
-                    </tbody>
-                    <tfoot class="table-dark" id="projectionFooter">
-                        <!-- Gerado via JS -->
-                    </tfoot>
-                </table>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0 projection-table">
+                        <thead id="projectionHeader"></thead>
+                        <tbody id="projectionBody"></tbody>
+                        <tfoot class="table-dark" id="projectionFooter"></tfoot>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Lista Detalhada -->
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-list-nested me-2"></i>DETALHAMENTO POR COLABORADOR</h6>
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-list-nested me-2 text-primary"></i>Detalhamento por Colaborador
+                </h6>
                 <div class="badge bg-light text-dark border">TOTAL: <span id="totalItemsCount">0</span></div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0" style="font-size: 0.85rem;">
-                        <thead class="bg-light">
+                        <thead class="table-light">
                             <tr>
                                 <th class="ps-3">COLABORADOR</th>
                                 <th>EMPRESA</th>
                                 <th>VÍNCULO</th>
-                                <th>TOTAL EMPRESTADO</th>
+                                <th>TOTAL</th>
                                 <th>PENDENTE</th>
-                                <th>PARCELA ATUAL</th>
-                                <th>PARCELAS</th>
+                                <th>PARCELA</th>
+                                <th>QTD</th>
                                 <th>STATUS</th>
                                 <th class="text-center">AÇÕES</th>
                             </tr>
                         </thead>
-                        <tbody id="detailedLoanBody">
-                            <!-- Gerado via JS -->
-                        </tbody>
+                        <tbody id="detailedLoanBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -258,7 +268,34 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script src="emprestimos.js?v=27.84"></script>
+    <script src="emprestimos.js?v=27.87"></script>
+    <script>
+        // Sidebar Toggle
+        document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('bi-chevron-left');
+            icon.classList.toggle('bi-chevron-right');
+        });
+
+        // Clear Filters
+        function clearFilters() {
+            document.getElementById('filterCompany').value = '';
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterStatus').value = '';
+            renderDashboard();
+        }
+
+        // Version Updater
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION;
+            }
+        });
+    </script>
 </body>
 
 </html>

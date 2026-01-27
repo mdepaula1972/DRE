@@ -28,13 +28,22 @@ async function fetchEmployees() {
 }
 
 function renderDashboard() {
-    const filterCompany = document.getElementById('filterCompany').value;
-    const filterType = document.getElementById('filterType').value;
+    const filterCompany = document.getElementById('filterCompany')?.value || '';
+    const filterType = document.getElementById('filterType')?.value || '';
+    const filterStatus = document.getElementById('filterStatus')?.value || '';
 
     const filtered = allEmployees.filter(emp => {
         const matchCompany = !filterCompany || emp.company === filterCompany;
         const matchType = !filterType || emp.employment_type === filterType;
         const hasLoan = (emp.loan_amount > 0) || (emp.loans_data && emp.loans_data.length > 0);
+
+        // Filtro por status do empréstimo
+        if (filterStatus) {
+            const debt = calculateDebt(emp);
+            if (filterStatus === 'ativo' && debt <= 0) return false;
+            if (filterStatus === 'quitado' && debt > 0) return false;
+        }
+
         return matchCompany && matchType && hasLoan;
     });
 
