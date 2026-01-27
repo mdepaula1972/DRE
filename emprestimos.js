@@ -182,17 +182,22 @@ function renderDetailedTable(filtered) {
     const body = document.getElementById('detailedLoanBody');
     body.innerHTML = '';
 
-    filtered.forEach(emp => {
+    filtered.forEach((emp, idx) => {
         const tr = document.createElement('tr');
         const debt = calculateDebt(emp);
         const totalLent = (emp.loan_amount || 0) + (emp.loans_data ? emp.loans_data.reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0) : 0);
         const currentInstallment = getInstallmentForMonth(emp, `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`);
 
+        // Verifica se tem múltiplos empréstimos
+        const hasMultiple = (emp.loan_amount > 0 && emp.loans_data && emp.loans_data.length > 0) || (emp.loans_data && emp.loans_data.length > 1);
+        const rowId = `detail-${idx}`;
+
         tr.className = debt > 0 ? 'active-row' : 'closed-row';
         tr.innerHTML = `
-            <td class="ps-3">
-                <div class="fw-bold">${emp.full_name}</div>
-                <div class="small text-muted">${emp.job_role || '---'}</div>
+            <td class="ps-2">
+                ${hasMultiple ? `<button class="btn btn-xs btn-outline-warning p-0 px-1 me-2" onclick="toggleLoanDetail('${rowId}')" title="Expandir"><i class="bi bi-plus-circle" id="icon-${rowId}"></i></button>` : '<span style="width:28px;display:inline-block;"></span>'}
+                <span class="fw-bold">${emp.full_name}</span>
+                <div class="small text-muted ps-4">${emp.job_role || '---'}</div>
             </td>
             <td><span class="badge bg-light text-dark border">${emp.company || '---'}</span></td>
             <td>${emp.employment_type || '---'}</td>
@@ -208,8 +213,64 @@ function renderDetailedTable(filtered) {
             </td>
         `;
         body.appendChild(tr);
+
+        // Linha de detalhamento (oculta por padrão)
+        if (hasMultiple || emp.loan_amount > 0) {
+            const detailRow = document.createElement('tr');
+            detailRow.id = rowId;
+            detailRow.style.display = 'none';
+            detailRow.className = 'bg-dark';
+
+            let detailHTML = '<td colspan="9" class="ps-5 py-2"><div class="row g-2">';
+
+            // Empréstimo Principal
+            if (emp.loan_amount > 0) {
+                detailHTML += `
+                    <div class="col-auto">
+                        <div class="border border-warning rounded p-2 bg-dark-subtle" style="min-width:200px;">
+                            <div class="small text-warning fw-bold mb-1"><i class="bi bi-star-fill me-1"></i>PRINCIPAL</div>
+                            <div class="small">Valor: <span class="text-white fw-bold">${formatCurrency(emp.loan_amount)}</span></div>
+                            <div class="small">Parcelas: <span class="text-white">${emp.loan_installments}x</span></div>
+                            <div class="small">Início: <span class="text-white">${emp.loan_start_cycle || '---'}</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Empréstimos Diversos
+            if (emp.loans_data && emp.loans_data.length > 0) {
+                emp.loans_data.forEach((ln, i) => {
+                    detailHTML += `
+                        <div class="col-auto">
+                            <div class="border border-secondary rounded p-2 bg-dark-subtle" style="min-width:200px;">
+                                <div class="small text-muted fw-bold mb-1"><i class="bi bi-cash me-1"></i>ADICIONAL #${i + 1}</div>
+                                <div class="small">Valor: <span class="text-white fw-bold">${formatCurrency(ln.amount)}</span></div>
+                                <div class="small">Parcelas: <span class="text-white">${ln.installments}x</span></div>
+                                <div class="small">Início: <span class="text-white">${ln.start_cycle || '---'}</span></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            detailHTML += '</div></td>';
+            detailRow.innerHTML = detailHTML;
+            body.appendChild(detailRow);
+        }
     });
 }
+
+window.toggleLoanDetail = function (rowId) {
+    const row = document.getElementById(rowId);
+    const icon = document.getElementById('icon-' + rowId);
+    if (row) {
+        const isHidden = row.style.display === 'none';
+        row.style.display = isHidden ? 'table-row' : 'none';
+        if (icon) {
+            icon.className = isHidden ? 'bi bi-dash-circle' : 'bi bi-plus-circle';
+        }
+    }
+};
 
 function setupLayout() {
     const btnClose = document.getElementById('sidebarToggleClose');
