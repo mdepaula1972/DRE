@@ -516,6 +516,88 @@ function calculateDebtForLoan(amount, installments, startCycle) {
     return Math.max(0, amount - paid);
 }
 
+// --- CENTRAL DE DOCUMENTOS ---
+window.addDocRow = function (containerId, value = '') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = 'input-group input-group-sm mb-1 doc-link-row';
+    div.innerHTML = `
+        <span class="input-group-text bg-dark border-secondary text-info"><i class="bi bi-link-45deg"></i></span>
+        <input type="url" class="form-control form-control-dark border-secondary" placeholder="https://..." value="${value}">
+        <button class="btn btn-outline-danger border-secondary" type="button" onclick="this.parentElement.remove()">
+            <i class="bi bi-trash"></i>
+        </button>
+    `;
+    container.appendChild(div);
+};
+
+window.openDocsModal = function () {
+    const id = currentProfileId;
+    const emp = allEmployees.find(e => e.id === id);
+    if (!emp) return;
+
+    // Reset Contratos (1 fixo)
+    document.getElementById('docLinkContratos').value = emp.links_contratos || '';
+
+    // Helper para parse seguro
+    const safeParse = (str) => {
+        try { return JSON.parse(str || '[]'); }
+        catch (e) { return str ? [str] : []; } // Caso seja texto legado
+    };
+
+    // Reset Aditivos
+    const listAditivos = document.getElementById('listAditivos');
+    listAditivos.innerHTML = '';
+    const aditivos = safeParse(emp.links_aditivos);
+    aditivos.forEach(link => addDocRow('listAditivos', link));
+    if (listAditivos.children.length === 0) addDocRow('listAditivos');
+
+    // Reset Emprestimos
+    const listEmprestimos = document.getElementById('listEmprestimos');
+    listEmprestimos.innerHTML = '';
+    const emprestimos = safeParse(emp.links_emprestimos);
+    emprestimos.forEach(link => addDocRow('listEmprestimos', link));
+    if (listEmprestimos.children.length === 0) addDocRow('listEmprestimos');
+
+    const m = new bootstrap.Modal(document.getElementById('modalDocumentos'));
+    m.show();
+};
+
+window.saveDocsLinks = async function () {
+    const id = currentProfileId;
+    if (!id) return;
+
+    const aditivos = Array.from(document.querySelectorAll('#listAditivos input'))
+        .map(i => i.value.trim()).filter(v => v !== '');
+    const emprestimos = Array.from(document.querySelectorAll('#listEmprestimos input'))
+        .map(i => i.value.trim()).filter(v => v !== '');
+
+    const payload = {
+        links_contratos: document.getElementById('docLinkContratos').value.trim(),
+        links_aditivos: JSON.stringify(aditivos),
+        links_emprestimos: JSON.stringify(emprestimos)
+    };
+
+    try {
+        const { error } = await db.from('employees').update(payload).eq('id', id);
+        if (error) throw error;
+
+        // Atualizar state local
+        const idx = allEmployees.findIndex(e => e.id === id);
+        if (idx !== -1) {
+            allEmployees[idx] = { ...allEmployees[idx], ...payload };
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('modalDocumentos')).hide();
+        alert("✅ Central de Documentos atualizada!");
+    } catch (e) {
+        console.error("Erro ao salvar docs:", e);
+        alert("Erro ao salvar documentos.");
+    }
+};
+
 // --- CURD & UTIL ---
 window.saveEmployee = async function () {
     console.log(">>> [DEBUG] Iniciando saveEmployee...");
