@@ -405,6 +405,117 @@ function setupFilters() {
     });
 }
 
+// --- VALIDAÇÃO DE EMPRÉSTIMOS ---
+function validateLoanRequest(payload, empId) {
+    const warnings = [];
+
+    // Obter dados do colaborador existente (para edição) ou usar payload (novo)
+    const existingEmp = empId ? allEmployees.find(e => e.id === empId) : null;
+    const startDate = payload.start_date || existingEmp?.start_date;
+    const remuneration = payload.remuneration || existingEmp?.remuneration || 0;
+
+    // Calcular total de novos empréstimos sendo solicitados
+    const newLoanAmount = payload.loan_amount || 0;
+    const newLoanInstallments = payload.loan_installments || 1;
+    const newLoanInstallment = newLoanAmount > 0 ? newLoanAmount / newLoanInstallments : 0;
+
+    // Calcular parcelas dos empréstimos adicionais (loans_data)
+    let additionalInstallments = 0;
+    if (payload.loans_data && payload.loans_data.length > 0) {
+        payload.loans_data.forEach(loan => {
+            if (loan.amount > 0 && loan.installments > 0) {
+                additionalInstallments += loan.amount / loan.installments;
+            }
+        });
+    }
+
+    const totalNewInstallment = newLoanInstallment + additionalInstallments;
+
+    // Verificar se há novo empréstimo sendo cadastrado
+    const hasNewLoan = totalNewInstallment > 0;
+
+    if (!hasNewLoan) {
+        return { valid: true, warnings: [] };
+    }
+
+    // 1. Verificar tempo de empresa (mínimo 6 meses)
+    if (startDate) {
+        const start = new Date(startDate);
+        const now = new Date();
+        const monthsWorked = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+
+        if (monthsWorked < 6) {
+            warnings.push({
+                type: 'TEMPO_EMPRESA',
+                message: `⚠️ ATENÇÃO: Colaborador tem apenas ${monthsWorked} meses de empresa.\n\nO mínimo recomendado para concessão de empréstimo é de 6 meses.`,
+                severity: 'warning'
+            });
+        }
+    } else {
+        warnings.push({
+            type: 'SEM_DATA_ADMISSAO',
+            message: `⚠️ ATENÇÃO: Data de admissão não informada.\n\nNão é possível verificar o tempo mínimo de empresa.`,
+            severity: 'info'
+        });
+    }
+
+    // 2. Verificar margem consignável
+    const margemBase = remuneration * 0.3; // 30% do salário
+
+    // Calcular dívida atual (parcelas em andamento)
+    let currentInstallment = 0;
+    if (existingEmp) {
+        // Parcela do empréstimo principal atual
+        if (existingEmp.loan_amount > 0 && existingEmp.loan_installments > 0) {
+            const debtPrincipal = calculateDebtForLoan(existingEmp.loan_amount, existingEmp.loan_installments, existingEmp.loan_start_cycle);
+            if (debtPrincipal > 0) {
+                currentInstallment += existingEmp.loan_amount / existingEmp.loan_installments;
+            }
+        }
+        // Parcelas dos empréstimos adicionais atuais
+        if (existingEmp.loans_data && Array.isArray(existingEmp.loans_data)) {
+            existingEmp.loans_data.forEach(loan => {
+                const debt = calculateDebtForLoan(loan.amount, loan.installments, loan.start_cycle);
+                if (debt > 0) {
+                    currentInstallment += loan.amount / loan.installments;
+                }
+            });
+        }
+    }
+
+    const margemDisponivel = margemBase - currentInstallment;
+
+    if (totalNewInstallment > margemDisponivel) {
+        warnings.push({
+            type: 'MARGEM_INSUFICIENTE',
+            message: `⚠️ MARGEM CONSIGNÁVEL INSUFICIENTE!\n\n` +
+                `📊 Margem base (30%): ${formatCurrency(margemBase)}\n` +
+                `📉 Comprometido atual: ${formatCurrency(currentInstallment)}\n` +
+                `✅ Margem disponível: ${formatCurrency(margemDisponivel)}\n` +
+                `❌ Parcela solicitada: ${formatCurrency(totalNewInstallment)}\n\n` +
+                `A parcela excede a margem disponível em ${formatCurrency(totalNewInstallment - margemDisponivel)}.`,
+            severity: 'danger'
+        });
+    }
+
+    return {
+        valid: warnings.length === 0,
+        warnings: warnings
+    };
+}
+
+// Helper para calcular dívida de um empréstimo específico
+function calculateDebtForLoan(amount, installments, startCycle) {
+    if (!amount || !installments || !startCycle) return 0;
+    const start = new Date(startCycle + '-01');
+    const now = new Date();
+    let elapsed = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+    if (now.getDate() < 10) elapsed--;
+    elapsed = Math.max(0, Math.min(elapsed, installments));
+    const paid = elapsed * (amount / installments);
+    return Math.max(0, amount - paid);
+}
+
 // --- CURD & UTIL ---
 window.saveEmployee = async function () {
     console.log(">>> [DEBUG] Iniciando saveEmployee...");
@@ -464,6 +575,19 @@ window.saveEmployee = async function () {
     };
 
     console.log(">>> [PAYLOAD]", payload);
+
+    // Validação de empréstimos
+    const validation = validateLoanRequest(payload, id);
+    if (validation.warnings.length > 0) {
+        for (const warning of validation.warnings) {
+            const proceed = confirm(warning.message + '\n\nDeseja prosseguir mesmo assim?');
+            if (!proceed) {
+                console.log(">>> [VALIDAÇÃO] Operação cancelada pelo usuário:", warning.type);
+                return;
+            }
+        }
+        console.log(">>> [VALIDAÇÃO] Usuário optou por prosseguir com alertas.");
+    }
 
     try {
         const query = id ? db.from('employees').update(payload).eq('id', id) : db.from('employees').insert([payload]);
@@ -801,6 +925,15 @@ window.maskPhone = function (i) {
 window.maskCEP = function (i) {
     let v = i.value.replace(/\D/g, '');
     v = v.replace(/^(\d{5})(\d)/, "$1-$2");
+    i.value = v;
+};
+
+window.maskRG = function (i) {
+    let v = i.value.replace(/\D/g, '');
+    // Formato padrão RG: XX.XXX.XXX-X
+    v = v.replace(/^(\d{2})(\d)/, '$1.$2')
+        .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2');
     i.value = v;
 };
 

@@ -585,3 +585,37 @@
     padding: 2px 5px !important;
     border-bottom: 2px solid var(--primary-color) !important;
 }
+
+/* ========================================
+   FIX: PeopleBoard Modal Fields
+   ======================================== */
+
+/* Garantir texto escuro nos campos do formulário */
+#employeeModal .form-control,
+#employeeModal .form-select,
+#employeeModal input,
+#employeeModal select,
+#employeeModal textarea {
+    color: #212529 !important;
+    background-color: #fff !important;
+}
+
+#employeeModal .form-control:focus,
+#employeeModal .form-select:focus {
+    color: #212529 !important;
+    background-color: #fff !important;
+    border-color: #F2911B;
+    box-shadow: 0 0 0 0.25rem rgba(242, 145, 27, 0.25);
+}
+
+#employeeModal .form-control[readonly] {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+}
+
+/* Labels do formulário */
+#employeeModal .form-label {
+    color: #212529;
+    font-weight: 500;
+}
+
