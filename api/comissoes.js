@@ -70,8 +70,92 @@ export default async function handler(req, res) {
                 break;
 
             case 'POST':
-                // Create a new Receivement and its Commissions
-                const { contrato_id, data_recebimento, mes_ref, ano_ref, nota_fiscal, valor_bruto, valor_liquido, divisoes } = req.body;
+                const { action } = req.body;
+
+                // Action: Adicionar novo contrato
+                if (action === 'add_contrato') {
+                    const { nome_contrato, numero_contrato, observacoes } = req.body;
+
+                    const { data, error } = await supabase
+                        .from('contratos_base')
+                        .insert([{
+                            nome_contrato,
+                            numero_contrato: numero_contrato || null,
+                            observacoes: observacoes || null,
+                            ativo: true
+                        }])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    return res.status(200).json(data);
+                }
+
+                // Action: Adicionar novo membro da equipe
+                if (action === 'add_equipe') {
+                    const { nome, pct_padrao } = req.body;
+
+                    const { data, error } = await supabase
+                        .from('equipe')
+                        .insert([{
+                            nome,
+                            pct_padrao: pct_padrao || 0,
+                            ativo: true
+                        }])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    return res.status(200).json(data);
+                }
+
+                // Action: Atualizar recebimento existente
+                if (action === 'update_recebimento') {
+                    const { id, contrato_id, data_recebimento, mes_ref, ano_ref, nota_fiscal, ciclo, valor_bruto, valor_liquido, divisoes } = req.body;
+
+                    // 1. Atualizar Recebimento
+                    const { error: recError } = await supabase
+                        .from('recebimentos')
+                        .update({
+                            contrato_id,
+                            data_recebimento,
+                            mes_ref,
+                            ano_ref,
+                            nota_fiscal,
+                            ciclo,
+                            valor_bruto,
+                            valor_liquido
+                        })
+                        .eq('id', id);
+
+                    if (recError) throw recError;
+
+                    // 2. Atualizar Comissões (Deletar e inserir novamente para garantir consistência da distribuição)
+                    const { error: delError } = await supabase
+                        .from('comissoes')
+                        .delete()
+                        .eq('recebimento_id', id);
+
+                    if (delError) throw delError;
+
+                    if (divisoes && divisoes.length > 0) {
+                        const comissoesToInsert = divisoes.map(div => ({
+                            recebimento_id: id,
+                            membro_id: div.membro_id,
+                            porcentagem: div.porcentagem,
+                            valor_calculado: div.valor_comissao,
+                            status: 'Pendente'
+                        }));
+
+                        const { error: comError } = await supabase.from('comissoes').insert(comissoesToInsert);
+                        if (comError) throw comError;
+                    }
+
+                    return res.status(200).json({ success: true, message: 'Recebimento e comissões atualizados.' });
+                }
+
+                // Default: Create a new Receivement and its Commissions
+                const { contrato_id, data_recebimento, mes_ref, ano_ref, nota_fiscal, ciclo, valor_bruto, valor_liquido, divisoes } = req.body;
 
                 // 1. Insert Receivement
                 const { data: recData, error: recError } = await supabase
@@ -82,6 +166,7 @@ export default async function handler(req, res) {
                         mes_ref,
                         ano_ref,
                         nota_fiscal,
+                        ciclo,
                         valor_bruto,
                         valor_liquido
                     }])
