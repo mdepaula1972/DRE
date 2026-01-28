@@ -137,12 +137,18 @@
                 </div>
 
                 <!-- Botões de Ação -->
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary flex-grow-1" id="btnAplicarFiltros">
-                        <i class="bi bi-check me-1"></i>Aplicar
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary" id="btnLimparFiltros">
-                        <i class="bi bi-x-lg"></i>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary flex-grow-1" id="btnAplicarFiltros">
+                            <i class="bi bi-check me-1"></i>Aplicar
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="btnLimparFiltros">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-info w-100" data-bs-toggle="modal"
+                        data-bs-target="#modalGerenciarEquipe">
+                        <i class="bi bi-people me-1"></i>Gerenciar Equipe
                     </button>
                 </div>
             </div>
@@ -179,37 +185,13 @@
             </div>
         </header>
 
-        <!-- KPI Cards -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-3">
-                <div class="glass-card kpi">
-                    <div class="card-label"><i class="bi bi-people me-2"></i>Carlos</div>
-                    <div class="card-value h3" id="kpiCarlos">R$ 0,00</div>
-                    <div class="card-subtitle">0.35% Padrão</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="glass-card kpi">
-                    <div class="card-label"><i class="bi bi-people me-2"></i>Abrantes</div>
-                    <div class="card-value h3" id="kpiAbrantes">R$ 0,00</div>
-                    <div class="card-subtitle">0.35% Padrão</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="glass-card kpi">
-                    <div class="card-label"><i class="bi bi-people me-2"></i>Geovanna</div>
-                    <div class="card-value h3" id="kpiGeovanna">R$ 0,00</div>
-                    <div class="card-subtitle">0.20% Padrão</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="glass-card kpi">
-                    <div class="card-label"><i class="bi bi-people me-2"></i>Prado</div>
-                    <div class="card-value h3" id="kpiPrado">R$ 0,00</div>
-                    <div class="card-subtitle">0.10% Padrão</div>
-                </div>
-            </div>
+        <!-- KPI Cards Dinâmicos -->
+        <div class="row g-4 mb-4" id="kpiCardsContainer">
+            <!-- Populated by JS -->
         </div>
+
+        <!-- Espaçamento removido da barra anterior -->
+        <div class="mb-4"></div>
 
         <!-- Painel de Diagnóstico (v15.6) -->
         <div id="debugPanel" class="alert alert-info bg-dark border-info text-info small mb-4 d-none">
@@ -229,7 +211,7 @@
             <div class="table-responsive">
                 <table class="table table-dark table-hover mb-0 matrix-table">
                     <thead>
-                        <tr>
+                        <tr id="comissoesTableHead">
                             <th style="width: 40px;"></th>
                             <th>Contrato</th>
                             <th>Data</th>
@@ -237,10 +219,7 @@
                             <th>Ciclo</th>
                             <th>Valor Líquido</th>
                             <th>Total 1%</th>
-                            <th>Carlos</th>
-                            <th>Abrantes</th>
-                            <th>Geovanna</th>
-                            <th>Prado</th>
+                            <!-- Colunas de Comissionados dinâmicas -->
                         </tr>
                     </thead>
                     <tbody id="comissoesTableBody">
@@ -311,6 +290,13 @@
                             <div id="divisoesContainer" class="row g-2">
                                 <!-- Populated by JS -->
                             </div>
+                            <div class="mt-3 d-flex justify-content-end align-items-center gap-3">
+                                <span class="small text-white-50">Soma da Distribuição:</span>
+                                <div id="totalPctIndicador" class="badge rounded-pill px-3 py-2 fw-bold"
+                                    style="font-size: 0.9rem; background: rgba(255,255,255,0.1);">
+                                    0.00%
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-secondary p-4">
@@ -359,7 +345,31 @@
         </div>
     </div>
 
-    <!-- Modal Novo Comissionado -->
+    <!-- Modal Gerenciar Equipe -->
+    <div class="modal fade" id="modalGerenciarEquipe" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-dark rounded-4">
+                <div class="modal-header border-secondary p-4">
+                    <h5 class="modal-title fw-bold text-info"><i class="bi bi-people me-2"></i>Gerenciar Equipe</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-white-50 small">Membros Cadastrados</span>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#modalNovoComissionado">
+                            <i class="bi bi-plus-lg me-1"></i>Novo
+                        </button>
+                    </div>
+                    <div id="equipeListContainer" class="list-group list-group-flush bg-transparent">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo Comissionado (Simplificado, será usado dentro do gerenciamento) -->
     <div class="modal fade" id="modalNovoComissionado" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-content-dark rounded-4">

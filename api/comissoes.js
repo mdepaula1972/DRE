@@ -32,7 +32,8 @@ export default async function handler(req, res) {
 
                 if (type === 'init') {
                     // Fetch basic data for the UI
-                    const { data: equipe, error: eqError } = await supabase.from('equipe').select('*').eq('ativo', true);
+                    // Load all members to allow management in the UI
+                    const { data: equipe, error: eqError } = await supabase.from('equipe').select('*').order('nome');
                     if (eqError) throw new Error(`Erro tabela equipe: ${eqError.message}`);
 
                     const { data: contratos, error: ctError } = await supabase.from('contratos_base').select('*').order('nome_contrato');
@@ -41,7 +42,7 @@ export default async function handler(req, res) {
                     return res.status(200).json({
                         equipe: equipe || [],
                         contratos: contratos || [],
-                        equipe_count: equipe?.length || 0,
+                        equipe_count: equipe?.filter(m => m.ativo).length || 0,
                         contratos_count: contratos?.length || 0
                     });
                 }
@@ -152,6 +153,28 @@ export default async function handler(req, res) {
                     }
 
                     return res.status(200).json({ success: true, message: 'Recebimento e comissões atualizados.' });
+                }
+
+                if (action === 'delete_recebimento') {
+                    const { id: deleteId } = req.body;
+
+                    // 1. Deletar comissões primeiro (FK constraint)
+                    const { error: delComError } = await supabase
+                        .from('comissoes')
+                        .delete()
+                        .eq('recebimento_id', deleteId);
+
+                    if (delComError) throw delComError;
+
+                    // 2. Deletar o recebimento
+                    const { error: delRecError } = await supabase
+                        .from('recebimentos')
+                        .delete()
+                        .eq('id', deleteId);
+
+                    if (delRecError) throw delRecError;
+
+                    return res.status(200).json({ success: true, message: 'Lançamento excluído com sucesso.' });
                 }
 
                 // Default: Create a new Receivement and its Commissions

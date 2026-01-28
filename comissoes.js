@@ -107,14 +107,68 @@ function populateSelectors() {
         });
     }
 
-    // Preencher filtro de comissionado
+    // Preencher filtro de comissionado (apenas ativos)
     if (filterComissionado) {
-        state.equipe.forEach(m => {
+        filterComissionado.innerHTML = '<option value="">Todos</option>';
+        state.equipe.filter(m => m.ativo).forEach(m => {
             const opt = document.createElement('option');
             opt.value = m.id;
             opt.textContent = m.nome;
             filterComissionado.appendChild(opt);
         });
+    }
+
+    // Preencher lista de gerenciamento de equipe
+    renderGerenciarEquipe();
+}
+
+function renderGerenciarEquipe() {
+    const container = document.getElementById('equipeListContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    state.equipe.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item bg-transparent border-secondary text-white d-flex justify-content-between align-items-center px-0';
+        item.innerHTML = `
+            <div>
+                <span class="${m.ativo ? '' : 'text-white-50 text-decoration-line-through'}">${m.nome}</span>
+                <div class="small text-white-50">${(m.pct_padrao * 100).toFixed(2)}% padrão</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" ${m.ativo ? 'checked' : ''} 
+                    onchange="toggleMembroStatus('${m.id}', this.checked)">
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+async function toggleMembroStatus(id, ativo) {
+    try {
+        showLoading(true);
+        const res = await fetch('/api/comissoes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'toggle_membro_status', id, ativo })
+        });
+
+        if (!res.ok) throw new Error('Erro ao atualizar status');
+
+        const updated = await res.json();
+        const idx = state.equipe.findIndex(m => m.id === id);
+        if (idx !== -1) {
+            state.equipe[idx] = updated;
+        }
+
+        renderDivisoesSugeridas();
+        renderGerenciarEquipe();
+        populateSelectors();
+
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        showLoading(false);
     }
 }
 
@@ -123,18 +177,18 @@ function renderDivisoesSugeridas() {
     if (!container) return;
     container.innerHTML = '';
 
-    state.equipe.forEach(membro => {
+    state.equipe.filter(m => m.ativo).forEach(membro => {
         const pctPadrao = state.padroes[membro.nome] || 0;
 
         const div = document.createElement('div');
         div.className = 'col-md-3';
         div.innerHTML = `
-            <div class="p-2 border border-secondary rounded-3">
+            <div class="p-2 border border-secondary rounded-3 bg-dark-subtle">
                 <small class="d-block text-white-50 border-bottom border-secondary mb-2 pb-1">${membro.nome}</small>
                 <div class="input-group input-group-sm mb-2">
-                    <input type="number" step="0.01" class="form-control bg-transparent text-white border-0 input-pct" 
+                    <input type="number" step="0.01" class="form-control bg-dark text-warning border-secondary fw-bold input-pct" 
                         data-membro-id="${membro.id}" data-membro-nome="${membro.nome}" value="${(pctPadrao * 100).toFixed(2)}">
-                    <span class="input-group-text bg-transparent text-white-50 border-0">%</span>
+                    <span class="input-group-text bg-transparent text-white-50 border-secondary">%</span>
                 </div>
                 <div class="text-primary fw-bold valor-calculado" id="calc-${membro.id}">R$ 0,00</div>
             </div>
@@ -146,28 +200,79 @@ function renderDivisoesSugeridas() {
     container.querySelectorAll('.input-pct').forEach(input => {
         input.addEventListener('input', recalculateSuggested);
     });
+
+    recalculateSuggested();
 }
 
 function recalculateSuggested() {
     const liquido = parseFloat(document.getElementById('inputLiquido').value) || 0;
+    let totalPct = 0;
 
     document.querySelectorAll('.input-pct').forEach(input => {
-        const pct = parseFloat(input.value) / 100 || 0;
+        const pctDigitado = parseFloat(input.value) || 0;
+        totalPct += pctDigitado;
+
+        const pct = pctDigitado / 100;
         const valor = liquido * pct;
         const membroId = input.dataset.membroId;
-        document.getElementById(`calc-${membroId}`).textContent = formatCurrency(valor);
+        const calcEl = document.getElementById(`calc-${membroId}`);
+        if (calcEl) calcEl.textContent = formatCurrency(valor);
     });
+
+    // Atualizar indicador de total
+    const indicador = document.getElementById('totalPctIndicador');
+    if (indicador) {
+        indicador.textContent = `${totalPct.toFixed(2)}%`;
+        // Deve somar 1% total (que representamos como 100% da distribuição sugerida ou 1.0 no total dos campos)
+        // Como os campos são digitados como "0.35", a soma deve ser 1.00 se for 1% total.
+        // Se o usuário usa 100 como base, ajustamos. Aqui parece usar 1.0 como total (0.35+0.35+0.20+0.10)
+        if (Math.abs(totalPct - 1.0) < 0.001) {
+            indicador.className = 'badge rounded-pill px-3 py-2 fw-bold bg-success';
+        } else {
+            indicador.className = 'badge rounded-pill px-3 py-2 fw-bold bg-danger';
+        }
+    }
 }
 
 function renderHistory(dados = null) {
     const tbody = document.getElementById('comissoesTableBody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
+    const theadRow = document.getElementById('comissoesTableHead');
+    if (!tbody || !theadRow) return;
 
     const historico = dados || state.historico;
 
+    // 1. Identificar todos os nomes de membros para as colunas
+    // Usamos um Set para garantir nomes únicos e ordenados
+    const nomesParaColunas = new Set();
+
+    // Adicionar membros ativos atuais
+    state.equipe.filter(m => m.ativo).forEach(m => nomesParaColunas.add(m.nome));
+
+    // Adicionar membros que já têm dados no histórico (mesmo que inativos agora)
+    historico.forEach(rec => {
+        rec.comissoes.forEach(com => {
+            if (com.equipe?.nome) nomesParaColunas.add(com.equipe.nome);
+        });
+    });
+
+    const listaNomes = Array.from(nomesParaColunas).sort();
+
+    // 2. Atualizar Cabeçalho (thead)
+    theadRow.innerHTML = `
+        <th style="width: 40px;"></th>
+        <th>Contrato</th>
+        <th>Data</th>
+        <th>NF</th>
+        <th>Ciclo</th>
+        <th>Valor Líquido</th>
+        <th>Total 1%</th>
+        ${listaNomes.map(nome => `<th class="text-nowrap text-uppercase small" style="min-width: 100px;">${nome}</th>`).join('')}
+    `;
+
+    // 3. Atualizar Corpo (tbody)
+    tbody.innerHTML = '';
     if (historico.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-5 opacity-50">Nenhum recebimento encontrado.<br><small>Ajuste os filtros ou cadastre um novo recebimento.</small></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="${7 + listaNomes.length}" class="text-center py-5 opacity-50">Nenhum recebimento encontrado.<br><small>Ajuste os filtros ou cadastre um novo recebimento.</small></td></tr>`;
         return;
     }
 
@@ -177,68 +282,93 @@ function renderHistory(dados = null) {
 
         const row = document.createElement('tr');
 
-        // Formatar ciclo de aaaa-mm para mm/aaaa
         let cicloFormatado = '-';
         if (rec.ciclo) {
             const [ano, mes] = rec.ciclo.split('-');
             cicloFormatado = `${mes}/${ano}`;
         }
 
-        // Base Cells
         const [y, m, d] = rec.data_recebimento.split('-');
         const dataFormatada = `${d}/${m}/${y}`;
 
-        row.innerHTML = `
+        // Base HTML
+        let rowHtml = `
             <td>
-                <button class="btn btn-sm btn-outline-warning border-0" onclick="editRecebimento('${rec.id}')">
-                    <i class="bi bi-pencil-square"></i>
-                </button>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-warning border-0 p-1" onclick="editRecebimento('${rec.id}')" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteRecebimento('${rec.id}')" title="Excluir">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </td>
             <td>${contratoNome}</td>
             <td class="small">${dataFormatada}</td>
             <td>${rec.nota_fiscal || '-'}</td>
-            <td class="small">${cicloFormatado}</td>
+            <td class="small text-nowrap">${cicloFormatado}</td>
             <td>${formatCurrency(rec.valor_liquido)}</td>
             <td class="text-primary fw-bold">${formatCurrency(totalUmPorCento)}</td>
         `;
 
-        // Member Cells (Adaptive to team)
-        const nomesEquipe = ['Carlos', 'Abrantes', 'Geovanna', 'Prado'];
-        nomesEquipe.forEach(nome => {
+        // Dynamic Member Cells
+        listaNomes.forEach(nome => {
             const comissao = rec.comissoes.find(c => c.equipe?.nome === nome);
             const valor = comissao ? comissao.valor_calculado : 0;
-            const td = document.createElement('td');
-            td.className = valor > 0 ? 'text-white' : 'text-white-50';
-            td.textContent = formatCurrency(valor);
-            row.appendChild(td);
+            const corClass = valor > 0 ? 'text-white' : 'text-white-50 opacity-25';
+            rowHtml += `<td class="${corClass} small">${formatCurrency(valor)}</td>`;
         });
 
+        row.innerHTML = rowHtml;
         tbody.appendChild(row);
     });
 }
 
 function updateKPIs(dados = null) {
-    let totais = { Carlos: 0, Abrantes: 0, Geovanna: 0, Prado: 0, Geral: 0 };
-
     const historico = dados || state.historico;
+    let totais = { Geral: 0 };
+
+    // Inicializar totais baseados em todos os membros que aparecem no histórico + membros atuais
+    state.equipe.forEach(m => {
+        totais[m.nome] = 0;
+    });
 
     historico.forEach(rec => {
         rec.comissoes.forEach(com => {
             const nome = com.equipe?.nome;
-            if (totais[nome] !== undefined) {
+            if (nome) {
+                if (totais[nome] === undefined) totais[nome] = 0;
                 totais[nome] += com.valor_calculado;
                 totais.Geral += com.valor_calculado;
             }
         });
     });
 
-    document.getElementById('kpiCarlos').textContent = formatCurrency(totais.Carlos);
-    document.getElementById('kpiAbrantes').textContent = formatCurrency(totais.Abrantes);
-    document.getElementById('kpiGeovanna').textContent = formatCurrency(totais.Geovanna);
-    document.getElementById('kpiPrado').textContent = formatCurrency(totais.Prado);
-    document.getElementById('totalGeralComissoes').textContent = formatCurrency(totais.Geral);
-    if (document.getElementById('kpiTotalPago')) {
-        document.getElementById('kpiTotalPago').textContent = formatCurrency(totais.Geral);
+    // Renderizar cards dinamicamente
+    const container = document.getElementById('kpiCardsContainer');
+    if (container) {
+        container.innerHTML = '';
+
+        // Mostrar cards apenas para membros ativos ou que tenham algum valor no período
+        const membrosParaMostrar = state.equipe.filter(m => m.ativo || (totais[m.nome] > 0));
+
+        membrosParaMostrar.forEach(m => {
+            const valor = totais[m.nome] || 0;
+            const div = document.createElement('div');
+            div.className = 'col-md-3';
+            div.innerHTML = `
+                <div class="glass-card kpi">
+                    <div class="card-label"><i class="bi bi-people me-2"></i>${m.nome}</div>
+                    <div class="card-value h3" style="font-size: 1.5rem;">${formatCurrency(valor)}</div>
+                    <div class="card-subtitle small opacity-50">${(m.pct_padrao * 100).toFixed(2)}% Padrão</div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    if (document.getElementById('totalGeralComissoes')) {
+        document.getElementById('totalGeralComissoes').textContent = formatCurrency(totais.Geral);
     }
 }
 
@@ -278,6 +408,35 @@ window.editRecebimento = function (id) {
     modal.show();
 }
 
+window.deleteRecebimento = async function (id) {
+    if (!confirm('Deseja realmente excluir este lançamento? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+
+    try {
+        showLoading(true);
+        const res = await fetch('/api/comissoes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete_recebimento', id })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Erro ao excluir lançamento');
+        }
+
+        await loadHistory();
+        alert('Lançamento excluído com sucesso.');
+
+    } catch (error) {
+        console.error('Erro ao excluir:', error);
+        alert('Erro: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
 function setupEventListeners() {
     const form = document.getElementById('formRecebimento');
     if (form) {
@@ -303,12 +462,33 @@ function setupEventListeners() {
 
     // Resetar form de lançamento ao fechar
     const modalLancamento = document.getElementById('modalLancamento');
+    const modalNovoMembro = document.getElementById('modalNovoComissionado');
+
     if (modalLancamento) {
         modalLancamento.addEventListener('hidden.bs.modal', () => {
-            const form = document.getElementById('formRecebimento');
-            form.reset();
-            delete form.dataset.editId;
-            form.querySelector('button[type="submit"]').textContent = 'Salvar Recebimento';
+            // Se o modal de novo membro abrir, não resetamos o form do lançamento
+            // para que os dados possam ser restaurados depois.
+            // Apenas resetamos se o modal estiver fechando de vez (sem outro abrindo)
+            setTimeout(() => {
+                if (!document.body.classList.contains('modal-open')) {
+                    const form = document.getElementById('formRecebimento');
+                    if (form) {
+                        form.reset();
+                        delete form.dataset.editId;
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        if (submitBtn) submitBtn.textContent = 'Salvar Recebimento';
+                    }
+                }
+            }, 300);
+        });
+    }
+
+    if (modalNovoMembro) {
+        modalNovoMembro.addEventListener('hidden.bs.modal', () => {
+            // Ao fechar o modal de novo membro, reabrimos o de lançamento se ele estava sendo preenchido
+            // O state e os dados já são restaurados no handleSaveComissionado
+            const m = new bootstrap.Modal(document.getElementById('modalLancamento'));
+            m.show();
         });
     }
 
@@ -462,11 +642,41 @@ async function handleSaveComissionado(e) {
         state.equipe.push(novoMembro);
         state.padroes[novoMembro.nome] = pct;
 
-        // Re-renderizar a seção de distribuição
+        // Salvar dados atuais do modal de lançamento antes de re-renderizar
+        const formRec = document.getElementById('formRecebimento');
+        const currentData = {
+            contrato: document.getElementById('selectContrato').value,
+            data: document.getElementById('inputData').value,
+            nf: document.getElementById('inputNF').value,
+            ciclo: document.getElementById('inputCiclo').value,
+            bruto: document.getElementById('inputBruto').value,
+            liquido: document.getElementById('inputLiquido').value,
+            pcts: {}
+        };
+        document.querySelectorAll('.input-pct').forEach(input => {
+            currentData.pcts[input.dataset.membroId] = input.value;
+        });
+
+        // Re-renderizar seletores e distribuição
+        populateSelectors();
         renderDivisoesSugeridas();
 
-        // Fechar modal e limpar form
-        bootstrap.Modal.getInstance(document.getElementById('modalNovoComissionado')).hide();
+        // Restaurar dados
+        document.getElementById('selectContrato').value = currentData.contrato;
+        document.getElementById('inputData').value = currentData.data;
+        document.getElementById('inputNF').value = currentData.nf;
+        document.getElementById('inputCiclo').value = currentData.ciclo;
+        document.getElementById('inputBruto').value = currentData.bruto;
+        document.getElementById('inputLiquido').value = currentData.liquido;
+        Object.keys(currentData.pcts).forEach(id => {
+            const input = document.querySelector(`.input-pct[data-membro-id="${id}"]`);
+            if (input) input.value = currentData.pcts[id];
+        });
+        recalculateSuggested();
+
+        // Fechar apenas o modal de novo comissionado
+        const modalNovo = bootstrap.Modal.getInstance(document.getElementById('modalNovoComissionado'));
+        modalNovo.hide();
         document.getElementById('formNovoComissionado').reset();
 
         alert('Comissionado cadastrado com sucesso!');
@@ -483,9 +693,13 @@ async function handleSave(e) {
     e.preventDefault();
 
     const divisoes = [];
+    let totalPct = 0;
     document.querySelectorAll('.input-pct').forEach(input => {
+        const pctDigitado = parseFloat(input.value) || 0;
+        totalPct += pctDigitado;
+
         const liquido = parseFloat(document.getElementById('inputLiquido').value) || 0;
-        const pct = parseFloat(input.value) / 100 || 0;
+        const pct = pctDigitado / 100;
 
         divisoes.push({
             membro_id: input.dataset.membroId,
@@ -493,6 +707,12 @@ async function handleSave(e) {
             valor_comissao: liquido * pct
         });
     });
+
+    // VALIDAÇÃO: Soma deve ser 1.00%
+    if (Math.abs(totalPct - 1.0) > 0.001) {
+        alert(`A soma das comissões está incorreta (${totalPct.toFixed(2)}%). \n\nÉ necessário reanalisar a distribuição para que o total seja exatamente 1.00%.`);
+        return;
+    }
 
     const payload = {
         contrato_id: document.getElementById('selectContrato').value,
