@@ -287,48 +287,43 @@ function renderCultureAsteroids() {
     const missao = FRASES_CULTURA.find(f => f.tag === "Missão");
     const cultureOrbits = FRASES_CULTURA.filter(f => f.tag !== "Missão");
 
-    // Create Missão as a special diagonal asteroid
+    // Create Missão as a special horizontal rocket with BrisinhAI
     if (missao) {
         const wrapper = document.createElement('div');
         wrapper.className = 'culture-asteroid-wrapper';
         scene.appendChild(wrapper);
 
-        const asteroidContainer = document.createElement('div');
-        asteroidContainer.className = 'asteroid-crossing missao-special';
+        const rocketContainer = document.createElement('div');
+        rocketContainer.className = 'missao-rocket-container';
 
-        // Slower speed: 30s to 42s (3s slower as requested)
-        const duration = (30 + Math.random() * 12) + 's';
-        const delay = '2s';
+        // Horizontal crossing: 35s to 45s for smooth visibility
+        const duration = (35 + Math.random() * 10) + 's';
+        const delay = '3s';
 
-        // Central diagonal lane
-        const config = { startX: '-40%', startY: '85%', travelX: '140vw', travelY: '-110vh' };
-        const randomSize = Math.floor(175 + Math.random() * 70) + 'px';
+        // Horizontal trajectory (left to right, centered vertically)
+        rocketContainer.style.setProperty('--duration', duration);
+        rocketContainer.style.animationDelay = delay;
 
-        asteroidContainer.style.setProperty('--duration', duration);
-        asteroidContainer.style.animationDelay = delay;
-        asteroidContainer.style.setProperty('--start-x', config.startX);
-        asteroidContainer.style.setProperty('--start-y', config.startY);
-        asteroidContainer.style.setProperty('--travel-x', config.travelX);
-        asteroidContainer.style.setProperty('--travel-y', config.travelY);
+        // Create rocket body with BrisinhAI
+        const rocket = document.createElement('div');
+        rocket.className = 'missao-rocket';
 
-        const balloon = document.createElement('div');
-        balloon.className = 'culture-balloon missao-balloon';
-        balloon.style.width = randomSize;
-        balloon.style.height = randomSize;
-        balloon.innerHTML = `<strong>${missao.tag}</strong><span>${missao.texto}</span>`;
+        // Rocket image container (BrisinhAI inside rocket)
+        const rocketImg = document.createElement('img');
+        rocketImg.src = 'BrisinhAI.jpeg';
+        rocketImg.alt = 'BrisinhAI';
+        rocketImg.className = 'rocket-mascot';
 
-        // Add trail particles
-        for (let t = 0; t < 6; t++) {
-            const trail = document.createElement('div');
-            trail.className = 'asteroid-trail';
-            trail.style.left = (20 + Math.random() * 60) + '%';
-            trail.style.top = (20 + Math.random() * 60) + '%';
-            trail.style.animationDelay = (t * 0.3) + 's';
-            balloon.appendChild(trail);
-        }
+        rocket.appendChild(rocketImg);
 
-        asteroidContainer.appendChild(balloon);
-        wrapper.appendChild(asteroidContainer);
+        // Mission message trail with highlighted tag
+        const trail = document.createElement('div');
+        trail.className = 'rocket-trail';
+        trail.innerHTML = `<span class="trail-message"><span class="missao-tag">${missao.tag}:</span> ${missao.texto}</span>`;
+
+        rocketContainer.appendChild(rocket);
+        rocketContainer.appendChild(trail);
+        wrapper.appendChild(rocketContainer);
     }
 
     // Create other culture values as orbiting planets
