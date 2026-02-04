@@ -57,10 +57,98 @@ async function init() {
         await loadHistory();
 
     } catch (error) {
-        output.innerHTML = `❌ <strong>Erro Crítico:</strong> ${error.message}`;
-        output.classList.add('text-danger');
-        console.error("Erro ao inicializar:", error);
+        console.warn("API indisponível, tentando MODO OFFLINE:", error.message);
+        initOfflineMode(error.message);
     }
+}
+
+async function initOfflineMode(errorMsg) {
+    const debug = document.getElementById('debugPanel');
+    const output = document.getElementById('debugOutput');
+    debug.classList.remove('d-none');
+    output.innerHTML = `⚠️ <strong>Modo Offline:</strong> ${errorMsg}<br>Tentando carregar dados de 'dados-comissoes.csv'...`;
+    output.classList.add('text-warning');
+
+    const defaultFile = 'dados-comissoes.csv';
+    try {
+        const response = await fetch(defaultFile);
+        if (!response.ok) throw new Error("Arquivo 'dados-comissoes.csv' não encontrado.");
+
+        const text = await response.text();
+        
+        // Parsing manual simples do CSV (formatado para Comissões)
+        Papa.parse(text, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+                console.log("Offline CSV loaded:", results.data);
+                processOfflineData(results.data);
+            },
+            error: (err) => { throw new Error(err.message); }
+        });
+
+    } catch (err) {
+        output.innerHTML = `❌ <strong>Erro Crítico:</strong> Não foi possível conectar à API nem carregar o CSV local.<br>${err.message}`;
+        output.classList.remove('text-warning');
+        output.classList.add('text-danger');
+    }
+}
+
+function processOfflineData(data) {
+    // 1. Mapear Equipe (baseado nos cabeçalhos que não são colunas fixas)
+    const fixedKeys = ['contrato', 'data', 'nf', 'ciclo', 'valor liquido'];
+    const allKeys = Object.keys(data[0] || {});
+    const memberNames = allKeys.filter(k => !fixedKeys.includes(k.toLowerCase()));
+    
+    state.equipe = memberNames.map((nome, idx) => ({
+        id: `offline-${idx}`,
+        nome: nome,
+        ativo: true,
+        pct_padrao: state.padroes[nome] || 0
+    }));
+
+    // 2. Mapear Contratos
+    const uniqueContratos = [...new Set(data.map(d => d.Contrato))].filter(Boolean);
+    state.contratos = uniqueContratos.map((nome, idx) => ({
+        id: `c-off-${idx}`,
+        nome_contrato: nome
+    }));
+
+    // 3. Mapear Histórico
+    state.historico = data.map((d, idx) => {
+        const comissoes = [];
+        memberNames.forEach(nome => {
+            const val = parseCurrency(d[nome]);
+            if (val > 0) {
+                comissoes.push({
+                    membro_id: state.equipe.find(m => m.nome === nome).id,
+                    equipe: { nome: nome },
+                    valor_calculado: val,
+                    porcentagem: val / (parseCurrency(d['Valor Liquido']) * 0.01) // Estimativa
+                });
+            }
+        });
+
+        return {
+            id: `h-off-${idx}`,
+            contrato_id: state.contratos.find(c => c.nome_contrato === d.Contrato)?.id,
+            contratos_base: { nome_contrato: d.Contrato },
+            data_recebimento: d.Data || '',
+            nota_fiscal: d.NF || '',
+            ciclo: d.Ciclo || '',
+            valor_liquido: parseCurrency(d['Valor Liquido']),
+            comissoes: comissoes
+        };
+    });
+
+    populateSelectors();
+    renderDivisoesSugeridas();
+    renderHistory();
+    updateKPIs();
+    
+    const output = document.getElementById('debugOutput');
+    output.innerHTML = `✅ <strong>MODO OFFLINE ATIVO</strong><br>Dados carregados de 'dados-comissoes.csv'`;
+    document.getElementById('lastUpdate').textContent = "Sincronizado: Arquivo LOCAL Offline";
 }
 
 async function loadHistory() {

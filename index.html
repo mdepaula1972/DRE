@@ -481,6 +481,7 @@
         async function checkAuth() {
             const pass = document.getElementById('dashboardPass').value;
             const errorEl = document.getElementById('authError');
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
             try {
                 const response = await fetch('/api/auth', {
@@ -493,6 +494,7 @@
 
                 if (response.ok) {
                     sessionStorage.setItem('dashboard_auth', 'true');
+                    sessionStorage.setItem('dashboard_mode', 'online');
                     document.getElementById('loginOverlay').style.display = 'none';
                 } else {
                     console.error('Falha na auth:', response.status);
@@ -500,8 +502,19 @@
                     errorEl.style.display = 'block';
                 }
             } catch (err) {
-                console.error('Erro de fetch:', err);
-                alert('Erro de conexão com o servidor de segurança. Verifique o console.');
+                console.error('Erro de fetch (possível modo offline):', err);
+                
+                // Fallback Offline: Se estiver local e a senha for a padrão (ou se falhar a rede)
+                // Permitimos entrada se estiver em localhost para facilitar o uso offline
+                if (isLocal) {
+                    console.log('Modo Local detectado. Permitindo acesso offline.');
+                    sessionStorage.setItem('dashboard_auth', 'true');
+                    sessionStorage.setItem('dashboard_mode', 'offline');
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    alert('Acessando em MODO OFFLINE (Localhost). Algumas funções de banco de dados podem estar indisponíveis.');
+                } else {
+                    alert('Erro de conexão com o servidor de segurança. Verifique sua internet.');
+                }
             }
         }
 
