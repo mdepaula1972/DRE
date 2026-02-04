@@ -1,0 +1,12 @@
+Setor,Categoria,Despesas,jun/25,jul/25,ago/25,set/25,out/25,nov/25
+Operacional,Equipe,Equipe,10,12,12,14,14,15
+Comercial,Equipe,Equipe,5,5,6,6,7,7
+Financeiro,Equipe,Equipe,3,3,3,3,3,4
+Operacional,Manutenção,120000,20000,20000,20000,20000,20000,20000
+Operacional,Serviços,180000,30000,30000,30000,30000,30000,30000
+Comercial,Publicidade,60000,10000,10000,10000,10000,10000,10000
+Comercial,Comissões,30000,5000,5000,5000,5000,5000,5000
+Financeiro,Sistemas,30000,5000,5000,5000,5000,5000,5000
+Administrativo,Aluguel,60000,10000,10000,10000,10000,10000,10000
+Administrativo,Material Escritório,12000,2000,2000,2000,2000,2000,2000
+Administrativo,Energia,30000,5000,5000,5000,5000,5000,5000

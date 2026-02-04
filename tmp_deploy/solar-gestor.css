@@ -1,0 +1,208 @@
+/* Solar Gestor UI Styles - v3: Radar com Cards */
+:root {
+    --sun-glow-gestor: rgba(242, 145, 27, 0.5);
+    --orbit-color-gestor: rgba(255, 255, 255, 0.08);
+    --card-shadow: rgba(0, 0, 0, 0.4);
+}
+
+.solar-gestor-container {
+    position: relative;
+    width: 100%;
+    min-height: 800px;
+    background: transparent;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3rem;
+    perspective: 3000px;
+}
+
+.solar-scene-gestor {
+    position: relative;
+    width: 1200px;
+    height: 700px;
+    transform-style: preserve-3d;
+    transform: rotateX(68deg);
+    /* Requested high inclination */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Central Element (Sun) - Metric Card Style */
+.sun-gestor-container {
+    position: absolute;
+    z-index: 1000;
+    transform: rotateX(-68deg);
+}
+
+.sun-gestor {
+    width: 250px;
+    min-height: 140px;
+    background: linear-gradient(135deg, rgba(242, 145, 27, 0.95), rgba(139, 78, 4, 0.95));
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 80px var(--sun-glow-gestor),
+        0 20px 40px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    padding: 25px;
+    text-align: center;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.sun-gestor .sun-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    opacity: 0.9;
+}
+
+.sun-gestor .sun-value {
+    font-size: 2rem;
+    font-weight: 900;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Orbits */
+.orbital-ring-gestor {
+    position: absolute;
+    border: 1px solid var(--orbit-color-gestor);
+    border-radius: 50%;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+.orbit-gestor-1 {
+    width: 500px;
+    height: 500px;
+}
+
+.orbit-gestor-2 {
+    width: 850px;
+    height: 850px;
+}
+
+.orbit-gestor-3 {
+    width: 1200px;
+    height: 1200px;
+}
+
+/* Indicators as Glass-Cards in Orbits */
+.planet-wrapper-gestor {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: orbitalMoveGestor var(--duration, 60s) linear infinite;
+}
+
+@keyframes orbitalMoveGestor {
+    from {
+        transform: rotate(var(--start-angle)) translateY(calc(-1 * var(--radius))) rotate(calc(-1 * var(--start-angle)));
+    }
+
+    to {
+        transform: rotate(calc(var(--start-angle) + 360deg)) translateY(calc(-1 * var(--radius))) rotate(calc(-1 * (var(--start-angle) + 360deg)));
+    }
+}
+
+.planet-gestor {
+    position: absolute;
+    width: 200px;
+    /* Rectangular as requested */
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    /* Original Glass Style */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: all 0.4s ease;
+    transform: rotateX(-68deg);
+    /* Strong counter-rotation for tilt */
+    box-shadow: 0 10px 30px var(--card-shadow);
+}
+
+.planet-gestor:hover {
+    transform: rotateX(-68deg) scale(1.1) translateY(-15px);
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(242, 145, 27, 0.3);
+}
+
+.planet-gestor i {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: var(--primary);
+    opacity: 0.9;
+}
+
+.planet-gestor .planet-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.planet-gestor .planet-value {
+    font-size: 1.3rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+/* Distinctive card accents instead of glows */
+.planet-gestor.green-glow {
+    border-left: 4px solid #2ecc71;
+}
+
+.planet-gestor.blue-glow {
+    border-left: 4px solid #3498db;
+}
+
+.planet-gestor.orange-glow {
+    border-left: 4px solid #e67e22;
+}
+
+/* Privacy Blur */
+body.privacy-enabled .sun-value,
+body.privacy-enabled .planet-value {
+    filter: blur(12px);
+}
+
+@media (max-width: 1400px) {
+    .solar-scene-gestor {
+        transform: scale(0.8) rotateX(68deg);
+    }
+}
+
+@media (max-width: 1100px) {
+    .solar-scene-gestor {
+        transform: scale(0.6) rotateX(68deg);
+    }
+
+    .solar-gestor-container {
+        min-height: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    .solar-scene-gestor {
+        transform: scale(0.4) rotateX(68deg);
+    }
+}

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Mar Brasil | Portal Financeiro</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Bootstrap 5 CSS -->
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Favicon.png">
+    <script src="version.js?v=27.88"></script>
+
+    <style>
+        :root {
+            --primary: #F2911B;
+            --dark-bg: #0d0d0d;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--dark-bg);
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(242, 145, 27, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 10% 10%, rgba(0, 71, 122, 0.2) 0%, transparent 40%);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* --- Orbital Scene --- */
+        .scene {
+            position: relative;
+            width: 800px;
+            height: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .core {
+            position: relative;
+            z-index: 10;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: coreFloat 4s ease-in-out infinite;
+        }
+
+        .core img {
+            width: 140%;
+            height: 140%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 50px rgba(242, 145, 27, 0.8));
+        }
+
+        .core-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.2;
+            animation: pulse 4s infinite alternate;
+        }
+
+        /* --- Satellites (Buttons) --- */
+        .satellite-wrapper {
+            position: absolute;
+            width: 0;
+            height: 0;
+            top: 50%;
+            left: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: orbitalMove 60s linear infinite;
+            z-index: 20;
+        }
+
+        .satellite-wrapper:hover {
+            animation-play-state: paused;
+            z-index: 100;
+        }
+
+        .satellite {
+            width: 160px;
+            height: 160px;
+            flex-shrink: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        @keyframes orbitalMove {
+            from {
+                transform: rotate(var(--start-angle)) translateY(-275px) rotate(calc(-1 * var(--start-angle)));
+            }
+
+            to {
+                transform: rotate(calc(var(--start-angle) + 360deg)) translateY(-275px) rotate(calc(-1 * (var(--start-angle) + 360deg)));
+            }
+        }
+
+        .satellite:hover {
+            background: var(--primary);
+            border-color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 60px rgba(242, 145, 27, 0.9);
+            color: #000 !important;
+        }
+
+        .satellite i {
+            display: block;
+            margin: 0 auto 8px;
+            font-size: 2.5rem;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .satellite:hover i {
+            color: #000 !important;
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        .satellite span {
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            line-height: 1.2;
+        }
+
+        .satellite p {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            font-weight: 300;
+        }
+
+        /* Sat Positions in a Circle */
+        /* Sat Positions - Symmetry for 7 items */
+        .sat-1 {
+            --start-angle: 0deg;
+            animation-duration: 60s;
+        }
+
+        .sat-2 {
+            --start-angle: 45deg;
+            animation-duration: 60s;
+        }
+
+        .sat-3 {
+            --start-angle: 90deg;
+            animation-duration: 60s;
+        }
+
+        .sat-4 {
+            --start-angle: 135deg;
+            animation-duration: 60s;
+        }
+
+        .sat-5 {
+            --start-angle: 180deg;
+            animation-duration: 60s;
+        }
+
+        .sat-6 {
+            --start-angle: 225deg;
+            animation-duration: 60s;
+        }
+
+        .sat-7 {
+            --start-angle: 270deg;
+            animation-duration: 60s;
+        }
+
+        .sat-8 {
+            --start-angle: 315deg;
+            animation-duration: 60s;
+        }
+
+        /* Decorative Orbits */
+        .orbital-ring {
+            position: absolute;
+            border: 1px dashed rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .ring-1 {
+            width: 550px;
+            height: 550px;
+            border-style: solid;
+            border-color: rgba(242, 145, 27, 0.1);
+        }
+
+        .ring-2 {
+            width: 750px;
+            height: 750px;
+            border-style: dashed;
+            border-color: rgba(242, 145, 27, 0.05);
+        }
+
+        /* --- Footer & HUD --- */
+        .hud-info {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            border-left: 2px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .hud-version {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Keyframes --- */
+        @keyframes coreFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes pulse {
+            from {
+                opacity: 0.1;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 0.3;
+                transform: scale(1.1);
+            }
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 850px) {
+            .scene {
+                width: 100%;
+                height: 100%;
+                flex-direction: column;
+                overflow-y: auto;
+                padding: 100px 0;
+                justify-content: flex-start;
+            }
+
+            .core {
+                position: relative;
+                margin-bottom: 50px;
+                width: 180px;
+                height: 180px;
+                flex-shrink: 0;
+            }
+
+            .satellite {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                bottom: auto !important;
+                margin-bottom: 20px;
+                transform: none !important;
+                animation: none !important;
+                width: 80%;
+                height: auto;
+                border-radius: 12px;
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 15px 25px;
+                gap: 20px;
+            }
+
+            .satellite i {
+                margin-bottom: 0;
+                font-size: 1.5rem;
+            }
+
+            .satellite span {
+                font-size: 1rem;
+            }
+
+            .satellite p {
+                display: none;
+            }
+
+            .orbital-ring {
+                display: none;
+            }
+
+            .hud-info,
+            .hud-version {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="scene">
+        <div class="orbital-ring ring-1"></div>
+        <div class="orbital-ring ring-2"></div>
+
+        <div class="core">
+            <div class="core-glow"></div>
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Logo Mar Brasil">
+        </div>
+
+        <!-- Orbs -->
+        <div class="satellite-wrapper sat-1">
+            <a href="dre.html" class="satellite">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>DRE Gerencial</span>
+                <p>Visão Financeira</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-2">
+            <a href="analise-setorial.html" class="satellite">
+                <i class="bi bi-pie-chart-fill"></i>
+                <span>Análise Setorial</span>
+                <p>Custos por Área</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-3">
+            <a href="parcelamentos.html" class="satellite">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Parcelamentos</span>
+                <p>Controle de Dívidas</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-4">
+            <a href="seguros.html" class="satellite">
+                <i class="bi bi-shield-check"></i>
+                <span>Seguros</span>
+                <p>Gestão de Apólices</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-5">
+            <a href="indicadores_v2.html" class="satellite">
+                <i class="bi bi-speedometer2"></i>
+                <span>Indicadores</span>
+                <p>KPIs Estratégicos</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-6">
+            <a href="contratos.html" class="satellite">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span>Contratos</span>
+                <p>Vínculo Faturamento</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-7">
+            <a href="comissoes.html" class="satellite">
+                <i class="bi bi-person-badge-fill"></i>
+                <span>Comissões</span>
+                <p>Divisão Equipe</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-8">
+            <a href="people.html" class="satellite">
+                <i class="bi bi-people-fill"></i>
+                <span>PeopleBoard</span>
+                <p>Gestão de RH</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="hud-info">
+        Mar Brasil<br>
+        Portal de Gestão Inteligente
+    </div>
+
+    <div class="hud-version">
+        v<span class="appVersionText">0.0</span>
+    </div>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay"
+        style="position: fixed; top:0; left:0; width:100%; height:100%; background: #0d0d0d; z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px);">
+        <div
+            style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; text-align: center;">
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Logo" style="width: 150px; margin-bottom: 20px;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 20px;">Acesso Restrito</h2>
+            <div style="position: relative; margin-bottom: 15px;">
+                <input type="password" id="dashboardPass" placeholder="Digite a senha de acesso"
+                    style="width: 100%; padding: 12px; padding-right: 45px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; outline: none;">
+                <i class="bi bi-eye-slash" id="togglePass"
+                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-size: 1.2rem;"></i>
+            </div>
+            <button onclick="checkAuth()"
+                style="width: 100%; padding: 12px; border-radius: 8px; background: var(--primary); border: none; color: white; font-weight: 600; cursor: pointer;">Entrar</button>
+            <p id="authError" style="color: #ff4d4d; font-size: 0.8rem; margin-top: 15px; display: none;">Senha
+                incorreta. Tente novamente.</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js?v=27.44"></script>
+
+    <div id="footerVersionDisplay" class="appVersionText"
+        style="position: fixed; bottom: 10px; right: 10px; font-size: 0.65rem; color: rgba(255,255,255,0.3); z-index: 1000;">
+        v0.0
+    </div>
+    <script>
+        // Version Updater
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                document.querySelectorAll('.appVersionText').forEach(el => {
+                    el.textContent = 'v' + window.APP_VERSION;
+                });
+            }
+        });
+        // Existing Auth Script
+        async function checkAuth() {
+            const pass = document.getElementById('dashboardPass').value;
+            const errorEl = document.getElementById('authError');
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass.trim() })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    sessionStorage.setItem('dashboard_auth', 'true');
+                    sessionStorage.setItem('dashboard_mode', 'online');
+                    document.getElementById('loginOverlay').style.display = 'none';
+                } else {
+                    console.error('Falha na auth:', response.status);
+                    errorEl.textContent = data.error || 'Senha incorreta. Tente novamente.';
+                    errorEl.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Erro de fetch (possível modo offline):', err);
+                
+                // Fallback Offline: Se estiver local e a senha for a padrão (ou se falhar a rede)
+                // Permitimos entrada se estiver em localhost para facilitar o uso offline
+                if (isLocal) {
+                    console.log('Modo Local detectado. Permitindo acesso offline.');
+                    sessionStorage.setItem('dashboard_auth', 'true');
+                    sessionStorage.setItem('dashboard_mode', 'offline');
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    alert('Acessando em MODO OFFLINE (Localhost). Algumas funções de banco de dados podem estar indisponíveis.');
+                } else {
+                    alert('Erro de conexão com o servidor de segurança. Verifique sua internet.');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('dashboard_auth') === 'true') {
+                document.getElementById('loginOverlay').style.display = 'none';
+            }
+
+            if (window.APP_VERSION) {
+                document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION + ' (Ativo)';
+            }
+
+            // Toggle Password Visibility
+            const togglePass = document.getElementById('togglePass');
+            const passwordInput = document.getElementById('dashboardPass');
+
+            togglePass.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePass.classList.toggle('bi-eye');
+                togglePass.classList.toggle('bi-eye-slash');
+            });
+
+            // Enter key trigger
+            document.getElementById('dashboardPass').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkAuth();
+            });
+        });
+    </script>
+
+</body>

@@ -4,6 +4,6 @@
     const isLoginPage = path === '/' || path.endsWith('index.html') || path.endsWith('landing.html') || path === '';
 
     if (!isAuthed && !isLoginPage) {
-        window.location.replace('/');
+        window.location.replace('index.html');
     }
 })();

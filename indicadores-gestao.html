@@ -17,6 +17,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="Favicon.png">
+    <link rel="stylesheet" href="solar-gestor.css?v=27.83">
     <script src="version.js?v=27.83"></script>
 
     <style>
@@ -64,7 +65,8 @@
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-bottom: 1px solid var(--card-border);
-            z-index: 1000;
+            z-index: 5;
+            /* Lower z-index to allow balloons to pass over */
         }
 
         .header-info {
@@ -476,31 +478,49 @@
         <!-- Novo Informativo Centralizado -->
         <div style="text-align: center; margin-bottom: 40px; animation: fadeInDown 0.8s ease-out;">
             <h3
-                style="color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 6px; font-size: 1.8rem; margin: 0; text-shadow: 0 0 20px rgba(242, 145, 27, 0.3);">
+                style="color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 6px; font-size: 1.2rem; margin: 0; text-shadow: 0 0 20px rgba(242, 145, 27, 0.3); opacity: 0.8;">
                 Indicadores por Equipamento
             </h3>
             <div
-                style="width: 100px; height: 3px; background: var(--primary); margin: 15px auto; border-radius: 3px; opacity: 0.6;">
+                style="width: 60px; height: 2px; background: var(--primary); margin: 12px auto; border-radius: 3px; opacity: 0.4;">
             </div>
         </div>
 
-        <!-- Linha Única de Indicadores -->
-        <section class="indicators-section">
+        <!-- Solar System Panel (Metricas Radicais) -->
+        <div class="solar-gestor-container" id="solarGestorPanel">
+            <div class="solar-scene-gestor" id="solarSceneGestor">
+                <div class="orbital-ring-gestor orbit-gestor-1"></div>
+                <div class="orbital-ring-gestor orbit-gestor-2"></div>
+                <div class="orbital-ring-gestor orbit-gestor-3"></div>
+
+                <!-- Sun (Central Metric) -->
+                <div class="sun-gestor-container">
+                    <div class="sun-gestor" id="sunMetricGestor">
+                        <div class="sun-title">Total Recebimentos</div>
+                        <div class="sun-value" id="sunValueGestor">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <!-- Planets will be injected here by JS -->
+            </div>
+        </div>
+
+        <!-- Linha Única de Indicadores (Oculto) -->
+        <section class="indicators-section d-none">
             <div class="section-title" style="display: none;">Painel Estratégico</div>
             <div class="indicators-grid" id="indicatorsGrid">
                 <div class="scroll-container" id="mainIndicatorsGrid">
                     <!-- Cards populated by JS -->
                 </div>
             </div>
-            <!-- Carrossel de Cultura (v27.61) -->
-            <section class="culture-section">
-                <div class="section-title">Valores & Cultura Mar Brasil</div>
-                <div class="culture-grid">
-                    <div class="culture-scroll-container" id="cultureCarousel">
-                        <!-- Cards Gerados por JS -->
-                    </div>
+        </section>
+        <!-- Galáxia de Cultura (Oculto em favor da poeira estelar) -->
+        <section class="culture-section d-none">
+            <div class="culture-grid">
+                <div class="culture-scroll-container" id="cultureCarousel">
                 </div>
-            </section>
+            </div>
+        </section>
     </main>
 
     <div id="appVersionDisplay"
@@ -509,9 +529,9 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="indicadores-gestao.js?v=27.62"></script>
+    <script src="indicadores-gestao.js?v=28.01"></script>
     <script>
-        // Carrossel de Cultura - Engrenagem v27.61
+        // Carrossel de Cultura - Engrenagem v28.01
         const FRASES_CULTURA = [
             { tag: "Missão", texto: "Nossa missão é promover a Climatização com Autossuficiência Energética em Escolas Públicas do Brasil." },
             { tag: "Propósito", texto: "A Mar Brasil só prospera quando cuida de vidas reais." },
@@ -527,7 +547,7 @@
 
         function initCultureCarousel() {
             const container = document.getElementById('cultureCarousel');
-            if (!container) return;
+            if (!container || container.children.length > 0) return; // Prevent double init
 
             // Duplicar para scroll infinito
             const carrosselItems = [...FRASES_CULTURA, ...FRASES_CULTURA];

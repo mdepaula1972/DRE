@@ -1,0 +1,44 @@
+ATIVOS E BENS;Detalhes;FORMATO;TIPO;EMPRESA;Documento;CENTRO DE CUSTO;STATUS;FORMA DE PAGTO;Dia Débito;Início Contrato;Término Contrato;Mês; Total Contrato ;Parcelas Contratadas; Valor Parcela ;Parcelas Pagas;Parcelas Restantes; Total Pago ; Montante a Pagar 
+Trator;;FINANCIAMENTO;ATIVOS;MAR BRASIL;Contr 014799729;NOSSA EMPRESA;Transferido;Débito CC Bradesco - MBR;19;19/06/2021;19/06/2026;46192; R$ 321.796,80 ;60; R$ 5.363,30 ;55;5; R$ 294.981,50 ; R$ 26.816,50 
+Plataforma GL-12;;FINANCIAMENTO;ATIVOS;CONECTIUS;;Conectius - Rateio;Pagando;BNDES Bradesco - CONECTIUS ;15;15/10/2022;15/09/2025;45915; R$ 60.549,48 ;36; R$ 1.681,93 ;36;0; R$ 60.549,48 ; R$ -   
+ABC Telhas Metálicas;Material ribeirópolis;FINANCIAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Pagando;BNDES Bradesco - Mar Brasil;15;21/07/2023;15/10/2026;; R$ 79.039,60 ;40; R$ 1.975,99 ;30;10; R$ 59.279,70 ; R$ 19.759,90 
+Caminhão GL-12 ;CDC Veículo;FINANCIAMENTO;ATIVOS;CONECTIUS;Contr 5897374;Conectius - Rateio;Transferido;Débito CC Bradesco - CONECTIUS;28;29/08/2022;29/07/2027;46597; R$ 337.354,80 ;60; R$ 5.622,58 ;41;19; R$ 230.525,78 ; R$ 106.829,02 
+New Comercio;;FINANCIAMENTO;ATIVOS;CONECTIUS;;Conectius - Rateio;Pagando;BNDES Bradesco - CONECTIUS ;15;15/08/2023;15/07/2026;; R$ 29.255,40 ;36; R$ 812,65 ;29;7; R$ 23.566,85 ; R$ 5.688,55 
+LOTE 6 - Casa Dauren Pri;;FINANCIAMENTO;ATIVOS;PESSOAL;;PESSOAL;Pagando;VIA PIX ITAÚ PRI PF;20;06/03/2023;20/04/2028;46863; R$ 650.000,00 ;66; R$ 5.000,00 ;33;33; R$ 460.000,00 ; R$ 165.000,00 
+Carro SONGPLUS BYD;;FINANCIAMENTO;ATIVOS;MAR BRASIL;Contr 291482031;Mar Brasil - Rateio;Pagando;Débito CC Bradesco - MBR;3;28/11/2023;10/12/2027;46731; R$ 225.465,66 ;48; R$ 4.601,34 ;24;24; R$ 190.232,16 ; R$ 110.432,16 
+Caminhonete Iveco;;FINANCIAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado; ;19;19/01/2024;26/11/2024;; R$ 129.196,44 ;12; R$ 3.588,79 ;12;0; R$ 113.907,48 ; R$ -   
+Consórcio Bradesco ;Grupo 10447 cota 54;CONSÓRCIO;ATIVOS;CONECTIUS;Contr 701664330;Conectius - Rateio;Pagando;Débito CC Bradesco;10;28/07/2022;28/12/2029;47480; R$ 63.233,61 ;89; R$ 710,49 ;41;48; R$ 22.575,90 ; R$ 34.103,52 
+Consórcio Bradesco ;Grupo 10010 cota 167;CONSÓRCIO;ATIVOS;CONECTIUS;;Conectius - Rateio;Desistido;Débito CC Bradesco;10;31/03/2023;10/08/2023;; R$ 40.914,00 ;65; R$ 750,17 ;5;60; R$ 3.812,01 ; R$ 45.010,20 
+Consórcio Bradesco ;Grupo 10051 cota 186;CONSÓRCIO;ATIVOS;CONECTIUS;;Conectius - Rateio;Desistido;Débito CC Bradesco;10;31/03/2023;10/08/2023;; R$ 40.914,00 ;66; R$ 741,45 ;5;61; R$ 3.754,47 ; R$ 45.228,45 
+Consórcio Bradesco ;Grupo 10069 cota 175;CONSÓRCIO;ATIVOS;CONECTIUS;;Conectius - Rateio;Desistido;Débito CC Bradesco;10;31/03/2023;10/08/2023;; R$ 40.914,00 ;66; R$ 741,45 ;5;61; R$ 3.754,47 ; R$ 45.228,45 
+Consórcio Massey ;Grupo 0366 cota 0804;CONSÓRCIO;ATIVOS;MAR BRASIL;Contemplado;Mar Brasil - Rateio;Pagando;Boleto - Tchandra;20;28/03/2024;28/02/2029;47177; R$ 201.399,00 ;60; R$ 2.510,64 ;22;38; R$ 169.582,16 ; R$ 64.990,03 
+Consórcio Massey  ;Grupo 0378 cota 0458;CONSÓRCIO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Pagando;Débito CC Bradesco;20;28/03/2024;18/11/2033;48901; R$ 292.320,00 ;117; R$ 2.873,22 ;22;95; R$ 60.371,02 ; R$ 272.955,90 
+Consórcio Massey  ;Grupo 0367 cota 0202;CONSÓRCIO;ATIVOS;MAR BRASIL;Contemplado;Mar Brasil - Rateio;Pagando;Débito CC Bradesco;20;28/03/2024;28/02/2029;47177; R$ 193.396,00 ;60; R$ 2.412,72 ;22;38; R$ 155.820,81 ; R$ 76.672,78 
+Compra Notebook ;;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Elo - Priscilla;10;10/09/2024;10/06/2025;; R$ 3.199,00 ;10; R$ 319,90 ;10;0; R$ 3.199,00 ; R$ -   
+Compra Notebook ;;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Elo - Priscilla;10;10/09/2024;10/06/2025;; R$ 3.199,00 ;10; R$ 319,90 ;10;0; R$ 3.199,00 ; R$ -   
+Compra Notebook; - 4un;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Sicredi Visa Empresarial;23;21/10/2024;21/07/2025;45859; R$ 11.196,00 ;10; R$ 1.119,60 ;10;0; R$ 11.196,00 ; R$ -   
+Compra Notebooks ;- 7un;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Pagando;CC Elo - Dauren;10;10/05/2025;10/01/2026;46032; R$ 28.050,52 ;12; R$ 2.337,54 ;8;4; R$ 18.700,32 ; R$ 9.350,16 
+Compra Monitores ;- 10un;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Pagando;CC Elo - Priscilla;10;08/04/2025;10/01/2026;46032; R$ 5.390,00 ;10; R$ 539,00 ;9;1; R$ 4.851,00 ; R$ 539,00 
+Compra Monitores; - 10un;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Pagando;CC Elo - Dauren;10;10/05/2025;10/01/2026;46032; R$ 6.520,00 ;10; R$ 652,00 ;8;2; R$ 5.216,00 ; R$ 1.304,00 
+Compra Monitor;Priscilla/Tchandra;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Sicredi Visa Empresarial;23;21/06/2024;21/05/2025;; R$ 2.098,20 ;12; R$ 174,85 ;12;0; R$ 2.098,20 ; R$ -   
+Smartphones; - 05un;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Elo - Priscilla;10;10/01/2024;10/10/2024;; R$ 5.834,00 ;10; R$ 583,40 ;10;0; R$ 5.834,00 ; R$ -   
+Smartphones; - 04un;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Elo - Priscilla;10;10/10/2024;10/08/2025;45879; R$ 5.803,40 ;10; R$ 580,34 ;10;0; R$ 5.803,40 ; R$ -   
+Smartphones; - 02un;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Elo - Priscilla;10;10/09/2024;10/06/2025;; R$ 3.295,80 ;10; R$ 329,58 ;10;0; R$ 3.295,80 ; R$ -   
+Iphone; - Priscilla;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Pagando;Fatura Claro;10;28/11/2025;28/10/2027;46688; R$ 8.930,00 ;24; R$ 247,46 ;0;24; R$ -   ; R$ 5.939,04 
+Iphone; - Priscilla;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Pagando;;10;10/12/2023;10/12/2025;46001; R$ 5.939,04 ;24; R$ 247,46 ;23;1; R$ 5.691,58 ; R$ 247,46 
+Cadeiras Escritório; Comercial;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Elo - Priscilla;10;10/01/2025;10/10/2025;45940; R$ 4.428,80 ;10; R$ 442,88 ;10;0; R$ 4.428,80 ; R$ -   
+Cadeiras Escritório; TI;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Elo - Priscilla;10;10/02/2025;10/11/2025;45971; R$ 3.338,10 ;10; R$ 333,81 ;10;0; R$ 3.338,10 ; R$ -   
+Televisores Escritório;03 unidades;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;CC Sicredi Visa Empresarial;23;23/09/2024;21/08/2025;45890; R$ 7.797,00 ;12; R$ 649,75 ;12;0; R$ 7.797,00 ; R$ -   
+Compra Tenda ;;PARCELAMENTO;ATIVOS;MAR BRASIL;;Mar Brasil - Rancho;Liquidado;CC Sicredi Visa Empresarial;23;25/08/2024;25/07/2025;45863; R$ 9.087,00 ;12; R$ 757,25 ;12;0; R$ 9.087,00 ; R$ -   
+Compra Roçadeira;;PARCELAMENTO;ATIVOS;MAR BRASIL;;DZM - Rancho;Liquidado;CC Sicredi Visa Empresarial;23;23/01/2025;23/11/2025;45984; R$ 693,90 ;10; R$ 69,39 ;10;0; R$ 693,90 ; R$ -   
+Parcelamento Alvará 2025;;PARCELAMENTO;DESPESA;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;Guia;9;10/01/2025;10/08/2025;45879; R$ 2.322,50 ;8; R$ 232,25 ;8;0; R$ 1.858,00 ; R$ -   
+Parcelamento ISS 2022;;PARCELAMENTO;DESPESA;MAR BRASIL;910009/2022;Mar Brasil - Rateio;Pagando;Guia;11;11/04/2022;11/03/2027;46457; R$ 22.198,20 ;60; R$ 369,97 ;44;16; R$ 16.278,68 ; R$ 5.919,52 
+Parcelamento Alvará 2020;;PARCELAMENTO;DESPESA;MAR BRASIL;;Mar Brasil - Rateio;Liquidado;Guia;25;25/05/2023;22/04/2024;; R$ 9.307,15 ;12; R$ 775,55 ;12;0; R$ 9.306,60 ; R$ -   
+Parcelamento Simples Nacional;;PARCELAMENTO;DESPESA;MAR BRASIL;Negociação 4911852;Mar Brasil - Rateio;Pagando;Guia;28;30/09/2021;30/09/2033;48852; R$ 232.082,29 ;145; R$ 2.294,22 ;51;94; R$ 80.788,61 ; R$ 215.656,68 
+Giro Pronampe;;PARCELAMENTO;DESPESA;MAR BRASIL;Contr 015828170;Mar Brasil - Rateio;Pagando;Débito CC Bradesco - MBR;27;24/08/2022;27/08/2026;46261; R$ 214.605,19 ;42; R$ 5.815,27 ;34;8; R$ 112.714,50 ; R$ 46.522,16 
+Giro Pronampe;;PARCELAMENTO;DESPESA;CONECTIUS;;Conectius - Rateio;Pagando;Débito CC Itau - Conectius;30;30/03/2023;30/08/2026;46264; R$ 171.116,40 ;42; R$ 4.081,99 ;34;8; R$ 140.330,87 ; R$ 32.655,92 
+Trabalhista (Ed Carlos);;PARCELAMENTO;DESPESA;MAR BRASIL;;Mar Brasil - Rateio;Pagando;;13;13/01/2025;13/03/2026;46094; R$ 12.000,00 ;16; R$ 750,00 ;12;4; R$ 9.000,00 ; R$ 3.000,00 
+Trabalhista (Ed Carlos);;PARCELAMENTO;DESPESA;MAR BRASIL;;Mar Brasil - Rateio;Pagando;;13;13/04/2026;13/04/2026;; R$ 250,00 ;1; R$ 250,00 ;0;1; R$ -   ; R$ 250,00 
+Trabalhista (Ed Carlos);;PARCELAMENTO;DESPESA;MAR BRASIL;;Mar Brasil - Rateio;Pagando;;13;13/05/2026;13/05/2026;; R$ 500,00 ;1; R$ 500,00 ;0;1; R$ -   ; R$ 500,00 
+;;;;;;;;;;;;;;;;;; Transferido ; R$ 133.645,52 
+;;;;;;;;;;;;;;;;;;;#REF!

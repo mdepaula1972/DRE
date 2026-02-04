@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Debug - Análise Setorial</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .section {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        input[type="file"] {
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Debug - Análise Setorial CSV</h1>
+
+    <div class="section info">
+        <h2>1. Carregue seu CSV</h2>
+        <input type="file" id="csvFile" accept=".csv">
+        <p><strong>Instruções:</strong></p>
+        <ul>
+            <li>Carregue o arquivo <code>exemplo-analise-setorial.csv</code> ou seu próprio arquivo</li>
+            <li>Os resultados aparecerão automaticamente abaixo</li>
+        </ul>
+    </div>
+
+    <div class="section" id="resultsSection" style="display: none;">
+        <h2>2. Resultados do Parsing</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="section" id="dataSection" style="display: none;">
+        <h2>3. Dados Processados</h2>
+        <div id="dataDisplay"></div>
+    </div>
+
+    <div class="section" id="metadataSection" style="display: none;">
+        <h2>4. Metadados Extraídos</h2>
+        <div id="metadataDisplay"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script>
+        let rawData = [];
+
+        function log(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        function parseNumber(value) {
+            if (!value) return 0;
+            let cleaned = String(value).trim();
+            cleaned = cleaned.replace(/[R$\s]/g, '');
+            if (cleaned.includes(',') && cleaned.includes('.')) {
+                cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+            } else if (cleaned.includes(',')) {
+                cleaned = cleaned.replace(',', '.');
+            }
+            const result = parseFloat(cleaned);
+            return isNaN(result) ? 0 : result;
+        }
+
+        document.getElementById('csvFile').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            log('Iniciando parse do arquivo: ' + file.name);
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                encoding: 'UTF-8',
+                complete: function (results) {
+                    handleParseComplete(results, file);
+                },
+                error: function (err) {
+                    showError('Erro ao processar arquivo: ' + err.message);
+                }
+            });
+        });
+
+        function handleParseComplete(results, file) {
+            document.getElementById('resultsSection').style.display = 'block';
+            const resultsDiv = document.getElementById('results');
+
+            let html = '<div class="success">';
+            html += `<h3>✅ Arquivo Carregado: ${file.name}</h3>`;
+            html += `<p><strong>Total de linhas:</strong> ${results.data.length}</p>`;
+            html += `<p><strong>Erros:</strong> ${results.errors.length}</p>`;
+            html += '</div>';
+
+            if (results.errors.length > 0) {
+                html += '<div class="error"><h4>Erros encontrados:</h4><pre>' + JSON.stringify(results.errors, null, 2) + '</pre></div>';
+            }
+
+            if (results.data.length > 0) {
+                const firstRow = results.data[0];
+                const headers = Object.keys(firstRow);
+
+                html += '<div class="info">';
+                html += '<h4>📋 Cabeçalhos Detectados:</h4>';
+                html += '<pre>' + JSON.stringify(headers, null, 2) + '</pre>';
+                html += '</div>';
+
+                html += '<div class="info">';
+                html += '<h4>🔍 Primeira Linha (Raw):</h4>';
+                html += '<pre>' + JSON.stringify(firstRow, null, 2) + '</pre>';
+                html += '</div>';
+
+                // Processar dados
+                processData(results.data);
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function processData(data) {
+            document.getElementById('dataSection').style.display = 'block';
+            const dataDiv = document.getElementById('dataDisplay');
+
+            try {
+                // Validar colunas obrigatórias
+                const firstRow = data[0];
+                const hasSetor = 'Setor' in firstRow;
+                const hasCategoria = 'Categoria' in firstRow;
+                const hasDespesas = 'Despesas' in firstRow;
+
+                let html = '<div class="' + (hasSetor && hasCategoria && hasDespesas ? 'success' : 'error') + '">';
+                html += '<h4>Validação de Colunas Obrigatórias:</h4>';
+                html += '<ul>';
+                html += `<li>Setor: ${hasSetor ? '✅' : '❌'}</li>`;
+                html += `<li>Categoria: ${hasCategoria ? '✅' : '❌'}</li>`;
+                html += `<li>Despesas: ${hasDespesas ? '✅' : '❌'}</li>`;
+                html += '</ul></div>';
+
+                if (!hasSetor || !hasCategoria || !hasDespesas) {
+                    html += '<div class="error"><p><strong>ERRO:</strong> Faltam colunas obrigatórias!</p></div>';
+                    dataDiv.innerHTML = html;
+                    return;
+                }
+
+                // Processar linhas
+                rawData = data.map((row, index) => {
+                    const processed = {
+                        Setor: row.Setor?.trim() || '',
+                        Categoria: row.Categoria?.trim() || '',
+                        Despesas: parseNumber(row.Despesas)
+                    };
+
+                    // Adicionar colunas de mês
+                    Object.keys(row).forEach(key => {
+                        const trimmedKey = key.trim();
+                        if (trimmedKey.match(/^\d{2}\/\d{2}$/)) {
+                            processed[trimmedKey] = parseNumber(row[key]);
+                        }
+                    });
+
+                    return processed;
+                }).filter(row => row.Setor && row.Categoria);
+
+                html += '<div class="success">';
+                html += `<h4>✅ Dados Processados: ${rawData.length} registros</h4>`;
+                html += '</div>';
+
+                html += '<div class="info">';
+                html += '<h4>📊 Primeira Linha Processada:</h4>';
+                html += '<pre>' + JSON.stringify(rawData[0], null, 2) + '</pre>';
+                html += '</div>';
+
+                html += '<div class="info">';
+                html += '<h4>📊 Segunda Linha Processada:</h4>';
+                html += '<pre>' + JSON.stringify(rawData[1], null, 2) + '</pre>';
+                html += '</div>';
+
+                dataDiv.innerHTML = html;
+
+                // Extrair metadados
+                extractMetadata();
+
+            } catch (error) {
+                dataDiv.innerHTML = '<div class="error"><h4>Erro ao processar:</h4><p>' + error.message + '</p><pre>' + error.stack + '</pre></div>';
+            }
+        }
+
+        function extractMetadata() {
+            document.getElementById('metadataSection').style.display = 'block';
+            const metaDiv = document.getElementById('metadataDisplay');
+
+            const setores = new Set();
+            const categorias = new Set();
+            const periodos = new Set();
+
+            rawData.forEach(row => {
+                if (row.Setor) setores.add(row.Setor);
+                if (row.Categoria) categorias.add(row.Categoria);
+
+                Object.keys(row).forEach(key => {
+                    if (key.match(/^\d{2}\/\d{2}$/)) {
+                        periodos.add(key);
+                    }
+                });
+            });
+
+            const sortedPeriods = Array.from(periodos).sort((a, b) => {
+                const [monthA, yearA] = a.split('/');
+                const [monthB, yearB] = b.split('/');
+                return yearA !== yearB ? yearA - yearB : monthA - monthB;
+            });
+
+            let html = '<div class="success">';
+            html += '<h4>📊 Metadados Extraídos:</h4>';
+            html += `<p><strong>Setores encontrados:</strong> ${setores.size}</p>`;
+            html += '<pre>' + JSON.stringify(Array.from(setores).sort(), null, 2) + '</pre>';
+
+            html += `<p><strong>Categorias encontradas:</strong> ${categorias.size}</p>`;
+            html += '<pre>' + JSON.stringify(Array.from(categorias).sort(), null, 2) + '</pre>';
+
+            html += `<p><strong>Períodos encontrados:</strong> ${periodos.size}</p>`;
+            html += '<pre>' + JSON.stringify(sortedPeriods, null, 2) + '</pre>';
+            html += '</div>';
+
+            // Calcular totais de exemplo
+            if (sortedPeriods.length > 0) {
+                const firstPeriod = sortedPeriods[0];
+                let total = 0;
+                rawData.forEach(row => {
+                    total += (row[firstPeriod] || 0);
+                });
+
+                html += '<div class="info">';
+                html += `<h4>🧮 Teste de Cálculo (${firstPeriod}):</h4>`;
+                html += `<p><strong>Total:</strong> R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>`;
+                html += '</div>';
+            }
+
+            metaDiv.innerHTML = html;
+        }
+
+        function showError(message) {
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('results').innerHTML = '<div class="error"><h3>❌ Erro</h3><p>' + message + '</p></div>';
+        }
+    </script>
+</body>
+
+</html>
