@@ -3,22 +3,37 @@
 
 
 
-const GEMINI_API_URL = "/api/chat";
+// Detecção de ambiente
+const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('192.168');
+const GEMINI_API_URL = IS_LOCAL ? null : "/api/chat";
+
+// CONFIGURAÇÃO LOCAL: Insira sua API key aqui para desenvolvimento local
+const LOCAL_API_KEY = "AIzaSyCjyjw_pwuLC6gcrdhUEst_JdJh4zUDAt0"; // Coloque sua chave da API Gemini aqui para testar localmente
 
 class GeminiService {
     constructor() {
-        // A chave não fica mais no código. 
-        // Ela é gerenciada pelo servidor (Proxy) via variáveis de ambiente.
-        this.apiKey = null;
+        if (IS_LOCAL) {
+            this.apiKey = LOCAL_API_KEY;
+            this.isLocal = true;
+            console.log("🔧 BrisinhAI: Modo LOCAL ativado");
+        } else {
+            this.apiKey = null;
+            this.isLocal = false;
+            console.log("☁️ BrisinhAI: Modo PRODUÇÃO (Vercel Proxy)");
+        }
     }
 
     isAuthenticated() {
-        // Sempre retorna verdadeiro pois a autenticação é tratada no servidor Proxy
-        return true;
+        if (this.isLocal) {
+            return this.apiKey && this.apiKey.length > 0;
+        }
+        return true; // Em produção, autenticação é tratada no servidor
     }
 
     setKey(key) {
-        // Método mantido para compatibilidade, mas sem utilidade no modo Proxy
+        if (this.isLocal) {
+            this.apiKey = key;
+        }
     }
 
     async generateAnalysis(contextData, userQuestion = null, signal = null) {
@@ -32,17 +47,47 @@ class GeminiService {
                     throw new DOMException("The user aborted a request.", "AbortError");
                 }
 
-                const response = await fetch(GEMINI_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt: prompt
-                    }),
-                    signal: signal
-                });
+                let response;
+
+                if (this.isLocal) {
+                    // Modo LOCAL: Chama API diretamente
+                    const DIRECT_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${this.apiKey}`;
+
+                    response = await fetch(DIRECT_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: prompt }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.7,
+                                maxOutputTokens: 2048
+                            }
+                        }),
+                        signal: signal
+                    });
+                } else {
+                    // Modo PRODUÇÃO: Usa proxy Vercel
+                    response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: prompt
+                        }),
+                        signal: signal
+                    });
+                }
 
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    const errorText = await response.text();
+                    let errorData;
+
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch {
+                        throw new Error(`Erro HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+                    }
 
                     if (response.status === 503 || response.status === 500) {
                         console.warn(`Tentativa ${attempt + 1} falhou: ${response.statusText}. Tentando novamente...`);

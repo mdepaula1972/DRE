@@ -187,12 +187,12 @@
     </div>
     </div>
 
-    <!-- Overlay de Detalhes (Estilo CSI Mantido) -->
+    <!-- Overlay de Detalhes (5 COLUNAS HORIZONTAIS) -->
     <div id="profileOverlay">
         <div class="hud-profile shadow-lg">
             <button class="btn-close-hud hud-font small" onclick="closeProfile()">CLOSE_X</button>
 
-            <!-- Barra Lateral do Perfil -->
+            <!-- COLUNA 1: Foto e Resumo -->
             <div class="profile-sidebar">
                 <div class="profile-photo-container">
                     <img id="profilePhoto" src="" class="profile-photo">
@@ -231,48 +231,71 @@
                 </div>
             </div>
 
-            <!-- Dados Principais -->
-            <div class="profile-main-data">
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="data-row"><span class="label">EMPRESA</span><span id="profileCompany"
-                                class="value">...</span></div>
-                        <div class="data-row"><span class="label">VÍNCULO</span><span id="profileType"
-                                class="value">...</span></div>
-                        <div class="data-row"><span class="label">SETOR</span><span id="profileDept"
-                                class="value">...</span></div>
-                        <div class="data-row"><span class="label">FUNÇÃO</span><span id="profileRole"
-                                class="value">...</span></div>
-                        <div class="data-row"><span class="label">E-MAIL</span><span id="profileEmail"
-                                class="value small text-lowercase">...</span></div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="data-row"><span class="label">ADMISSÃO</span><span id="profileStart"
-                                class="value">...</span></div>
-                        <div class="data-row"><span class="label">REMUNERAÇÃO</span><span id="profileRemuneration"
-                                class="value fw-bold text-success font-monospace">...</span></div>
-                        <div class="data-row"><span class="label">DOCUMENTO</span><span id="profileDoc"
-                                class="value font-monospace">...</span></div>
-                        <div class="data-row"><span class="label">STATUS</span><span id="profileStatus"
-                                class="value badge bg-success">...</span></div>
-                        <div class="data-row"><span class="label">CONSIGNÁVEL</span><span id="profileConsignable"
-                                class="value fw-bold text-warning font-monospace ${isPrivacyActive ? 'privacy-text' : ''}">R$
-                                0,00</span></div>
-                        <div class="data-row"><span class="label">SALDO DEVEDOR</span><span id="profileDebtBalance"
-                                class="value small font-monospace ${isPrivacyActive ? 'privacy-text' : ''}">R$
-                                0,00</span></div>
-                        <div class="data-row"><span class="label">REGISTRO</span><span id="profileCreated"
-                                class="value small">...</span></div>
-                    </div>
+            <!-- COLUNA 2: Dados na Empresa -->
+            <div class="profile-column">
+                <h6 class="column-title">🏢 DADOS NA EMPRESA</h6>
+                <div class="data-row"><span class="label">EMPRESA</span><span id="profileCompany"
+                        class="value">...</span></div>
+                <div class="data-row"><span class="label">VÍNCULO</span><span id="profileType" class="value">...</span>
                 </div>
+                <div class="data-row"><span class="label">SETOR</span><span id="profileDept" class="value">...</span>
+                </div>
+                <div class="data-row"><span class="label">FUNÇÃO</span><span id="profileRole" class="value">...</span>
+                </div>
+                <div class="data-row"><span class="label">TELEFONE PROFISSIONAL</span><span id="profilePhonePro"
+                        class="value small">...</span></div>
+                <div class="data-row"><span class="label">E-MAIL PROFISSIONAL</span><span id="profileEmailPro"
+                        class="value small text-lowercase">...</span></div>
+            </div>
 
-                <div id="profileHistory" class="profile-history-container mt-4">
+            <!-- COLUNA 3: Datas e Valores -->
+            <div class="profile-column">
+                <h6 class="column-title">💰 DATAS E VALORES</h6>
+                <div class="data-row"><span class="label">ADMISSÃO</span><span id="profileStart"
+                        class="value">...</span></div>
+                <div class="data-row"><span class="label">REMUNERAÇÃO</span><span id="profileRemuneration"
+                        class="value fw-bold text-success font-monospace">...</span></div>
+                <div class="data-row"><span class="label">CONSIGNÁVEL</span><span id="profileConsignable"
+                        class="value fw-bold text-warning font-monospace">R$ 0,00</span></div>
+                <div class="data-row"><span class="label">SALDO DEVEDOR</span><span id="profileDebtBalance"
+                        class="value small font-monospace">R$ 0,00</span></div>
+                <div class="data-row"><span class="label">STATUS</span><span id="profileStatus"
+                        class="value badge bg-success">...</span></div>
+                <div class="data-row"><span class="label">REGISTRO</span><span id="profileCreated"
+                        class="value small">...</span></div>
+            </div>
+
+            <!-- COLUNA 4: Histórico -->
+            <div class="profile-column">
+                <h6 class="column-title">📜 HISTÓRICO</h6>
+                <div id="profileHistory" class="profile-history-container">
                     <!-- Histórico injetado aqui -->
                 </div>
+            </div>
 
-                <div class="mt-4 pt-3 border-top border-secondary opacity-50">
-                    <button class="btn btn-sm btn-outline-light" onclick="exportPDF('ia')">
-                        <i class="bi bi-journal-text me-2"></i>GERAR DOSSIÊ INDIVIDUAL
+            <!-- COLUNA 5: Dados Pessoais -->
+            <div class="profile-column">
+                <h6 class="column-title">👤 DADOS PESSOAIS</h6>
+                <div class="data-row"><span class="label">DOCUMENTO</span><span id="profileDoc"
+                        class="value font-monospace">...</span></div>
+                <div class="data-row"><span class="label">TELEFONE PESSOAL</span><span id="profilePhone"
+                        class="value small">...</span></div>
+                <div class="data-row"><span class="label">E-MAIL PESSOAL</span><span id="profileEmail"
+                        class="value small text-lowercase">...</span></div>
+                <div class="data-row"><span class="label">PIX</span><span id="profilePix"
+                        class="value small font-monospace">...</span></div>
+
+                <h6 class="column-title mt-3">🚨 EMERGÊNCIA</h6>
+                <div class="data-row"><span class="label">CONTATO</span><span id="profileEmergencyName"
+                        class="value small">...</span></div>
+                <div class="data-row"><span class="label">TELEFONE</span><span id="profileEmergencyPhone"
+                        class="value small">...</span></div>
+                <div class="data-row"><span class="label">VÍNCULO</span><span id="profileEmergencyRelation"
+                        class="value small">...</span></div>
+
+                <div class="mt-auto">
+                    <button class="btn btn-sm btn-outline-light w-100" onclick="exportPDF('ia')">
+                        <i class="bi bi-journal-text me-2"></i>GERAR DOSSIÊ
                     </button>
                 </div>
             </div>
@@ -449,13 +472,23 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">Telefone</label>
+                                <label class="form-label">Telefone Pessoal</label>
                                 <input type="text" id="empPhone" class="form-control" oninput="maskPhone(this)"
                                     placeholder="(00) 00000-0000">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">E-mail Pessoal</label>
                                 <input type="email" id="empEmail" class="form-control" placeholder="usuario@email.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Telefone Profissional</label>
+                                <input type="text" id="empPhonePro" class="form-control" oninput="maskPhone(this)"
+                                    placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">E-mail Profissional</label>
+                                <input type="email" id="empEmailPro" class="form-control"
+                                    placeholder="usuario@empresa.com">
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">Chave PIX</label>

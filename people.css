@@ -155,32 +155,56 @@ body {
     backdrop-filter: blur(10px);
 }
 
-/* HUD Profile Typography & Layout refinements */
+/* HUD Profile Typography & Layout - 5 COLUNAS HORIZONTAIS */
 .hud-profile {
     display: grid;
-    grid-template-columns: 420px 1fr;
-    /* Foto maior à esquerda */
-    gap: 0;
+    grid-template-columns: 280px 1fr 1fr 1fr 1fr;
+    /* Foto | Empresa | Datas | Histórico | Pessoais */
+    gap: 15px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow: hidden;
 }
 
 .profile-sidebar {
-    padding: 40px;
+    padding: 15px;
     background: rgba(242, 145, 27, 0.03);
-    border-right: 1px solid rgba(242, 145, 27, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(242, 145, 27, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow-y: auto;
 }
 
-.profile-main-data {
-    padding: 40px 60px;
+/* Colunas de dados */
+.profile-column {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    border: 1px solid rgba(242, 145, 27, 0.1);
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
+    max-height: calc(90vh - 40px);
+}
+
+/* Títulos das colunas */
+.column-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(242, 145, 27, 0.3);
 }
 
 .profile-photo-container {
     width: 280px;
     height: 280px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     border: 3px solid var(--primary);
     box-shadow: 0 0 20px var(--primary-glow);
     position: relative;
@@ -242,13 +266,12 @@ body {
 #profileEmail {
     font-size: 0.75rem !important;
     word-break: break-all;
-    max-width: 180px;
-    line-height: 1;
+    max-width: 280px;
+    line-height: 1.2;
 }
 
 #profileName {
-    font-size: 2.4rem;
-    /* Um pouco maior */
+    font-size: 2.2rem;
     font-weight: 800;
     margin-bottom: 5px;
     letter-spacing: -1px;
@@ -257,47 +280,107 @@ body {
 }
 
 #profileID {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--primary);
     font-family: 'Orbitron', sans-serif;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
+/* Grid layout for data rows - respecting Bootstrap structure */
+.profile-main-data .row {
+    margin-bottom: 0;
+}
+
+/* Compact data rows */
 .data-row {
-    margin-bottom: 25px;
-    /* Mais espaço */
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(242, 145, 27, 0.15);
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.data-row:hover {
+    background: rgba(242, 145, 27, 0.08);
+    border-left-color: var(--primary);
 }
 
 .label {
-    font-size: 1rem;
-    color: var(--primary);
-    font-weight: 700;
+    font-size: 0.7rem;
+    color: rgba(242, 145, 27, 0.8);
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     display: block;
-    /* Label em cima */
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .value {
-    font-size: 1.5rem;
-    /* Fonte imponente */
+    font-size: 1rem;
     color: #fff;
     font-weight: 500;
     display: block;
+    line-height: 1.2;
+}
+
+/* Section headers */
+.profile-main-data>.row::before {
+    content: '⚡ DADOS PRINCIPAIS';
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(242, 145, 27, 0.3);
+}
+
+/* Highlight financial data */
+#profileRemuneration,
+#profileConsignable {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+}
+
+#profileDebtBalance {
+    font-size: 0.95rem !important;
+}
+
+/* Compact status badge */
+#profileStatus {
+    font-size: 0.75rem !important;
+    padding: 4px 10px !important;
 }
 
 .profile-history-container {
-    max-height: 400px;
+    flex: 1;
     overflow-y: auto;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 5px;
+    background: transparent;
+    border: none;
+}
+
+/* Remove section title from history */
+.profile-history-container::before {
+    display: none;
+}
+
+/* Compact additive items */
+.additive-item {
+    padding: 8px 10px !important;
+    margin-bottom: 6px !important;
+    font-size: 0.85rem !important;
+}
+
+.additive-item strong {
+    font-size: 0.75rem !important;
+    display: inline-block;
+    min-width: 100px;
 }
 
 .additive-item:hover {

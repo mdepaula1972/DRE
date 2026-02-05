@@ -666,6 +666,8 @@ window.saveEmployee = async function () {
         document_id: safeVal('empDoc'),
         phone: safeVal('empPhone'),
         email: safeVal('empEmail'),
+        phone_professional: safeVal('empPhonePro'),
+        email_professional: safeVal('empEmailPro'),
         pix_key: safeVal('empPix'),
         zip_code: safeVal('empZip'),
         street: safeVal('empStreet'),
@@ -763,6 +765,8 @@ window.editEmployee = function () {
     setVal('empDoc', emp.document_id);
     setVal('empPhone', emp.phone);
     setVal('empEmail', emp.email);
+    setVal('empPhonePro', emp.phone_professional);
+    setVal('empEmailPro', emp.email_professional);
     setVal('empPix', emp.pix_key);
     setVal('empZip', emp.zip_code);
     setVal('empStreet', emp.street);
@@ -845,11 +849,18 @@ async function openProfile(id) {
         scrambleText('profileType', emp.employment_type || '---');
         scrambleText('profileDept', emp.department || '---');
         scrambleText('profileRole', emp.job_role || '---');
+        scrambleText('profilePhonePro', emp.phone_professional || '---');
+        scrambleText('profileEmailPro', emp.email_professional || '---');
         scrambleText('profileEmail', emp.email || '---');
         scrambleText('profileStart', formatDate(emp.start_date));
         scrambleText('profileRemuneration', isPrivacyActive ? 'R$ ••••••' : formatCurrency(emp.remuneration));
         scrambleText('profileDoc', isPrivacyActive ? '•••.•••.•••-••' : (emp.document_id || '---'));
+        scrambleText('profilePhone', emp.phone || '---');
+        scrambleText('profilePix', isPrivacyActive ? '•••.•••.•••-••' : (emp.pix_key || '---'));
         scrambleText('profileStatus', (emp.status || 'Ativo').toUpperCase());
+        scrambleText('profileEmergencyName', emp.emergency_contact_name || '---');
+        scrambleText('profileEmergencyPhone', emp.emergency_contact_phone || '---');
+        scrambleText('profileEmergencyRelation', emp.emergency_contact_relation || '---');
 
         const debt = calculateDebt(emp);
         scrambleText('profileConsignable', isPrivacyActive ? 'R$ •••' : formatCurrency((emp.remuneration || 0) - debt));
