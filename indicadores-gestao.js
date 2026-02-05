@@ -217,52 +217,50 @@ function renderSpiralSystem() {
     }
 
     // Clear previous
-    scene.querySelectorAll('.planet-wrapper-gestor, .culture-asteroid-wrapper').forEach(p => p.remove());
+    scene.querySelectorAll('.planet-wrapper-gestor, .culture-asteroid-wrapper, .spiral-arm, .orbit-ring, .orbital-planet, .floating-indicator, .rotating-planet').forEach(p => p.remove());
 
     const indicators = [
-        { label: "M. Líquida", value: (m.totalEntradas ? (m.resultado / m.totalEntradas * 100) : 0), type: 'percent', icon: 'bi-gem', orbit: 1, glow: 'green-glow' },
-        { label: "M. EBITDA", value: (m.totalEntradas ? (m.ebitda / m.totalEntradas * 100) : 0), type: 'percent', icon: 'bi-activity', orbit: 1, glow: 'green-glow' },
-        { label: "M. FCL", value: (m.totalEntradas ? (m.fcl / m.totalEntradas * 100) : 0), type: 'percent', icon: 'bi-wallet2', orbit: 1, glow: 'green-glow' },
+        { label: "M. Líquida", value: (m.totalEntradas ? (m.resultado / m.totalEntradas * 100) : 0), type: 'percent', icon: 'bi-gem', glow: 'green-glow' },
+        { label: "M. EBITDA", value: (m.totalEntradas ? (m.ebitda / m.totalEntradas * 100) : 0), type: 'percent', icon: 'bi-activity', glow: 'green-glow' },
+        { label: "M. FCL", value: (m.totalEntradas ? (m.fcl / m.totalEntradas * 100) : 0), type: 'percent', icon: 'bi-wallet2', glow: 'green-glow' },
+        { label: "Total Saídas", value: m.totalSaidas / n, type: 'currency', icon: 'bi-graph-down-arrow', glow: 'orange-glow' },
+        { label: "Custos Op.", value: m.totalCustos / n, type: 'currency', icon: 'bi-gear', glow: 'blue-glow' },
+        { label: "Desp. Rateadas", value: m.totalDespesas / n, type: 'currency', icon: 'bi-calculator', glow: 'blue-glow' },
+        { label: "Impostos", value: m.impostos / n, type: 'currency', icon: 'bi-bank', glow: 'orange-glow' },
+        { label: "Pessoal", value: m.pessoal / n, type: 'currency', icon: 'bi-people', glow: 'blue-glow' },
+        { label: "Preventiva", value: (m.preventiva + m.credencialOp + m.clts) / n, type: 'currency', icon: 'bi-shield-check', glow: 'green-glow' },
+        { label: "Corretiva", value: m.corretiva / n, type: 'currency', icon: 'bi-tools', glow: 'orange-glow' },
+        { label: "FCL / Mák", value: m.fcl / n, type: 'currency', icon: 'bi-currency-dollar', glow: 'green-glow' }
+    ];
 
-        { label: "Total Saídas", value: m.totalSaidas / n, type: 'currency', icon: 'bi-graph-down-arrow', orbit: 2, glow: 'orange-glow' },
-        { label: "Custos Op.", value: m.totalCustos / n, type: 'currency', icon: 'bi-gear', orbit: 2, glow: 'blue-glow' },
-        { label: "Desp. Rateadas", value: m.totalDespesas / n, type: 'currency', icon: 'bi-calculator', orbit: 2, glow: 'blue-glow' },
-        { label: "Impostos", value: m.impostos / n, type: 'currency', icon: 'bi-bank', orbit: 2, glow: 'orange-glow' },
-
-        { label: "Pessoal", value: m.pessoal / n, type: 'currency', icon: 'bi-people', orbit: 3, glow: 'blue-glow' },
-        { label: "Preventiva", value: (m.preventiva + m.credencialOp + m.clts) / n, type: 'currency', icon: 'bi-shield-check', orbit: 3, glow: 'green-glow' },
-        { label: "Corretiva", value: m.corretiva / n, type: 'currency', icon: 'bi-tools', orbit: 3, glow: 'orange-glow' },
-        { label: "FCL / Mák", value: m.fcl / n, type: 'currency', icon: 'bi-currency-dollar', orbit: 3, glow: 'green-glow' }
+    // Orbital configurations - varied distances and sizes
+    const orbitalConfigs = [
+        { angle: 30, radius: 380, size: 180 },
+        { angle: 90, radius: 420, size: 165 },
+        { angle: 150, radius: 350, size: 195 },
+        { angle: 210, radius: 480, size: 170 },
+        { angle: 270, radius: 400, size: 185 },
+        { angle: 330, radius: 520, size: 160 },
+        { angle: 45, radius: 550, size: 190 },
+        { angle: 135, radius: 580, size: 175 },
+        { angle: 225, radius: 450, size: 200 },
+        { angle: 285, radius: 500, size: 168 },
+        { angle: 0, radius: 360, size: 188 }
     ];
 
     indicators.forEach((p, i) => {
-        const angle = (i * (360 / indicators.length));
-        // Expanded orbital spacing for better clarity
-        const baseRadius = p.orbit === 1 ? 250 : (p.orbit === 2 ? 450 : 650);
-        const duration = (30 + Math.random() * 50) + 's';
+        const config = orbitalConfigs[i];
 
         const wrapper = document.createElement('div');
-        wrapper.className = 'planet-wrapper-gestor';
-        wrapper.style.setProperty('--base-radius', `${baseRadius}px`);
-        wrapper.style.setProperty('--start-angle', `${angle}deg`);
-        wrapper.style.setProperty('--duration', duration);
-
-        // Add Micro Dust particles around planet
-        for (let d = 0; d < 3; d++) {
-            const dust = document.createElement('div');
-            dust.className = 'micro-dust';
-            dust.style.setProperty('--dust-speed', (3 + Math.random() * 4) + 's');
-            dust.style.animationDelay = (Math.random() * 2) + 's';
-            wrapper.appendChild(dust);
-        }
+        wrapper.className = 'rotating-planet';
+        wrapper.style.setProperty('--orbit-radius', `${config.radius}px`);
+        wrapper.style.setProperty('--start-angle', `${config.angle}deg`);
+        wrapper.style.setProperty('--rotation-duration', `${120 + Math.random() * 60}s`);
 
         const planet = document.createElement('div');
         planet.className = `planet-gestor ${p.glow || ''}`;
-
-        // Reduced sizes for indicators as requested (-0.3x approx)
-        const randomSize = Math.floor(125 + Math.random() * 55) + 'px';
-        planet.style.width = randomSize;
-        planet.style.height = randomSize;
+        planet.style.width = `${config.size}px`;
+        planet.style.height = `${config.size}px`;
 
         const formattedVal = p.type === 'percent' ? p.value.toFixed(1) + '%' : formatCurrency(p.value);
 
@@ -326,7 +324,8 @@ function renderCultureAsteroids() {
         wrapper.appendChild(rocketContainer);
     }
 
-    // Create other culture values as orbiting planets
+    // Culture orbital planets removed - only Missão rocket remains
+    /*
     cultureOrbits.forEach((f, i) => {
         const angle = (i * (360 / cultureOrbits.length));
         // Orbits 4 and 5 (outermost)
@@ -358,6 +357,7 @@ function renderCultureAsteroids() {
         wrapper.appendChild(planet);
         scene.appendChild(wrapper);
     });
+    */
 }
 
 function formatCurrency(value) {

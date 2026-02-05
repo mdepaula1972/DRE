@@ -598,6 +598,61 @@ window.saveDocsLinks = async function () {
     }
 };
 
+// Validação de Empréstimos
+function validateLoanRequest(payload, employeeId) {
+    const warnings = [];
+
+    // Buscar funcionário existente se for edição
+    const existingEmployee = employeeId ? allEmployees.find(e => e.id === employeeId) : null;
+
+    // 1. Validar tempo mínimo de empresa (6 meses)
+    if (payload.start_date) {
+        const startDate = new Date(payload.start_date);
+        const today = new Date();
+        const monthsWorked = (today.getFullYear() - startDate.getFullYear()) * 12 + (today.getMonth() - startDate.getMonth());
+
+        if (monthsWorked < 6 && payload.loan_amount > 0) {
+            warnings.push({
+                type: 'TEMPO_MINIMO',
+                message: `⚠️ ALERTA: O colaborador possui apenas ${monthsWorked} meses de empresa. O mínimo recomendado é 6 meses para concessão de empréstimo.`
+            });
+        }
+    }
+
+    // 2. Validar margem consignável (Total do empréstimo não pode exceder 1 salário)
+    const remuneration = payload.remuneration || 0;
+    const maxLoanAllowed = remuneration; // Limite: 1 salário
+
+    // Calcular total de empréstimos solicitados
+    let totalLoanAmount = parseFloat(payload.loan_amount) || 0;
+
+    // Adicionar empréstimos diversos se houver
+    if (payload.loans_data && Array.isArray(payload.loans_data)) {
+        payload.loans_data.forEach(ln => {
+            totalLoanAmount += parseFloat(ln.amount) || 0;
+        });
+    }
+
+    // Validar se o valor total do empréstimo excede 1 salário
+    if (totalLoanAmount > maxLoanAllowed) {
+        const exceeded = totalLoanAmount - maxLoanAllowed;
+        const percentExceeded = ((exceeded / maxLoanAllowed) * 100).toFixed(1);
+
+        warnings.push({
+            type: 'MARGEM_EXCEDIDA',
+            message: `⚠️ ALERTA DE LIMITE DE EMPRÉSTIMO:\n\n` +
+                `Remuneração Mensal: R$ ${remuneration.toFixed(2)}\n` +
+                `Limite Máximo Permitido: R$ ${maxLoanAllowed.toFixed(2)} (1 salário)\n` +
+                `Valor Total Solicitado: R$ ${totalLoanAmount.toFixed(2)}\n` +
+                `Excedente: R$ ${exceeded.toFixed(2)}\n\n` +
+                `O empréstimo excede em ${percentExceeded}% o limite permitido!\n` +
+                `REGRA: O valor total do empréstimo não pode ultrapassar 1 salário.`
+        });
+    }
+
+    return { warnings };
+}
+
 // --- CURD & UTIL ---
 window.saveEmployee = async function () {
     console.log(">>> [DEBUG] Iniciando saveEmployee...");
@@ -1194,7 +1249,7 @@ window.generateDebtTermPDF = async function () {
     });
 
     try {
-        const timbrado = await loadImg('Timbrado Mar Brasil.png');
+        const timbrado = await loadImg('./Timbrado Mar Brasil.png');
 
         const addPageWithTimbrado = () => {
             doc.addImage(timbrado, 'PNG', 0, 0, 210, 297);
