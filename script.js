@@ -187,36 +187,156 @@ function handleFileUpload(event) {
 /**
  * Tenta carregar dados automaticamente se estiver em ambiente remoto
  * ou se o usuário desejar um carregamento padrão.
+ * ATUALIZADO: Carrega JSON mesclado de duas fontes (até mai/25 e jun/25+)
  */
 function tryAutoLoad() {
     const isGitHubPages = window.location.hostname.includes('github.io');
-    const defaultFile = 'dados.csv';
+    const defaultFile = 'dados_dre_merged.json';  // ← JSON merged
 
     console.log(`Tentando auto-load (${defaultFile})...`);
 
-    // Se estiver no GitHub Pages, podemos ocultar a seção de upload se o auto-load for bem sucedido
-    // Ou apenas deixar como uma facilidade.
-
     fetch(defaultFile)
         .then(response => {
-            if (!response.ok) throw new Error("Arquivo padrão não encontrado");
-            return response.blob();
+            if (!response.ok) throw new Error("Arquivo JSON merged não encontrado");
+            return response.json();
         })
-        .then(blob => {
-            const file = new File([blob], defaultFile, { type: 'text/csv' });
-            const event = { target: { files: [file] } };
-            handleFileUpload(event);
+        .then(data => {
+            console.log(`JSON merged carregado: ${data.length} lançamentos`);
+            processJSONData(data);
 
             if (isGitHubPages) {
                 console.log("Ambiente GitHub Pages detectado. Ajustando interface...");
-                // Opcional: Ocultar seção de upload se carregou com sucesso
-                // const uploadSection = document.querySelector('.upload-section');
-                // if (uploadSection) uploadSection.style.display = 'none';
             }
         })
         .catch(err => {
             console.warn("Auto-load indisponível ou arquivo não encontrado:", err.message);
+            console.log("Fallback: tentando carregar dados.csv...");
+
+            // Fallback para CSV antigo
+            fetch('dados.csv')
+                .then(response => {
+                    if (!response.ok) throw new Error("Arquivo padrão não encontrado");
+                    return response.blob();
+                })
+                .then(blob => {
+                    const file = new File([blob], 'dados.csv', { type: 'text/csv' });
+                    const event = { target: { files: [file] } };
+                    handleFileUpload(event);
+                })
+                .catch(err2 => {
+                    console.warn("Fallback CSV também falhou:", err2.message);
+                });
         });
+}
+
+/**
+ * Processa dados JSON (formato normalizado do dual-source)
+ * Converte para formato CSV esperado pelo resto do código
+ */
+function processJSONData(jsonData) {
+    try {
+        console.log("Processando JSON data...");
+
+        // Converter JSON normalizado para formato CSV wide
+        // JSON: [{empresa, projeto, categoria, competencia, valor}, ...]
+        // CSV esperado: {Empresa, Projeto, Categoria, "jan/24": valor, "fev/24": valor, ...}
+
+        const csvFormat = {};
+        const allPeriods = new Set();
+
+        jsonData.forEach(item => {
+            const key = `${item.empresa}|${item.projeto}|${item.categoria}`;
+
+            if (!csvFormat[key]) {
+                csvFormat[key] = {
+                    Empresa: item.empresa,
+                    Projeto: item.projeto,
+                    Categoria: item.categoria
+                };
+            }
+
+            // Converter "2024-01" para "jan/24"
+            const periodFormatted = formatCompetenciaToCSV(item.competencia);
+            allPeriods.add(periodFormatted);
+            csvFormat[key][periodFormatted] = item.valor;
+        });
+
+        // Converter para Array
+        const data = Object.values(csvFormat);
+
+        // Listar todos os períodos encontrados (SORTED)
+        const periodosArray = Array.from(allPeriods).sort((a, b) => {
+            const [mesA, anoA] = a.split('/');
+            const [mesB, anoB] = b.split('/');
+            const yearDiff = anoA.localeCompare(anoB);
+            if (yearDiff !== 0) return yearDiff;
+            const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+            return meses.indexOf(mesA) - meses.indexOf(mesB);
+        });
+
+        // CRÍTICO: Preencher períodos faltantes com 0 em TODAS as linhas
+        // Isso garante que extractMetadata detecte todas as colunas
+        data.forEach(row => {
+            periodosArray.forEach(periodo => {
+                if (!(periodo in row)) {
+                    row[periodo] = 0;
+                }
+            });
+        });
+
+        console.log(`✅ Convertido: ${data.length} linhas, ${allPeriods.size} períodos`);
+        console.log(`📅 TODOS OS PERÍODOS:`, periodosArray);
+        console.log(`📅 Primeiro: ${periodosArray[0]}, Último: ${periodosArray[periodosArray.length - 1]}`);
+
+        // Debug: Verificar se todas as colunas de período existem na primeira linha
+        if (data.length > 0) {
+            const firstRow = data[0];
+            const firstRowPeriods = Object.keys(firstRow).filter(k => k.includes('/'));
+            console.log(`🔍 DEBUG: Primeira linha tem ${firstRowPeriods.length} colunas de período:`, firstRowPeriods);
+            const missingInFirstRow = periodosArray.filter(p => !(p in firstRow));
+            if (missingInFirstRow.length > 0) {
+                console.warn(`⚠️ Faltam na primeira linha:`, missingInFirstRow);
+            }
+        }
+
+        // Expor dados para BrisinhAI
+        window.FULL_CSV_DATA = data;
+        if (window.updateBrisinhAIContext) window.updateBrisinhAIContext();
+
+        // Normalizar e processar
+        data.forEach(row => {
+            row['Projeto'] = toTitleCase(row['Projeto'].toString());
+            row['Empresa'] = row['Empresa'] ? row['Empresa'].toString().trim() : '';
+            row['Categoria'] = row['Categoria'] ? row['Categoria'].toString().trim() : '';
+        });
+
+        state.rawData = data;
+        localStorage.setItem('dre_raw_data', JSON.stringify(data));
+
+        // Populate metadata and filters
+        extractMetadata(data);
+
+        // Initial Filter Application
+        applyFilters();
+
+        document.getElementById('fileStatus').textContent = `✅ ${data.length} registros carregados (dual-source)`;
+        document.getElementById('lastUpdate').textContent = `Atualizado em: ${new Date().toLocaleTimeString()}`;
+
+    } catch (error) {
+        console.error("Erro ao processar JSON:", error);
+        alert("Erro ao processar o arquivo JSON: " + error.message);
+    }
+}
+
+/**
+ * Converte "2024-01" para "jan/24"
+ */
+function formatCompetenciaToCSV(competencia) {
+    const [ano, mes] = competencia.split('-');
+    const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    const mesNome = meses[parseInt(mes) - 1];
+    const anoShort = ano.slice(-2);
+    return `${mesNome}/${anoShort}`;
 }
 
 function processParsedData(results) {

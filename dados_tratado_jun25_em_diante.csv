@@ -1,0 +1,323 @@
+Empresa;Projeto;Categoria;jun/25;jul/25;ago/25;set/25;out/25;nov/25;dez/25
+DZM;DZM - Alcalinas;Despesas Administrativas;0;484;0;345;374;374;374
+DZM;DZM - G2;Despesas Administrativas;15000;9143;9143;9143;9143;9143;9143
+DZM;DZM - Imóveis Guilhermina;Despesas Administrativas;523;1067;157;338;369;349;606
+DZM;DZM - Imóveis Guilhermina;Despesas Financeiras;3;4;0;0;0;0;0
+DZM;DZM - Imóveis Guilhermina;Impostos;0;140;0;0;0;0;0
+DZM;DZM - Imóveis Guilhermina;Outras Receitas;0;0;0;0;0;0;0
+DZM;DZM - Imóveis Guilhermina;Receita Bruta de Vendas;1822;1859;1834;1899;816;768;776
+DZM;DZM - Imóveis Guilhermina;Receitas Financeiras;7;0;18;18;0;39;0
+DZM;DZM - Mar Brasil;Ativos;0;0;0;771;0;0;1500
+DZM;DZM - Mar Brasil;Custo dos Serviços Prestados;0;0;140;0;0;0;0
+DZM;DZM - Mar Brasil;Despesas Administrativas;2435;1792;2063;400;100;180;9367
+DZM;DZM - Mar Brasil;Despesas Financeiras;3;14;0;0;0;0;0
+DZM;DZM - Mar Brasil;Despesas Variáveis;3142;49;72;0;610;40;0
+DZM;DZM - Mar Brasil;Despesas com Pessoal;1000;0;0;350;0;0;0
+DZM;DZM - Mar Brasil;Recuperação de Despesas Variáveis;5363;5363;5363;5363;5363;5363;5363
+DZM;DZM - Mar Brasil - Climatização;Despesas Administrativas;0;0;0;0;700;800;1000
+DZM;DZM - Mar Brasil - Climatização;Despesas de Vendas e Marketing;0;0;0;0;0;0;1290
+DZM;DZM - Pessoal;Despesas Administrativas;0;0;1027;2355;3278;359;0
+DZM;DZM - Pessoal;Despesas Financeiras;0;6;0;0;0;0;0
+DZM;DZM - Pessoal;Despesas Variáveis;2829;7676;7205;3384;2033;5775;1979
+DZM;DZM - Pessoal;Despesas com Pessoal;0;0;0;0;0;500;0
+DZM;DZM - Pessoal;Outras Receitas;0;0;129;129;129;0;0
+DZM;DZM - RATEIO;Ativos;0;0;139;0;0;0;0
+DZM;DZM - RATEIO;Despesas Administrativas;0;657;1944;1701;4353;3066;2297
+DZM;DZM - RATEIO;Despesas Financeiras;0;0;239;239;265;271;274
+DZM;DZM - RATEIO;Despesas Variáveis;0;0;0;64;0;0;794
+DZM;DZM - RATEIO;Despesas com Pessoal;0;0;0;1848;0;0;0
+DZM;DZM - RATEIO;Despesas de Vendas e Marketing;0;0;0;0;0;20000;0
+DZM;DZM - RATEIO;Impostos;5343;0;10532;16983;21438;21068;20563
+DZM;DZM - RATEIO;Outras Receitas;0;0;0;0;2;1;3
+DZM;DZM - RATEIO;Recuperação de Despesas Variáveis;0;0;1;284;0;60;0
+DZM;DZM - Rancho da Praia;Ativos;0;1613;244;2514;827;1257;1634
+DZM;DZM - Rancho da Praia;Credenciado Administrativo;2996;3493;3056;3721;2500;3300;3800
+DZM;DZM - Rancho da Praia;Custo dos Serviços Prestados;169;150;585;655;125;410;855
+DZM;DZM - Rancho da Praia;Despesas Administrativas;4917;5466;8804;7491;9428;15380;4729
+DZM;DZM - Rancho da Praia;Despesas Financeiras;3;114;54;29;0;0;1
+DZM;DZM - Rancho da Praia;Despesas Variáveis;3508;2530;1900;3138;2162;6219;6748
+DZM;DZM - Rancho da Praia;Despesas com Pessoal;0;619;1174;84;310;0;1650
+DZM;DZM - Rancho da Praia;Outras Receitas;0;1;0;0;0;0;0
+DZM;DZM - Rancho da Praia;Receita Bruta de Vendas;18778;43989;14848;23840;24030;20745;9258
+DZM;DZM - Ribeirópolis - Galpão 0643;Custo dos Serviços Prestados;665;0;0;0;0;0;0
+DZM;DZM - Ribeirópolis - Galpão 0643;Despesas Administrativas;500;975;1717;1493;3251;874;4944
+DZM;DZM - Ribeirópolis - Galpão 0643;Despesas Financeiras;2;0;0;0;0;0;0
+DZM;DZM - Ribeirópolis - Galpão 0643;Despesas Variáveis;4800;650;40;3779;40;60;3400
+DZM;DZM - Ribeirópolis - Galpão 0643;Impostos;91;0;0;0;0;0;0
+DZM;DZM - Terceirização;Ativos;0;0;0;758;0;0;0
+DZM;DZM - Terceirização;Despesas Administrativas;2813;1526;1153;3768;3054;2635;2195
+DZM;DZM - Terceirização;Despesas Financeiras;194;108;0;0;0;0;0
+DZM;DZM - Terceirização;Despesas Variáveis;0;83;0;0;0;0;0
+DZM;DZM - Terceirização;Despesas com Pessoal;33829;47861;53340;41854;58481;51936;53188
+DZM;DZM - Terceirização;Despesas de Vendas e Marketing;0;0;0;1160;496;500;0
+DZM;DZM - Terceirização;Outras Receitas;1;1;0;0;0;0;0
+DZM;DZM - Terceirização;Receita Bruta de Vendas;44229;49728;55090;51628;53726;63276;74889
+DZM;DZM - Ybox;Despesas Administrativas;0;0;34;0;0;0;0
+DZM;N/D;Recuperação de Despesas Variáveis;0;0;100;0;0;0;0
+DZM;Tchandra Coelho;Ativos;0;0;0;0;0;0;94
+DZM;Tchandra Coelho;Consórcios - contemplados;0;0;0;0;2569;2631;2631
+DZM;Tchandra Coelho;Despesas Variáveis;0;0;300;7187;5590;5780;21202
+DZM;Ybox - Terceirização;Receita Bruta de Vendas;0;0;0;12220;3464;3345;6714
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Adiantamento - Credenciado Administrativo;0;0;0;0;2520;0;3516
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Adiantamento - Credenciado TI;0;0;0;0;600;0;10606
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Ativos;0;0;0;0;4900;96;25566
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Consórcios - a contemplar;0;0;0;0;682;0;1129
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Consórcios - contemplados;0;0;0;0;579;579;948
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Corretiva - B2G;0;0;0;13;7504;4576;12755
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado Administrativo;0;0;0;4421;9092;0;16399
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado Operacional;0;0;0;1652;1956;5091;5985
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado TI;0;0;0;0;3540;0;4623
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Custo dos Serviços Prestados;0;0;0;0;2917;0;5385
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas Administrativas;0;0;0;0;23300;12;21183
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas Financeiras;0;0;0;0;1931;5;3331
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas Variáveis;0;0;0;0;1349;0;14210
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas com Pessoal;0;0;0;0;3970;0;1657
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas de Vendas e Marketing;0;0;0;0;184;0;795
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Impostos;0;0;0;0;5947;0;36693
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Outros Custos;0;0;0;0;5304;120;3451
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Preventiva - B2G;0;0;0;0;738;46;208
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;4387;0;23440
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Receita Bruta de Vendas;0;0;0;0;170636;0;398442
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Receitas Financeiras;0;0;0;0;0;30;2
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Terceirização de Mão de Obra;0;0;0;0;12894;0;34726
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Corretiva - B2G;5885;2764;3356;228;225;228;0
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Credenciado Operacional;3944;7934;8500;4100;0;0;0
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Custo dos Serviços Prestados;250;0;628;378;0;125;0
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Despesas Administrativas;0;2308;3139;2317;0;471;0
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Despesas Financeiras;0;5;1;0;0;0;0
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Despesas Variáveis;0;0;0;0;0;5;0
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Outros Custos;0;0;410;111;0;0;0
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Preventiva - B2G;0;0;0;110;0;0;0
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Terceirização de Mão de Obra;912;742;1306;0;0;0;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Adiantamento - Credenciado Administrativo;0;451;805;412;525;416;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Adiantamento - Credenciado TI;0;80;0;27;125;133;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Ativos;402;464;953;1301;1054;715;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Consórcios - a contemplar;143;151;150;155;142;126;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Consórcios - contemplados;246;260;386;266;121;227;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Corretiva - B2G;1227;1305;1195;1497;1771;677;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado Administrativo;2107;1852;2378;2921;2403;2175;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado Operacional;4329;84;130;344;536;2354;174
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado TI;854;800;660;1065;738;583;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Custo dos Serviços Prestados;76;523;599;449;604;793;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas Administrativas;1468;2093;4515;4039;4967;2338;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas Financeiras;539;442;572;471;439;384;1
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas Variáveis;42;204;73;132;282;1002;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas com Pessoal;709;163;263;314;828;114;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas de Vendas e Marketing;9;26;24;18;39;65;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Impostos;3607;3632;3627;3556;3385;3185;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Outras Receitas;115;175;466;22;0;0;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Outros Custos;439;1086;553;682;1120;512;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Outros Tributos;0;0;14;0;0;0;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Preventiva - B2G;20;139;289;250;266;56;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Provisão - IRPJ e CSSL Trimestral;1574;1683;1653;1729;2747;1704;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Receita Bruta de Vendas;31583;31583;31583;31583;31583;29478;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Receitas Financeiras;73;5;1;0;0;7;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Serviços;3;0;306;0;0;3;0
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Terceirização de Mão de Obra;7117;6829;5668;8924;2686;3274;0
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Adiantamento - Credenciado Administrativo;0;660;1347;0;0;1405;299
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Adiantamento - Credenciado TI;0;117;0;0;0;448;899
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Ativos;6078;6043;6959;5750;43;7123;7537
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Consórcios - a contemplar;254;221;252;0;0;424;96
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Consórcios - contemplados;437;380;645;0;0;360;81
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Corretiva - B2G;0;1233;1064;0;0;0;0
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado Administrativo;3738;2706;3977;101;1137;5442;1394
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado Operacional;140;122;218;0;0;0;138
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado TI;1516;1168;1104;0;0;1192;393
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Custo dos Serviços Prestados;134;398;582;94;0;314;243
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas Administrativas;2602;3061;6602;75;231;5461;1456
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas Financeiras;936;648;956;40;41;1292;284
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas Variáveis;7;298;121;0;0;2946;1209
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas com Pessoal;1259;237;439;0;0;387;141
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas de Vendas e Marketing;16;38;40;0;0;218;67
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Impostos;2263;1708;1946;0;570;3992;1044
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Outras Receitas;175;182;780;37;0;0;0
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Outros Custos;779;1307;926;267;22;219;291
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Outros Tributos;0;0;23;0;0;0;0
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Preventiva - B2G;0;204;484;0;0;0;0
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Provisão - IRPJ e CSSL Trimestral;8694;7335;8342;0;0;10549;3610
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Receita Bruta de Vendas;55886;46259;52879;39170;7306;0;2916
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Receitas Financeiras;228;7;1;0;0;1;0
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Serviços;4;0;510;0;0;4;7
+Mar_BR;D.Z.M;Ativos;286;0;393;676;0;0;289
+Mar_BR;D.Z.M;Custo dos Serviços Prestados;757;757;0;500;0;0;0
+Mar_BR;D.Z.M;Despesas Administrativas;2382;49;343;0;0;1470;1470
+Mar_BR;D.Z.M;Despesas Variáveis;0;0;0;0;0;0;11
+Mar_BR;D.Z.M;Despesas com Pessoal;0;0;0;0;0;0;619
+Mar_BR;D.Z.M;Outros Custos;0;619;0;118;0;0;0
+Mar_BR;Eventuais B2B;Outras Receitas;36;0;0;0;0;0;0
+Mar_BR;Eventuais B2G;Adiantamento - Credenciado Administrativo;0;0;0;418;0;0;0
+Mar_BR;Eventuais B2G;Adiantamento - Credenciado TI;0;0;0;28;0;0;0
+Mar_BR;Eventuais B2G;Ativos;344;0;0;1062;0;0;0
+Mar_BR;Eventuais B2G;Consórcios - a contemplar;123;0;0;157;0;0;0
+Mar_BR;Eventuais B2G;Consórcios - contemplados;211;0;0;270;0;0;0
+Mar_BR;Eventuais B2G;Corretiva - B2G;1077;0;0;1516;0;1500;0
+Mar_BR;Eventuais B2G;Credenciado Administrativo;1802;0;0;1932;0;0;0
+Mar_BR;Eventuais B2G;Credenciado Operacional;68;0;0;0;0;0;0
+Mar_BR;Eventuais B2G;Credenciado TI;731;0;0;1080;0;0;0
+Mar_BR;Eventuais B2G;Custo dos Serviços Prestados;65;0;0;394;0;4100;0
+Mar_BR;Eventuais B2G;Despesas Administrativas;1254;0;119;3644;0;0;0
+Mar_BR;Eventuais B2G;Despesas Financeiras;440;0;0;443;0;0;0
+Mar_BR;Eventuais B2G;Despesas Variáveis;37;0;0;133;0;0;0
+Mar_BR;Eventuais B2G;Despesas com Pessoal;607;0;0;319;0;0;0
+Mar_BR;Eventuais B2G;Despesas de Vendas e Marketing;8;0;0;19;0;0;0
+Mar_BR;Eventuais B2G;Impostos;5829;0;0;3941;0;0;0
+Mar_BR;Eventuais B2G;Outras Receitas;37;0;0;0;0;0;0
+Mar_BR;Eventuais B2G;Outros Custos;376;0;0;518;0;0;0
+Mar_BR;Eventuais B2G;Preventiva - B2G;18;0;0;254;0;0;0
+Mar_BR;Eventuais B2G;Provisão - IRPJ e CSSL Trimestral;1347;0;0;3605;0;0;0
+Mar_BR;Eventuais B2G;Receita Bruta de Vendas;26948;0;0;32058;0;0;0
+Mar_BR;Eventuais B2G;Receitas Financeiras;58;0;0;0;0;0;0
+Mar_BR;Eventuais B2G;Serviços;2;0;0;0;0;0;0
+Mar_BR;Eventuais B2G;Terceirização de Mão de Obra;1123;1234;864;864;0;0;0
+Mar_BR;Locação Oftalmológico 14/2021 033/2021;Outros Custos;565;565;0;565;0;0;0
+Mar_BR;Mar Brasil - Estoque;Corretiva - B2G;0;0;0;3352;0;0;0
+Mar_BR;Mar Brasil - Estoque;Despesas Financeiras;0;0;0;0;0;0;54
+Mar_BR;Mar Brasil - Rateio;Despesas Financeiras;0;0;0;0;0;0;54
+Mar_BR;Mar Brasil - Rateio;Despesas com Pessoal;0;0;0;0;0;0;240
+Mar_BR;N/D;Impostos;0;0;0;1638;0;0;0
+Mar_BR;Rede Alpha;Adiantamento - Credenciado Administrativo;0;35;63;37;0;34;29
+Mar_BR;Rede Alpha;Adiantamento - Credenciado TI;0;6;0;2;0;11;86
+Mar_BR;Rede Alpha;Ativos;30;36;76;97;2;37;208
+Mar_BR;Rede Alpha;Consórcios - a contemplar;11;12;0;14;0;10;9
+Mar_BR;Rede Alpha;Consórcios - contemplados;18;20;30;24;0;9;8
+Mar_BR;Rede Alpha;Corretiva - B2G;0;65;49;134;0;26;742
+Mar_BR;Rede Alpha;Credenciado Administrativo;154;142;185;180;42;178;134
+Mar_BR;Rede Alpha;Credenciado Operacional;6;6;10;0;11;12;13
+Mar_BR;Rede Alpha;Credenciado TI;63;62;51;96;0;13;38
+Mar_BR;Rede Alpha;Custo dos Serviços Prestados;6;21;27;35;0;51;23
+Mar_BR;Rede Alpha;Despesas Administrativas;106;157;281;323;3;151;140
+Mar_BR;Rede Alpha;Despesas Financeiras;37;37;42;42;2;45;27
+Mar_BR;Rede Alpha;Despesas Variáveis;0;16;6;12;0;69;116
+Mar_BR;Rede Alpha;Despesas com Pessoal;52;12;20;29;0;10;14
+Mar_BR;Rede Alpha;Despesas de Vendas e Marketing;1;2;2;2;0;5;6
+Mar_BR;Rede Alpha;Impostos;152;163;164;202;116;212;170
+Mar_BR;Rede Alpha;Outras Receitas;0;16;0;0;0;0;0
+Mar_BR;Rede Alpha;Outros Custos;32;70;43;46;37;33;27
+Mar_BR;Rede Alpha;Outros Tributos;0;0;1;0;0;0;0
+Mar_BR;Rede Alpha;Preventiva - B2G;0;11;22;22;4;3;0
+Mar_BR;Rede Alpha;Provisão - IRPJ e CSSL Trimestral;115;129;128;155;343;342;190
+Mar_BR;Rede Alpha;Receita Bruta de Vendas;2280;2425;2425;2830;3234;3234;3210
+Mar_BR;Rede Alpha;Receitas Financeiras;5;0;0;0;0;0;0
+Mar_BR;Rede Alpha;Serviços;0;0;23;0;0;0;0
+Mar_BR;Rede Alpha;Terceirização de Mão de Obra;96;106;0;74;0;0;0
+Mar_BR;Rossi Advogados;Adiantamento - Credenciado Administrativo;0;12;21;11;0;12;7
+Mar_BR;Rossi Advogados;Adiantamento - Credenciado TI;0;2;0;1;0;4;22
+Mar_BR;Rossi Advogados;Ativos;10;12;25;30;1;13;53
+Mar_BR;Rossi Advogados;Consórcios - a contemplar;4;4;0;4;0;4;2
+Mar_BR;Rossi Advogados;Consórcios - contemplados;6;7;10;7;0;3;2
+Mar_BR;Rossi Advogados;Corretiva - B2G;0;22;17;41;0;9;0
+Mar_BR;Rossi Advogados;Credenciado Administrativo;54;49;63;55;15;64;33
+Mar_BR;Rossi Advogados;Credenciado Operacional;2;2;3;0;4;4;3
+Mar_BR;Rossi Advogados;Credenciado TI;22;21;17;29;0;5;9
+Mar_BR;Rossi Advogados;Custo dos Serviços Prestados;2;7;9;10;0;18;6
+Mar_BR;Rossi Advogados;Despesas Administrativas;35;55;97;99;1;54;35
+Mar_BR;Rossi Advogados;Despesas Financeiras;13;11;16;13;1;13;9
+Mar_BR;Rossi Advogados;Despesas Variáveis;0;5;2;3;0;24;28
+Mar_BR;Rossi Advogados;Despesas com Pessoal;18;4;7;9;0;3;3
+Mar_BR;Rossi Advogados;Despesas de Vendas e Marketing;0;0;0;0;0;1;2
+Mar_BR;Rossi Advogados;Impostos;91;97;97;96;66;100;86
+Mar_BR;Rossi Advogados;Outras Receitas;0;5;0;0;0;0;0
+Mar_BR;Rossi Advogados;Outros Custos;11;22;14;14;14;12;7
+Mar_BR;Rossi Advogados;Outros Tributos;0;0;0;0;0;0;0
+Mar_BR;Rossi Advogados;Preventiva - B2G;0;4;8;7;1;1;0
+Mar_BR;Rossi Advogados;Provisão - IRPJ e CSSL Trimestral;41;44;44;48;49;49;91
+Mar_BR;Rossi Advogados;Receita Bruta de Vendas;800;850;850;850;850;850;850
+Mar_BR;Rossi Advogados;Receitas Financeiras;21;0;0;0;0;0;0
+Mar_BR;Rossi Advogados;Serviços;0;0;8;0;0;0;0
+Mar_BR;Rossi Advogados;Terceirização de Mão de Obra;34;37;0;26;0;0;0
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Adiantamento - Credenciado Administrativo;0;6577;11736;6016;6720;6496;4067
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Adiantamento - Credenciado Operacional;0;6500;0;0;0;0;0
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Adiantamento - Credenciado TI;0;1165;0;398;1600;2072;12269
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Ativos;5895;6774;13906;19004;13569;10871;29625
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Consórcios - a contemplar;2098;2205;2193;2263;1818;1962;1306
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Consórcios - contemplados;3603;3787;5619;3886;1544;3211;1096
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Corretiva - B2G;19212;22993;13071;28422;19795;14537;20119
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Credenciado Administrativo;30819;26976;34662;41008;32200;33996;18971
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Credenciado Operacional;25905;22537;40154;27221;23576;29637;31137
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Credenciado TI;12496;11648;9620;15538;9441;8675;5348
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Custo dos Serviços Prestados;7465;5763;13125;10180;15197;19062;12776
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas Administrativas;21520;30494;59347;56277;64905;29002;20945
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas Financeiras;7732;6574;8345;6720;5470;6003;3901
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas Variáveis;561;2968;1061;1922;3600;15410;16439
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas com Pessoal;10380;2369;3830;4585;10588;1789;1918
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas de Vendas e Marketing;128;374;650;264;491;1008;920
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Impostos;52677;52976;52914;51907;51782;54406;47054
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Outras Receitas;1529;2486;6795;324;0;0;1
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Outros Custos;6429;13245;8079;11093;17768;6384;4470
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Outros Tributos;0;0;200;0;0;0;0
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Preventiva - B2G;270;2247;4434;3654;2644;879;240
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Provisão - IRPJ e CSSL Trimestral;23030;24512;24097;25238;38450;26643;27114
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Receita Bruta de Vendas;460899;460899;460899;460899;460899;460899;460899
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Receitas Financeiras;1221;73;6;3;4;85;3
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Serviços;37;0;4449;0;0;39;39
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Terceirização de Mão de Obra;34947;40780;47253;41740;34385;51202;40163
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Adiantamento - Credenciado Administrativo;0;735;1278;655;735;707;443
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Adiantamento - Credenciado TI;0;130;0;43;175;226;1336
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Ativos;583;757;1515;2035;1482;1147;3221
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Consórcios - a contemplar;207;247;245;247;199;214;142
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Consórcios - contemplados;356;423;612;423;169;350;119
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Corretiva - B2G;1681;1841;1154;2594;2250;7068;2945
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado Administrativo;3046;3016;3774;4474;3518;3702;2067
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado Operacional;114;136;206;482;789;4053;4249
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado TI;1235;1302;1048;1693;1033;882;583
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Custo dos Serviços Prestados;110;444;554;704;788;2140;1633
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas Administrativas;2553;3658;6659;6068;7646;3421;2600
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas Financeiras;772;731;918;717;583;695;441
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas Variáveis;58;332;115;406;393;1656;1791
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas com Pessoal;18322;28390;25483;31502;38695;33521;48809
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas de Vendas e Marketing;13;41;38;29;54;109;100
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Impostos;9958;10840;10784;10676;10669;10946;16346
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Outras Receitas;162;337;759;36;0;184;0
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Outros Custos;636;1457;938;1127;2604;1023;683
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Outros Tributos;0;0;22;0;0;0;0
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Preventiva - B2G;1828;227;459;398;1143;96;26
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Provisão - IRPJ e CSSL Trimestral;2276;2740;2624;2749;4194;2902;2954
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Receita Bruta de Vendas;46658;50207;50207;50207;50207;50207;70669
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Receitas Financeiras;105;8;1;0;0;10;0
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Serviços;4;0;484;0;0;4;4
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Terceirização de Mão de Obra;0;0;0;0;3761;0;0
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Adiantamento - Credenciado Administrativo;0;0;0;0;0;0;380
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Adiantamento - Credenciado TI;0;0;0;0;0;0;1148
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Ativos;0;0;0;0;0;0;2766
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Consórcios - a contemplar;0;0;0;0;0;0;122
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Consórcios - contemplados;0;0;0;0;0;0;103
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Corretiva - B2G;0;0;0;0;0;913;883
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado Administrativo;0;0;0;0;0;0;1774
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado Operacional;0;0;0;0;0;0;176
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado TI;0;0;0;0;0;0;500
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Custo dos Serviços Prestados;0;0;0;0;0;0;543
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas Administrativas;0;0;0;0;37;0;2186
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas Financeiras;0;0;0;0;0;170;362
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas Variáveis;0;0;0;0;0;0;17999
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas com Pessoal;0;0;0;0;0;0;180
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas de Vendas e Marketing;0;0;0;0;0;0;86
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Impostos;0;0;0;0;0;0;10203
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Outros Custos;0;0;0;0;119;0;371
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Preventiva - B2G;0;0;0;0;0;0;22
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;2537
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Receita Bruta de Vendas;0;0;0;0;0;0;86256
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Receitas Financeiras;0;0;0;0;0;0;0
+Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado Administrativo;0;0;0;0;0;335;209
+Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado Operacional;0;0;0;0;4500;0;0
+Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado TI;0;0;0;0;0;107;634
+Mar_BR;São Paulo CRSN PSP 6018/2025;Ativos;0;0;0;0;0;359;1522
+Mar_BR;São Paulo CRSN PSP 6018/2025;Consórcios - a contemplar;0;0;0;0;0;101;67
+Mar_BR;São Paulo CRSN PSP 6018/2025;Consórcios - contemplados;0;0;0;0;0;86;56
+Mar_BR;São Paulo CRSN PSP 6018/2025;Corretiva - B2G;0;0;0;0;0;546;485
+Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado Administrativo;0;0;0;0;410;1752;977
+Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado Operacional;0;0;0;0;103;119;97
+Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado TI;0;0;0;0;0;125;275
+Mar_BR;São Paulo CRSN PSP 6018/2025;Custo dos Serviços Prestados;0;0;0;0;0;539;298
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas Administrativas;0;0;0;0;0;1487;1074
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas Financeiras;0;0;0;0;231;308;201
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas Variáveis;0;0;0;0;0;676;846
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas com Pessoal;0;0;0;0;338;931;1275
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas de Vendas e Marketing;0;0;0;0;0;51;47
+Mar_BR;São Paulo CRSN PSP 6018/2025;Impostos;0;0;0;0;0;5183;4803
+Mar_BR;São Paulo CRSN PSP 6018/2025;Outros Custos;0;0;0;0;0;337;204
+Mar_BR;São Paulo CRSN PSP 6018/2025;Preventiva - B2G;0;0;0;0;0;45;12
+Mar_BR;São Paulo CRSN PSP 6018/2025;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;1374;1398
+Mar_BR;São Paulo CRSN PSP 6018/2025;Receita Bruta de Vendas;0;0;0;0;0;23768;23768
+Mar_BR;São Paulo CRSN PSP 6018/2025;Receitas Financeiras;0;0;0;0;0;0;0
+Mar_BR;Ybox;Despesas Administrativas;0;74;0;76;0;0;0
+Mar_BR;Ybox;Despesas Financeiras;0;0;14;0;0;0;0

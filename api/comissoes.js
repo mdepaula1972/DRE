@@ -75,7 +75,16 @@ export default async function handler(req, res) {
 
                 // Action: Adicionar novo contrato
                 if (action === 'add_contrato') {
-                    const { nome_contrato, numero_contrato, observacoes } = req.body;
+                    const {
+                        nome_contrato,
+                        numero_contrato,
+                        observacoes,
+                        tem_iss,
+                        aliquota_iss,
+                        tem_icms,
+                        aliquota_icms,
+                        contrato_por_equipamentos
+                    } = req.body;
 
                     const { data, error } = await supabase
                         .from('contratos_base')
@@ -83,7 +92,12 @@ export default async function handler(req, res) {
                             nome_contrato,
                             numero_contrato: numero_contrato || null,
                             observacoes: observacoes || null,
-                            ativo: true
+                            ativo: true,
+                            tem_iss: tem_iss || false,
+                            aliquota_iss: aliquota_iss || 0,
+                            tem_icms: tem_icms || false,
+                            aliquota_icms: aliquota_icms || 0,
+                            contrato_por_equipamentos: contrato_por_equipamentos || false
                         }])
                         .select()
                         .single();
