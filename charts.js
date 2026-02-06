@@ -120,20 +120,20 @@ function renderEmpresaChart(invoices) {
     const ctx = document.getElementById('empresaChart');
     if (!ctx) return;
 
-    // Agrupar por empresa
-    const groupedByEmpresa = {};
+    // Agrupar por CONTRATO (mudado de empresa)
+    const groupedByContrato = {};
     invoices.forEach(invoice => {
         const contract = storageManager.getContract(invoice.contract_id);
-        const empresa = contract ? (contract.empresa || invoice.empresa || 'Não Especificada') : 'Não Especificada';
+        const nomeContrato = contract ? (contract.nome_contrato || 'Não Especificado') : 'Não Especificado';
 
-        if (!groupedByEmpresa[empresa]) {
-            groupedByEmpresa[empresa] = 0;
+        if (!groupedByContrato[nomeContrato]) {
+            groupedByContrato[nomeContrato] = 0;
         }
-        groupedByEmpresa[empresa] += invoice.valor_receita_bruta;
+        groupedByContrato[nomeContrato] += invoice.valor_receita_bruta;
     });
 
-    const labels = Object.keys(groupedByEmpresa);
-    const data = Object.values(groupedByEmpresa);
+    const labels = Object.keys(groupedByContrato);
+    const data = Object.values(groupedByContrato);
 
     const colors = [
         'rgba(242, 145, 27, 0.8)',  // Mar Brasil Orange
@@ -149,16 +149,16 @@ function renderEmpresaChart(invoices) {
         charts.empresa.destroy();
     }
 
-    // Criar novo chart
     charts.empresa = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
+                label: 'Faturamento por Contrato',
                 data: data,
-                backgroundColor: colors.slice(0, labels.length),
-                borderWidth: 2,
-                borderColor: '#fff'
+                backgroundColor: colors,
+                borderColor: '#1a1a1a',
+                borderWidth: 2
             }]
         },
         options: {
@@ -166,14 +166,23 @@ function renderEmpresaChart(invoices) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        color: '#ffffff',
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
                 },
                 tooltip: {
                     callbacks: {
                         label: function (context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percent = ((context.parsed / total) * 100).toFixed(1);
-                            return context.label + ': ' + formatCurrency(context.parsed) + ' (' + percent + '%)';
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${percentage}%)`;
                         }
                     }
                 }

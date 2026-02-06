@@ -1,5 +1,5 @@
 /**
- * Gestão Integrada - Controller Principal
+ * Gestão Integrada - v24.8.0
  * 
  * Gerencia toda a interface e interações do usuário
  */
@@ -9,6 +9,7 @@ let currentFilters = {};
 let currentEditingNF = null;
 let currentPayingNF = null;
 let selectedYear = new Date().getFullYear();
+let allEmployees = []; // Armazenar colaboradores do PeopleBoard
 
 // ========== Inicialização ==========
 document.addEventListener('DOMContentLoaded', async function () {
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         initializeUI();
         await loadContracts();
+        await fetchEmployees(); // Buscar colaboradores
         await loadInvoices();
         setupEventListeners();
         updateKPIs();
@@ -209,6 +211,10 @@ function updateKPIs() {
         ? ((stats.total_impostos / stats.total_faturado) * 100).toFixed(1)
         : 0;
     document.getElementById('kpiPercImpostos').textContent = `${percImpostos}%`;
+
+    // Atualizar número de NFs com comissão
+    const nfsComComissao = storageManager.filterInvoices(currentFilters).filter(nf => nf.comissoes && nf.comissoes.length > 0).length;
+    document.getElementById('kpiNumComissoes').textContent = `${nfsComComissao} NFs`;
 }
 
 // ========== Event Listeners ==========
@@ -227,6 +233,11 @@ function setupEventListeners() {
     document.getElementById('inputHouveRetencao').addEventListener('change', toggleRetencao);
     document.getElementById('btnSalvarNF').addEventListener('click', salvarNF);
 
+    // Comissões
+    document.getElementById('btnAddComissao').addEventListener('click', () => {
+        addCommissionRow();
+    });
+
     // Modal Config Impostos
     document.getElementById('btnSalvarConfigImpostos').addEventListener('click', salvarConfigImpostos);
     document.querySelector('#modalConfigImpostos').addEventListener('show.bs.modal', loadQuarterlyConfig);
@@ -238,6 +249,9 @@ function setupEventListeners() {
 
     // Exportar
     document.getElementById('btnExportarCSV').addEventListener('click', exportarCSV);
+
+    // Detalhes de Comissões ao clicar no card
+    document.getElementById('cardComissoes').addEventListener('click', showComissoesDetail);
 }
 
 function toggleSidebar() {
@@ -309,6 +323,102 @@ function onContratoSelected() {
     }
 
     updateTaxPreview();
+    updateCommissionsCalculations();
+}
+
+/**
+ * Busca colaboradores do Supabase (PeopleBoard)
+ */
+async function fetchEmployees() {
+    try {
+        const { data, error } = await supabaseStorage.client
+            .from('employees')
+            .select('id, full_name')
+            .eq('status', 'Ativo')
+            .order('full_name');
+
+        if (error) throw error;
+        allEmployees = data || [];
+        console.log(`[DEBUG] ${allEmployees.length} colaboradores carregados para comissões`);
+    } catch (error) {
+        console.error('Erro ao buscar colaboradores:', error);
+    }
+}
+
+/**
+ * Adiciona uma linha de comissão no modal
+ */
+function addCommissionRow(data = null) {
+    const container = document.getElementById('containerComissoes');
+    const row = document.createElement('div');
+    row.className = 'commission-row mb-2 d-flex gap-2 align-items-end';
+
+    const employeeOptions = allEmployees.map(emp =>
+        `<option value="${emp.id}" ${data && data.colaborador_id === emp.id ? 'selected' : ''}>${emp.full_name}</option>`
+    ).join('');
+
+    row.innerHTML = `
+        <div style="flex: 2;">
+            <label class="small text-muted mb-1">Colaborador</label>
+            <select class="form-select form-select-sm combo-colaborador" required>
+                <option value="">Selecione...</option>
+                ${employeeOptions}
+            </select>
+        </div>
+        <div style="flex: 1;">
+            <label class="small text-muted mb-1">Alíquota (%)</label>
+            <input type="number" step="0.01" class="form-control form-control-sm input-aliquota" 
+                   value="${data ? data.aliquota : '1.00'}" required oninput="updateCommissionsCalculations()">
+        </div>
+        <div style="flex: 1;">
+            <label class="small text-muted mb-1">Valor (R$)</label>
+            <input type="text" class="form-control form-control-sm input-valor-calc" readonly>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.remove(); updateCommissionsCalculations();">
+            <i class="bi bi-trash"></i>
+        </button>
+    `;
+
+    container.appendChild(row);
+    updateCommissionsCalculations();
+}
+
+/**
+ * Atualiza cálculos de comissão e validação de 1%
+ */
+function updateCommissionsCalculations() {
+    const valorFaturado = parseFloat(document.getElementById('inputValorFaturado').value) || 0;
+    const rows = document.querySelectorAll('.commission-row');
+    const sumContainer = document.getElementById('sumComissoes');
+    const totalLabel = document.getElementById('totalComissoesLabel');
+    const alertBox = document.getElementById('comissaoAlert');
+
+    let totalComissoes = 0;
+    let totalAliquota = 0;
+
+    rows.forEach(row => {
+        const aliquota = parseFloat(row.querySelector('.input-aliquota').value) || 0;
+        const valor = (valorFaturado * aliquota) / 100;
+        row.querySelector('.input-valor-calc').value = formatCurrency(valor);
+
+        totalComissoes += valor;
+        totalAliquota += aliquota;
+    });
+
+    if (rows.length > 0) {
+        sumContainer.style.setProperty('display', 'flex', 'important');
+        totalLabel.textContent = formatCurrency(totalComissoes);
+
+        // Validação de 1% (limite total)
+        if (totalAliquota > 1.0001) { // Margem de erro float
+            alertBox.style.display = 'block';
+        } else {
+            alertBox.style.display = 'none';
+        }
+    } else {
+        sumContainer.style.setProperty('display', 'none', 'important');
+        alertBox.style.display = 'none';
+    }
 }
 
 function updateTaxPreview() {
@@ -384,7 +494,7 @@ function salvarNF() {
     const [anoEm, mesEm, diaEm] = dataEmissao.split('-');
 
     const data = {
-        contract_id: document.getElementById('inputContrato').value,
+        contrato_id: document.getElementById('inputContrato').value,
         empresa: document.getElementById('inputEmpresa').value,
         numero_nf: document.getElementById('inputNumeroNF').value,
         competencia: `${mes}/${ano}`,
@@ -394,7 +504,13 @@ function salvarNF() {
         houve_imposto_retido: document.getElementById('inputHouveRetencao').checked,
         valor_imposto_retido: document.getElementById('inputHouveRetencao').checked
             ? parseFloat(document.getElementById('inputValorRetido').value)
-            : null
+            : null,
+        comissoes: Array.from(document.querySelectorAll('.commission-row')).map(row => ({
+            colaborador_id: row.querySelector('.combo-colaborador').value,
+            aliquota: parseFloat(row.querySelector('.input-aliquota').value) || 0,
+            valor: parseFloat(row.querySelector('.input-valor-calc').value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0,
+            nome_colaborador: row.querySelector('.combo-colaborador').options[row.querySelector('.combo-colaborador').selectedIndex].text
+        })).filter(c => c.colaborador_id)
     };
 
     try {
@@ -443,7 +559,14 @@ function editarNF(nfId) {
     document.getElementById('inputValorRetido').value = invoice.valor_imposto_retido || '';
     toggleRetencao();
 
+    // Carregar comissões
+    document.getElementById('containerComissoes').innerHTML = '';
+    if (invoice.comissoes && Array.isArray(invoice.comissoes)) {
+        invoice.comissoes.forEach(c => addCommissionRow(c));
+    }
+
     updateTaxPreview();
+    updateCommissionsCalculations();
 
     new bootstrap.Modal(document.getElementById('modalNovaНF')).show();
 }
@@ -468,6 +591,9 @@ function clearNFForm() {
     document.getElementById('taxPreview').style.display = 'none';
     document.getElementById('grupoEquipamentos').style.display = 'none';
     document.getElementById('grupoRetencao').style.display = 'none';
+    document.getElementById('containerComissoes').innerHTML = '';
+    document.getElementById('sumComissoes').style.setProperty('display', 'none', 'important');
+    document.getElementById('comissaoAlert').style.display = 'none';
     currentEditingNF = null;
 
     const hoje = new Date().toISOString().split('T')[0];
@@ -601,7 +727,13 @@ function marcarComoPago(nfId) {
     currentPayingNF = nfId;
     document.getElementById('pagarNFId').value = nfId;
 
+    // Se a NF já tem comissões configuradas, avisar ou carregar
+    const comissoesText = invoice.comissoes && invoice.comissoes.length > 0
+        ? `<div class="alert alert-info small py-1 mb-2"><i class="bi bi-info-circle me-1"></i> Esta NF possui ${invoice.comissoes.length} comissões configuradas.</div>`
+        : '';
+
     document.getElementById('infoNFPagar').innerHTML = `
+        ${comissoesText}
         <strong>NF ${invoice.numero_nf}</strong> - ${contract?.nome || ''}<br>
         Valor Líquido: <strong class="text-success">${formatCurrency(invoice.valor_liquido)}</strong>
     `;
@@ -624,32 +756,45 @@ function toggleComissoes() {
 
     if (checkbox.checked) {
         grupo.style.display = 'block';
-        adicionarFavorecido(); // Adicionar primeiro favorecido
+        // Se já existem comissões na NF, carregar elas
+        const invoice = storageManager.getInvoice(currentPayingNF);
+        document.getElementById('comissoesContainer').innerHTML = '';
+        if (invoice && invoice.comissoes && invoice.comissoes.length > 0) {
+            invoice.comissoes.forEach((c, idx) => {
+                adicionarFavorecido(c, idx);
+            });
+        } else {
+            adicionarFavorecido(); // Adicionar primeiro favorecido vazio
+        }
     } else {
         grupo.style.display = 'none';
         document.getElementById('comissoesContainer').innerHTML = '';
     }
 }
 
-function adicionarFavorecido() {
+function adicionarFavorecido(data = null, forceIndex = null) {
     const container = document.getElementById('comissoesContainer');
-    const index = container.children.length;
+    const index = forceIndex !== null ? forceIndex : container.children.length;
 
     const row = document.createElement('div');
     row.className = 'commission-row';
     row.innerHTML = `
         <div class="form-group" style="flex: 2;">
-            <label class="form-label small">Nome do Favorecido</label>
-            <input type="text" class="form-control form-control-sm form-control-light" 
-                   id="favorecido_nome_${index}" required>
+            <label class="form-label small">Favorecido (Colaborador)</label>
+            <select class="form-select form-select-sm form-control-light combo-favorecido" 
+                   id="favorecido_id_${index}" onchange="updateFavorecidoNome(${index})" required>
+                <option value="">Selecione...</option>
+                ${allEmployees.map(e => `<option value="${e.id}" ${data && (data.colaborador_id === e.id || data.nome === e.full_name) ? 'selected' : ''}>${e.full_name}</option>`).join('')}
+            </select>
+            <input type="hidden" id="favorecido_nome_${index}" value="${data ? (data.nome_colaborador || data.nome || '') : ''}">
         </div>
         <div class="form-group" style="flex: 1;">
             <label class="form-label small">Alíquota (%)</label>
-            <input type="number" step="0.01" class="form-control form-control-sm form-control-light" 
-                   id="favorecido_aliquota_${index}" oninput="calcularComissoes()" required>
+            <input type="number" step="0.01" class="form-control form-control-sm form-control-light input-aliq-pago" 
+                   id="favorecido_aliquota_${index}" value="${data ? data.aliquota : ''}" oninput="calcularComissoes()" required>
         </div>
         <div class="form-group">
-            <label class="form-label small">Valor Calculado</label>
+            <label class="form-label small">Valor</label>
             <input type="text" class="form-control form-control-sm form-control-light" 
                    id="favorecido_valor_${index}" readonly>
         </div>
@@ -660,6 +805,18 @@ function adicionarFavorecido() {
     `;
 
     container.appendChild(row);
+    if (data) calcularComissoes();
+}
+
+/**
+ * Helper para atualizar nome oculto quando seleciona colaborador
+ */
+function updateFavorecidoNome(index) {
+    const select = document.getElementById(`favorecido_id_${index}`);
+    const nomeInput = document.getElementById(`favorecido_nome_${index}`);
+    if (select && nomeInput) {
+        nomeInput.value = select.options[select.selectedIndex].text;
+    }
 }
 
 function removerFavorecido(btn) {
@@ -681,7 +838,12 @@ function calcularComissoes() {
         const aliquota = parseFloat(document.getElementById(`favorecido_aliquota_${index}`)?.value) || 0;
         totalAliquota += aliquota;
 
-        const valor = (invoice.valor_liquido * aliquota) / 100;
+        // IMPORTANTE: Aqui a comissão no pagamento pode ser diferente da comissão na NF
+        // Mas o usuário pediu validação de 1% do BRUTO na NF.
+        // Vou manter o cálculo baseado no VALOR LÍQUIDO pra distribuição se o usuário preencher no pagamento,
+        // mas carregar o valor calculado da NF se ele vier de lá.
+
+        const valor = (invoice.valor_receita_bruta * aliquota) / 100;
         const inputValor = document.getElementById(`favorecido_valor_${index}`);
         if (inputValor) {
             inputValor.value = formatCurrency(valor);
@@ -726,17 +888,23 @@ function confirmarPagamento() {
         let totalAliquota = 0;
 
         rows.forEach((row, index) => {
+            const idColab = document.getElementById(`favorecido_id_${index}`)?.value;
             const nome = document.getElementById(`favorecido_nome_${index}`)?.value;
             const aliquota = parseFloat(document.getElementById(`favorecido_aliquota_${index}`)?.value) || 0;
 
             if (nome && aliquota > 0) {
-                comissoes.push({ nome, aliquota });
+                comissoes.push({
+                    colaborador_id: idColab,
+                    nome_colaborador: nome,
+                    aliquota: aliquota,
+                    valor: (invoice.valor_receita_bruta * aliquota) / 100
+                });
                 totalAliquota += aliquota;
             }
         });
 
-        if (Math.abs(totalAliquota - 100) > 0.01) {
-            showAlert('O total das alíquotas deve somar 100%', 'danger');
+        if (totalAliquota > 1.0001) {
+            showAlert('O total das alíquotas de comissão não pode exceder 1%', 'danger');
             return;
         }
 

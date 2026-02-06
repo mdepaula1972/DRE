@@ -271,13 +271,12 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="metric-card">
-                    <div class="icon-box" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <div class="title">Comissões Distribuídas</div>
+                <div class="kpi-card h-100" id="cardComissoes" style="cursor: pointer;" data-bs-toggle="modal"
+                    data-bs-target="#modalDetalhesComissoes">
+                    <div class="label">Total Comissões</div>
                     <div class="value text-info" id="kpiTotalComissoes">R$ 0,00</div>
-                    <small class="text-muted d-block mt-2" id="kpiNumComissoes">0 NFs</small>
+                    <div class="trend" id="kpiNumComissoes">0 NFs</div>
+                    <i class="bi bi-person-badge icon text-info"></i>
                 </div>
             </div>
         </div>
@@ -298,7 +297,7 @@
             <div class="col-md-5">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white border-0">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-pie-chart me-2"></i>Por Empresa</h5>
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-pie-chart me-2"></i>Por Contrato</h5>
                         <small class="text-muted">Distribuição do faturamento</small>
                     </div>
                     <div class="card-body">
@@ -417,6 +416,31 @@
                                 <label class="form-label">Valor Retido (R$)</label>
                                 <input type="number" step="0.01" class="form-control form-control-light"
                                     id="inputValorRetido">
+                            </div>
+                        </div>
+
+                        <!-- Comissões -->
+                        <div class="border-top pt-3 mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 fw-bold">Gestão de Comissões</h6>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddComissao">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Comissão
+                                </button>
+                            </div>
+
+                            <div id="containerComissoes">
+                                <!-- Linhas de comissão inseridas via JS -->
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-2 p-2 bg-light rounded"
+                                id="sumComissoes" style="display: none !important;">
+                                <span class="small fw-bold">Total Comissões:</span>
+                                <span id="totalComissoesLabel" class="fw-bold text-primary">R$ 0,00</span>
+                            </div>
+
+                            <div id="comissaoAlert" class="alert alert-danger small p-2 mt-2" style="display: none;">
+                                <i class="bi bi-exclamation-triangle me-1"></i> O total de comissões excede o limite de
+                                1%.
                             </div>
                         </div>
 
@@ -551,6 +575,47 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-success" id="btnConfirmarPagamento">Confirmar
                         Recebimento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detalhes de Comissões -->
+    <div class="modal fade" id="modalDetalhesComissoes" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-people me-2"></i>Distribuição de Comissões</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="periodInfoComissoes" class="mb-3 fw-bold text-muted"></div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Colaborador</th>
+                                    <th class="text-end">Total Bruto NF</th>
+                                    <th class="text-center">Alíquota Média</th>
+                                    <th class="text-end">Valor Comissão</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaComissoesDetalhe">
+                                <!-- Gerado via JS -->
+                            </tbody>
+                            <tfoot class="table-light fw-bold">
+                                <tr>
+                                    <td>TOTAL</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="text-end text-primary" id="totalComissoesGeral">R$ 0,00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
