@@ -10227,6 +10227,13 @@
     "valor": 4
   },
   {
+    "empresa": "Total geral",
+    "projeto": "São Paulo CMSP CSP 274/2024 03/2025",
+    "categoria": "Outros Tributos",
+    "competencia": "2025-06",
+    "valor": 219856
+  },
+  {
     "empresa": "Conectius",
     "projeto": "Conectius - Rateio",
     "categoria": "Ativos",
@@ -11613,6 +11620,13 @@
     "valor": 74
   },
   {
+    "empresa": "Total geral",
+    "projeto": "São Paulo CMSP CSP 274/2024 03/2025",
+    "categoria": "Outros Tributos",
+    "competencia": "2025-07",
+    "valor": 190591
+  },
+  {
     "empresa": "Conectius",
     "projeto": "Conectius - Rateio",
     "categoria": "Ativos",
@@ -12983,6 +12997,13 @@
     "categoria": "Despesas Financeiras",
     "competencia": "2025-08",
     "valor": 14
+  },
+  {
+    "empresa": "Total geral",
+    "projeto": "São Paulo CMSP CSP 274/2024 03/2025",
+    "categoria": "Outros Tributos",
+    "competencia": "2025-08",
+    "valor": 80207
   },
   {
     "empresa": "Conectius",
@@ -14413,6 +14434,13 @@
     "valor": 76
   },
   {
+    "empresa": "Total geral",
+    "projeto": "São Paulo CMSP CSP 274/2024 03/2025",
+    "categoria": "Outros Tributos",
+    "competencia": "2025-09",
+    "valor": 95732
+  },
+  {
     "empresa": "Conectius",
     "projeto": "Conectius - Rateio",
     "categoria": "Ativos",
@@ -15608,6 +15636,13 @@
     "categoria": "Despesas com Pessoal",
     "competencia": "2025-10",
     "valor": 338
+  },
+  {
+    "empresa": "Total geral",
+    "projeto": "São Paulo CMSP CSP 274/2024 03/2025",
+    "categoria": "Outros Tributos",
+    "competencia": "2025-10",
+    "valor": 116549
   },
   {
     "empresa": "Conectius",
@@ -17115,6 +17150,13 @@
     "valor": 23768
   },
   {
+    "empresa": "Total geral",
+    "projeto": "São Paulo CMSP CSP 274/2024 03/2025",
+    "categoria": "Outros Tributos",
+    "competencia": "2025-11",
+    "valor": 13069
+  },
+  {
     "empresa": "Mar_BR",
     "projeto": "Bertioga 3151",
     "categoria": "Equipamentos",
@@ -18590,5 +18632,12 @@
     "categoria": "Receita Bruta de Vendas",
     "competencia": "2025-12",
     "valor": 23768
+  },
+  {
+    "empresa": "Total geral",
+    "projeto": "São Paulo CMSP CSP 274/2024 03/2025",
+    "categoria": "Outros Tributos",
+    "competencia": "2025-12",
+    "valor": 289434
   }
 ]
