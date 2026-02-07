@@ -1,34 +1,33 @@
-# Importação DRE - Duas Fontes
+# Dashboard DRE - Guia de Dados
 
-## Arquivos Processados
+O Dashboard agora está configurado para carregar automaticamente o arquivo **`dados.csv`** que estiver na pastaraiz.
 
-- **dados_mai25.csv** → Jan/2024 até Mai/2025 (124 registros)
-- **dados_tratado_jun25_em_diante.csv** → Jun/2025 em diante (322 registros)
+## Como Atualizar os Dados
 
-## Execução
+Para que o Dashboard mostre as informações mais recentes, você deve garantir que o arquivo `dados.csv` contenha toda a base consolidada (histórico + novos dados).
 
-```bash
-node import-dre-dual-source.js
-```
+### 1. Preparação da Planilha
 
-## Resultado
+1. Mantenha sua planilha master de controle (Excel).
+2. Certifique-se de que ela tenha as colunas: `Empresa`, `Projeto`, `Categoria` e os meses (ex: `jan/24`, `jun/25`).
+3. **Salve como CSV (separado por ponto e vírgula)** com o nome exato de `dados.csv` na pasta do projeto.
 
-- **2.527 lançamentos** processados
-- Formato normalizado: `{empresa, projeto, categoria, competencia, valor}`
-- Arquivo gerado: `dados_dre_merged.json`
+### 2. Carregamento Automático
 
-## Distribuição por Período
+- Ao abrir o arquivo `dre.html`, o sistema buscará o `dados.csv` automaticamente.
+- Se você fizer alterações no arquivo, basta **atualizar a página** do navegador.
+- O sistema detecta automaticamente:
+  - Separador `;` (ponto e vírgula)
+  - Acentos e caracteres especiais (ISO-8859-1)
 
-| Competência | Lançamentos |
-|-------------|-------------|
-| 2024-01     | 51          |
-| 2024-02     | 53          |
-| ...         | ...         |
-| 2025-06     | 176         |
-| 2025-12     | 204         |
+## Estrutura Esperada do CSV
 
-## Próximos Passos
+| Empresa | Projeto | Categoria | jan/24 | ... | jun/25 |
+|---------|---------|-----------|--------|-----|--------|
+| Mar_BR  | Exemplo | Ativos    | 1500   | ... | 2000   |
 
-1. ✅ Teste o script (já executado)
-2. Validar dados em `dados_dre_merged.json`
-3. Integrar com aplicação DRE
+## Dicas Adicionais
+
+- **Consórcios**: O app agrupa automaticamente "Consórcios - a contemplar" e "Consórcios - contemplados" em uma única linha visual.
+- **Equipamentos**: Itens na categoria "Equipamentos" são somados automaticamente à linha de **Ativos**.
+- **Limpeza de Filtros**: Use o botão "Limpar" no menu lateral se as opções parecerem travadas.

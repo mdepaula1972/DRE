@@ -982,3 +982,74 @@ function updateVersion() {
         versionEl.textContent = `${APP_VERSION} Gestão Integrada`;
     }
 }
+
+/**
+ * Mostra o modal com a distribuição detalhada de comissões
+ */
+function showComissoesDetail() {
+    const invoices = storageManager.filterInvoices(currentFilters);
+    const container = document.getElementById('listaComissoesDetalhe');
+    const totalGeralLabel = document.getElementById('totalComissoesGeral');
+    const periodInfo = document.getElementById('periodInfoComissoes');
+
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Agrupar comissões por colaborador
+    const distribution = {};
+    let totalGeral = 0;
+
+    invoices.forEach(nf => {
+        if (nf.comissoes && Array.isArray(nf.comissoes)) {
+            nf.comissoes.forEach(c => {
+                const key = c.colaborador_id || c.nome_colaborador || c.nome;
+                if (!distribution[key]) {
+                    distribution[key] = {
+                        nome: c.nome_colaborador || c.nome || 'Não identificado',
+                        totalBrutoNF: 0,
+                        totalComissao: 0,
+                        count: 0,
+                        aliqSum: 0
+                    };
+                }
+
+                distribution[key].totalBrutoNF += (nf.valor_receita_bruta || 0);
+                distribution[key].totalComissao += (c.valor || 0);
+                distribution[key].aliqSum += (c.aliquota || 0);
+                distribution[key].count++;
+                totalGeral += (c.valor || 0);
+            });
+        }
+    });
+
+    const entries = Object.values(distribution).sort((a, b) => b.totalComissao - a.totalComissao);
+
+    if (entries.length === 0) {
+        container.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">Nenhuma comissão encontrada para este período.</td></tr>';
+    } else {
+        entries.forEach(e => {
+            const tr = document.createElement('tr');
+            const aliqMedia = (e.aliqSum / e.count).toFixed(2);
+            tr.innerHTML = `
+                <td>
+                    <div class="fw-bold text-dark">${e.nome}</div>
+                    <div class="small text-muted">${e.count} lançamento(s)</div>
+                </td>
+                <td class="text-end">${formatCurrency(e.totalBrutoNF)}</td>
+                <td class="text-center"><span class="badge bg-light text-dark border">${aliqMedia}%</span></td>
+                <td class="text-end fw-bold text-primary">${formatCurrency(e.totalComissao)}</td>
+            `;
+            container.appendChild(tr);
+        });
+    }
+
+    if (totalGeralLabel) totalGeralLabel.textContent = formatCurrency(totalGeral);
+
+    // Info do período
+    const comp = currentFilters.competencias ? currentFilters.competencias.join(', ') : 'Todos os períodos';
+    if (periodInfo) periodInfo.textContent = `Período: ${comp}`;
+
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalhesComissoes'));
+    modal.show();
+}
+

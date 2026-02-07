@@ -2,8 +2,8 @@
 
 // Configuration
 const CONFIG = {
-    VERSION: "27.0",
-    LAST_UPDATE: "06/01/2026",
+    VERSION: "28.0",
+    LAST_UPDATE: "07/02/2026",
     COLORS: {
         primary: '#F2911B',
         secondary: '#262223',
@@ -260,11 +260,8 @@ function processParsedData(results) {
         }
 
         // Normalize text values
-        data.forEach(row => {
-            row['Projeto'] = toTitleCase(row['Projeto'].toString());
-            row['Empresa'] = row['Empresa'] ? row['Empresa'].toString().trim() : '';
-            row['Categoria'] = row['Categoria'] ? row['Categoria'].toString().trim() : '';
-        });
+        // Normalize and Fix Swapped Columns
+        fixAndNormalizeData(data);
 
         state.rawData = data;
         localStorage.setItem('dre_raw_data', JSON.stringify(data));
@@ -289,6 +286,45 @@ function processParsedData(results) {
 
 function toTitleCase(str) {
     return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+}
+
+/**
+ * Normaliza dados e corrige inversão Projeto <-> Categoria
+ */
+function fixAndNormalizeData(data) {
+    const catKeywords = ['RECEITA', 'IMPOSTOS', 'DESPESA', 'CUSTO', 'DEDUCOES', 'DEDUÇÕES', 'LUCRO', 'PREJUIZO', 'ATIVOS', 'PASSIVOS', 'PROVISÃO'];
+    let swapCount = 0;
+
+    data.forEach(row => {
+        // 1. Basic Trim
+        let p = row['Projeto'] ? row['Projeto'].toString().trim() : '';
+        let c = row['Categoria'] ? row['Categoria'].toString().trim() : '';
+        let e = row['Empresa'] ? row['Empresa'].toString().trim() : '';
+
+        // 2. Detect Swap
+        const pUpper = p.toUpperCase();
+        const cUpper = c.toUpperCase();
+
+        const pIsCat = catKeywords.some(k => pUpper.includes(k));
+        const cIsCat = catKeywords.some(k => cUpper.includes(k));
+
+        if (pIsCat && !cIsCat) {
+            // Swap
+            const temp = p;
+            p = c;
+            c = temp;
+            swapCount++;
+        }
+
+        // 3. Assign back
+        row['Projeto'] = p;
+        row['Categoria'] = c;
+        row['Empresa'] = e;
+    });
+
+    if (swapCount > 0) {
+        console.warn(`⚠️ Corrigidos ${swapCount} registros com Projeto e Categoria invertidos (v2).`);
+    }
 }
 
 function extractMetadata(data) {
@@ -333,9 +369,9 @@ function extractMetadata(data) {
     state.allColumns = periodos.map(p => p.full);
 
     // Extract Unique Companies, Projects, Categories for filters
-    const empresas = [...new Set(data.map(d => d.Empresa).filter(Boolean))].sort();
-    const projetos = [...new Set(data.map(d => d.Projeto).filter(Boolean))].sort();
-    const categorias = [...new Set(data.map(d => d.Categoria).filter(Boolean))].sort();
+    const empresas = getUniqueSortedClean(data.map(d => d.Empresa));
+    const projetos = getUniqueSortedClean(data.map(d => d.Projeto));
+    const categorias = getUniqueSortedClean(data.map(d => d.Categoria));
     const periodosList = periodos.map(p => `${p.mes}/${p.ano}`);
 
     // Update State Filters Options
@@ -440,16 +476,30 @@ function initEventListeners() {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Indicators App Initializing (v" + CONFIG.VERSION + ")...");
+
+    // Privacy Mode
+    const isPrivacyActive = localStorage.getItem('privacyMode') === 'true';
+    if (isPrivacyActive) document.body.classList.add('privacy-active');
+    updatePrivacyIcon();
+
+    // Standard Init
     initEventListeners();
     initCharts();
+
+    // Data Loading
+    loadStateFromStorage();
     tryAutoLoad();
 
-    // Update version in sidebar
+    // Version UI
     const vEl = document.getElementById('appVersion');
     if (vEl) vEl.textContent = CONFIG.VERSION;
-
     const uEl = document.getElementById('lastUpdate');
-    if (uEl) uEl.textContent = `Aguardando dados... (v${CONFIG.VERSION})`;
+    if (uEl) {
+        if (!state.rawData || state.rawData.length === 0) {
+            uEl.textContent = `Aguardando dados... (v${CONFIG.VERSION})`;
+        }
+    }
 });
 
 
@@ -579,14 +629,43 @@ function updateCascadeFilters(changedFilter) {
 }
 function populateSelect(id, options) {
     const select = document.getElementById(id);
-    if (!select) return; // Prevent error if select is missing
+    if (!select) return;
+
+    // Get current filter key to restore selection
+    const filter = id.replace('filter', '');
+    const filterKey = filter.toLowerCase() + (filter === 'Mes' ? 'es' : 's');
+    const selectedVals = state.filters[filterKey] || [];
+
     select.innerHTML = '';
     options.forEach(opt => {
         const option = document.createElement('option');
         option.value = opt;
         option.textContent = opt;
+
+        // Restore selection if it matches (case-insensitive)
+        if (selectedVals.some(v => v.toLowerCase().trim() === opt.toLowerCase().trim())) {
+            option.selected = true;
+        }
+
         select.appendChild(option);
     });
+}
+
+// Global Clean Helpers
+const cleanStr = (v) => (v || "").toString().trim();
+function getUniqueSortedClean(vals) {
+    const seen = new Set();
+    const result = [];
+    vals.forEach(v => {
+        const raw = cleanStr(v);
+        if (!raw) return;
+        const lower = raw.toLowerCase();
+        if (!seen.has(lower)) {
+            seen.add(lower);
+            result.push(raw);
+        }
+    });
+    return result.sort();
 }
 
 // Filtering Logic
@@ -3113,12 +3192,34 @@ function updatePrivacyIcon() {
     }
 }
 
-// Initialize logic
-document.addEventListener('DOMContentLoaded', () => {
-    // Check local storage
-    const isPrivacyActive = localStorage.getItem('privacyMode') === 'true';
-    if (isPrivacyActive) {
-        document.body.classList.add('privacy-active');
+// Função para carregar dados do localStorage
+function loadStateFromStorage() {
+    const savedData = localStorage.getItem('dre_raw_data');
+    if (savedData) {
+        try {
+            const data = JSON.parse(savedData);
+            if (!Array.isArray(data) || data.length === 0) return;
+
+            console.log("Dados carregados do localStorage:", data.length, "registros");
+            state.rawData = data;
+
+            // Expose for BrisinhAI
+            window.FULL_CSV_DATA = data;
+
+            extractMetadata(data);
+            applyFilters();
+
+            const fileStatus = document.getElementById('fileStatus');
+            if (fileStatus) fileStatus.textContent = `✅ ${data.length} registros (cache)`;
+
+            const lastUpdate = document.getElementById('lastUpdate');
+            if (lastUpdate && lastUpdate.textContent.includes('Aguardando')) {
+                lastUpdate.textContent = `Vibrando do cache local`;
+            }
+
+        } catch (e) {
+            console.error("Erro ao carregar cache local:", e);
+            localStorage.removeItem('dre_raw_data');
+        }
     }
-    updatePrivacyIcon();
-});
+}

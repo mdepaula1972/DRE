@@ -2,8 +2,8 @@
 
 // Configuration
 const CONFIG = {
-    VERSION: "27.0",
-    LAST_UPDATE: "06/01/2026",
+    VERSION: "28.0",
+    LAST_UPDATE: "07/02/2026",
     COLORS: {
         primary: '#F2911B',
         secondary: '#262223',
@@ -51,9 +51,9 @@ const CONFIG = {
         { titulo: "Intermediação de Negócios", tipo: "hidden", categorias: ["Intermediação de Negócios"] },
         { titulo: "Total Despesas Rateadas", tipo: "card", var: "total_despesas" },
         { titulo: "", tipo: "divisor" },
-        { titulo: "Consórcios a contemplar", tipo: "linha", categorias: ["Consórcios - a contemplar"] },
+        { titulo: "Consórcios", tipo: "linha", categorias: ["Consórcios - a contemplar", "Consórcios - contemplados"] },
         { titulo: "Serviços", tipo: "linha_calc", formula: "servicos_menos_consorcios", categorias: ["Serviços"] },
-        { titulo: "Ativos", tipo: "linha", categorias: ["Ativos"] },
+        { titulo: "Ativos", tipo: "linha", categorias: ["Ativos", "Equipamentos"] },
         { titulo: "Total Investimentos", tipo: "card", var: "total_investimentos" },
         { titulo: "", tipo: "divisor" },
         { titulo: "Total Saídas", tipo: "card", var: "total_saidas" },
@@ -151,24 +151,29 @@ function handleFileUpload(event) {
     document.getElementById('loadingOverlay').classList.remove('d-none');
     document.getElementById('fileStatus').textContent = `Carregando: ${file.name}`;
 
-    Papa.parse(file, {
+    const config = {
         header: true,
         skipEmptyLines: true,
+        dynamicTyping: false, // Don't let it guess types, we handle it
+        fastMode: false
+    };
+
+    // Tentar primeiro com ISO-8859-1 (Padrão Excel Brasil)
+    Papa.parse(file, {
+        ...config,
         encoding: "ISO-8859-1",
         complete: (results) => {
-            console.log("PapaParse (ISO-8859-1) completo. Linhas:", results.data.length, "Erros:", results.errors.length);
+            console.log("PapaParse (ISO-8859-1) completo. Linhas:", results.data.length);
 
-            // If it seems to have failed or parsed incorrectly (e.g. only 1 column when expecting more), try UTF-8
+            // Heurística de Separador: Se só tem 1 coluna, pode estar no separador errado (;)
             const headerCount = results.meta.fields ? results.meta.fields.length : 0;
-
-            if ((results.errors.length > 0 && results.data.length === 0) || headerCount <= 1) {
-                console.log("Tentativa com ISO-8859-1 falhou ou retornou poucas colunas. Tentando UTF-8...");
+            if (headerCount <= 1 && results.data.length > 0) {
+                console.log("Detectado separador incorreto ou falha de codificação. Tentando com ';' e UTF-8...");
                 Papa.parse(file, {
-                    header: true,
-                    skipEmptyLines: true,
+                    ...config,
+                    delimiter: ";", // Forçar ponto e vírgula
                     encoding: "UTF-8",
                     complete: (utfResults) => {
-                        console.log("PapaParse (UTF-8) completo. Linhas:", utfResults.data.length);
                         processParsedData(utfResults);
                     }
                 });
@@ -191,40 +196,33 @@ function handleFileUpload(event) {
  */
 function tryAutoLoad() {
     const isGitHubPages = window.location.hostname.includes('github.io');
-    const defaultFile = 'dados_dre_merged.json';  // ← JSON merged
+    const primaryFile = 'dados.csv';
 
-    console.log(`Tentando auto-load (${defaultFile})...`);
+    console.log(`Tentando auto-load prioritário (${primaryFile})...`);
 
-    fetch(defaultFile)
+    fetch(primaryFile)
         .then(response => {
-            if (!response.ok) throw new Error("Arquivo JSON merged não encontrado");
-            return response.json();
+            if (!response.ok) throw new Error("Arquivo dados.csv não encontrado");
+            return response.blob();
         })
-        .then(data => {
-            console.log(`JSON merged carregado: ${data.length} lançamentos`);
-            processJSONData(data);
-
-            if (isGitHubPages) {
-                console.log("Ambiente GitHub Pages detectado. Ajustando interface...");
-            }
+        .then(blob => {
+            console.log("dados.csv encontrado. Processando...");
+            const file = new File([blob], 'dados.csv', { type: 'text/csv' });
+            const event = { target: { files: [file] } };
+            handleFileUpload(event);
         })
         .catch(err => {
-            console.warn("Auto-load indisponível ou arquivo não encontrado:", err.message);
-            console.log("Fallback: tentando carregar dados.csv...");
+            console.warn("Auto-load de dados.csv falhou:", err.message);
+            console.log("Tentando fallback para dados_dre_merged.json...");
 
-            // Fallback para CSV antigo
-            fetch('dados.csv')
-                .then(response => {
-                    if (!response.ok) throw new Error("Arquivo padrão não encontrado");
-                    return response.blob();
-                })
-                .then(blob => {
-                    const file = new File([blob], 'dados.csv', { type: 'text/csv' });
-                    const event = { target: { files: [file] } };
-                    handleFileUpload(event);
+            fetch('dados_dre_merged.json')
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Fallback JSON carregado.");
+                    processJSONData(data);
                 })
                 .catch(err2 => {
-                    console.warn("Fallback CSV também falhou:", err2.message);
+                    console.warn("Todos os auto-loads falharam.");
                 });
         });
 }
@@ -304,11 +302,7 @@ function processJSONData(jsonData) {
         if (window.updateBrisinhAIContext) window.updateBrisinhAIContext();
 
         // Normalizar e processar
-        data.forEach(row => {
-            row['Projeto'] = toTitleCase(row['Projeto'].toString());
-            row['Empresa'] = row['Empresa'] ? row['Empresa'].toString().trim() : '';
-            row['Categoria'] = row['Categoria'] ? row['Categoria'].toString().trim() : '';
-        });
+        fixAndNormalizeData(data);
 
         state.rawData = data;
         localStorage.setItem('dre_raw_data', JSON.stringify(data));
@@ -354,7 +348,8 @@ function processParsedData(results) {
         data = data.map(row => {
             const newRow = {};
             Object.keys(row).forEach(key => {
-                const cleanKey = key.trim().replace(/["']/g, '');
+                // Strip UTF-8 BOM and other hidden characters
+                const cleanKey = key.trim().replace(/^\uFEFF/g, '').replace(/["']/g, '');
                 if (!cleanKey) return;
 
                 const lowerKey = cleanKey.toLowerCase();
@@ -385,12 +380,8 @@ function processParsedData(results) {
             return;
         }
 
-        // Normalize text values
-        data.forEach(row => {
-            row['Projeto'] = toTitleCase(row['Projeto'].toString());
-            row['Empresa'] = row['Empresa'] ? row['Empresa'].toString().trim() : '';
-            row['Categoria'] = row['Categoria'] ? row['Categoria'].toString().trim() : '';
-        });
+        // Normalize and Fix Swapped Columns
+        fixAndNormalizeData(data);
 
         state.rawData = data;
         localStorage.setItem('dre_raw_data', JSON.stringify(data));
@@ -410,6 +401,45 @@ function processParsedData(results) {
         alert("Erro ao processar o arquivo: " + error.message);
         document.getElementById('loadingOverlay').classList.add('d-none');
         document.getElementById('fileStatus').textContent = "❌ Erro no carregamento";
+    }
+}
+
+/**
+ * Normaliza dados e corrige inversão Projeto <-> Categoria
+ */
+function fixAndNormalizeData(data) {
+    const catKeywords = ['RECEITA', 'IMPOSTOS', 'DESPESA', 'CUSTO', 'DEDUCOES', 'DEDUÇÕES', 'LUCRO', 'PREJUIZO', 'ATIVOS', 'PASSIVOS', 'PROVISÃO'];
+    let swapCount = 0;
+
+    data.forEach(row => {
+        // 1. Basic Trim
+        let p = row['Projeto'] ? row['Projeto'].toString().trim() : '';
+        let c = row['Categoria'] ? row['Categoria'].toString().trim() : '';
+        let e = row['Empresa'] ? row['Empresa'].toString().trim() : '';
+
+        // 2. Detect Swap
+        const pUpper = p.toUpperCase();
+        const cUpper = c.toUpperCase();
+
+        const pIsCat = catKeywords.some(k => pUpper.includes(k));
+        const cIsCat = catKeywords.some(k => cUpper.includes(k));
+
+        if (pIsCat && !cIsCat) {
+            // Swap
+            const temp = p;
+            p = c;
+            c = temp;
+            swapCount++;
+        }
+
+        // 3. Assign back
+        row['Projeto'] = p;
+        row['Categoria'] = c;
+        row['Empresa'] = e;
+    });
+
+    if (swapCount > 0) {
+        console.warn(`⚠️ Corrigidos ${swapCount} registros com Projeto e Categoria invertidos.`);
     }
 }
 
@@ -459,9 +489,9 @@ function extractMetadata(data) {
     state.allColumns = periodos.map(p => p.full);
 
     // Extract Unique Companies, Projects, Categories for filters
-    const empresas = [...new Set(data.map(d => d.Empresa).filter(Boolean))].sort();
-    const projetos = [...new Set(data.map(d => d.Projeto).filter(Boolean))].sort();
-    const categorias = [...new Set(data.map(d => d.Categoria).filter(Boolean))].sort();
+    const empresas = getUniqueSortedClean(data.map(d => d.Empresa));
+    const projetos = getUniqueSortedClean(data.map(d => d.Projeto));
+    const categorias = getUniqueSortedClean(data.map(d => d.Categoria));
     const periodosList = periodos.map(p => `${p.mes}/${p.ano}`);
 
     // Update State Filters Options
@@ -571,16 +601,31 @@ function initEventListeners() {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DRE App Initializing (v" + CONFIG.VERSION + ")...");
+
+    // Privacy Mode (from old second listener)
+    const isPrivacyActive = localStorage.getItem('privacyMode') === 'true';
+    if (isPrivacyActive) document.body.classList.add('privacy-active');
+    if (typeof updatePrivacyIcon === 'function') updatePrivacyIcon();
+
+    // Standard Init
     initEventListeners();
     initCharts();
+
+    // Data Loading Priority: Cache (immediate UI) → Remote (fresh data)
+    loadStateFromStorage();
     tryAutoLoad();
 
-    // Update version in sidebar
+    // Version UI
     const vEl = document.getElementById('appVersion');
     if (vEl) vEl.textContent = CONFIG.VERSION;
 
     const uEl = document.getElementById('lastUpdate');
-    if (uEl) uEl.textContent = `Aguardando dados... (v${CONFIG.VERSION})`;
+    if (uEl) {
+        if (!state.rawData || state.rawData.length === 0) {
+            uEl.textContent = `Aguardando dados... (v${CONFIG.VERSION})`;
+        }
+    }
 });
 
 
@@ -629,12 +674,14 @@ function updateCascadeFilters(changedFilter) {
 
         // Apply Empresa filter
         if (f.empresas && f.empresas.length > 0 && i > filterOrder.indexOf('Empresa')) {
-            tempData = tempData.filter(row => f.empresas.includes(row.Empresa));
+            const selected = f.empresas.map(e => e.toLowerCase().trim());
+            tempData = tempData.filter(row => selected.includes(row.Empresa.toLowerCase().trim()));
         }
 
         // Apply Projeto filter
         if (f.projetos && f.projetos.length > 0 && i > filterOrder.indexOf('Projeto')) {
-            tempData = tempData.filter(row => f.projetos.includes(row.Projeto));
+            const selected = f.projetos.map(p => p.toLowerCase().trim());
+            tempData = tempData.filter(row => selected.includes(row.Projeto.toLowerCase().trim()));
         }
 
         // Get unique options for this filter
@@ -645,7 +692,8 @@ function updateCascadeFilters(changedFilter) {
                     // Year only logic
                     const anosSet = new Set();
                     Object.keys(state.mapaMeses).forEach(col => {
-                        const ano = col.split('/')[1]?.trim();
+                        const partes = col.split('/');
+                        const ano = partes[1] ? partes[1].trim() : '';
                         if (ano) anosSet.add(ano);
                     });
                     options = Array.from(anosSet).sort();
@@ -653,31 +701,34 @@ function updateCascadeFilters(changedFilter) {
                     // Extract unique periods that exist
                     const periodosSet = new Set();
                     Object.keys(state.mapaMeses).forEach(col => {
-                        const mes = state.mapaMeses[col];
-                        const ano = col.split('/')[1]?.trim();
-                        periodosSet.add(`${mes}/${ano}`);
+                        const mes = state.mapaMeses[col]; // Já normalizado em extractMetadata
+                        const partes = col.split('/');
+                        const ano = partes[1] ? partes[1].trim() : '';
+                        if (mes && ano) periodosSet.add(`${mes}/${ano}`);
                     });
                     options = Array.from(periodosSet).sort((a, b) => {
                         const [mesA, anoA] = a.split('/');
                         const [mesB, anoB] = b.split('/');
-                        const yearDiff = anoA.localeCompare(anoB);
-                        if (yearDiff !== 0) return yearDiff;
-                        return CONFIG.MESES_ORDEM.indexOf(mesA) - CONFIG.MESES_ORDEM.indexOf(mesB);
+                        const yA = parseInt(anoA) < 100 ? 2000 + parseInt(anoA) : parseInt(anoA);
+                        const yB = parseInt(anoB) < 100 ? 2000 + parseInt(anoB) : parseInt(anoB);
+                        if (yA !== yB) return yA - yB;
+                        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                        return meses.indexOf(mesA) - meses.indexOf(mesB);
                     });
                 }
                 break;
 
             case 'Empresa':
-                options = [...new Set(tempData.map(d => d.Empresa))].sort();
+                options = getUniqueSortedClean(tempData.map(d => d.Empresa));
                 break;
 
             case 'Projeto':
-                options = [...new Set(tempData.map(d => d.Projeto))].sort();
+                options = getUniqueSortedClean(tempData.map(d => d.Projeto));
                 break;
 
             case 'Categoria':
 
-                options = [...new Set(tempData.map(d => d.Categoria))].sort();
+                options = getUniqueSortedClean(tempData.map(d => d.Categoria));
                 break;
         }
 
@@ -685,20 +736,54 @@ function updateCascadeFilters(changedFilter) {
         const filterId = `filter${filterToUpdate}`;
         populateSelect(filterId, options);
 
-        // Reset the selection for this filter
+        // Reset the selection ONLY IF the previously selected item is no longer available
         const filterKey = filterToUpdate.toLowerCase() + (filterToUpdate === 'Mes' ? 'es' : 's');
-        state.filters[filterKey] = [];
+        const currentSelection = state.filters[filterKey] || [];
+        const validSelections = currentSelection.filter(val =>
+            options.some(opt => opt.toLowerCase().trim() === val.toLowerCase().trim())
+        );
+        state.filters[filterKey] = validSelections;
     }
 }
 function populateSelect(id, options) {
     const select = document.getElementById(id);
+    if (!select) return;
+
+    // Get current filter key to restore selection
+    const filter = id.replace('filter', '');
+    const filterKey = filter.toLowerCase() + (filter === 'Mes' ? 'es' : 's');
+    const selectedVals = state.filters[filterKey] || [];
+
     select.innerHTML = '';
     options.forEach(opt => {
         const option = document.createElement('option');
         option.value = opt;
         option.textContent = opt;
+
+        // Restore selection if it matches (case-insensitive)
+        if (selectedVals.some(v => v.toLowerCase().trim() === opt.toLowerCase().trim())) {
+            option.selected = true;
+        }
+
         select.appendChild(option);
     });
+}
+
+// Global Clean Helpers
+const cleanStr = (v) => (v || "").toString().trim();
+function getUniqueSortedClean(vals) {
+    const seen = new Set();
+    const result = [];
+    vals.forEach(v => {
+        const raw = cleanStr(v);
+        if (!raw) return;
+        const lower = raw.toLowerCase();
+        if (!seen.has(lower)) {
+            seen.add(lower);
+            result.push(raw);
+        }
+    });
+    return result.sort();
 }
 
 // Filtering Logic
@@ -716,17 +801,20 @@ function applyFilters() {
 
     // 1. Filter by Empresa
     if (f.empresas && f.empresas.length > 0) {
-        df = df.filter(row => f.empresas.includes(row.Empresa));
+        const selected = f.empresas.map(e => e.toLowerCase().trim());
+        df = df.filter(row => selected.includes(row.Empresa.toLowerCase().trim()));
     }
 
     // 2. Filter by Projeto
     if (f.projetos && f.projetos.length > 0) {
-        df = df.filter(row => f.projetos.includes(row.Projeto));
+        const selected = f.projetos.map(p => p.toLowerCase().trim());
+        df = df.filter(row => selected.includes(row.Projeto.toLowerCase().trim()));
     }
 
     // 3. Filter by Categoria (usando filtro "categorias")
     if (f.categorias && f.categorias.length > 0) {
-        df = df.filter(row => f.categorias.includes(row.Categoria));
+        const selected = f.categorias.map(c => c.toLowerCase().trim());
+        df = df.filter(row => selected.includes(row.Categoria.toLowerCase().trim()));
     }
 
     // 4. Valid Columns & Projection Logic
@@ -803,8 +891,9 @@ function calculateDRE() {
 
     // Helper to sum values
     const sumByCat = (categorias) => {
+        const catSet = new Set(categorias.map(c => c.toLowerCase().trim()));
         return df
-            .filter(row => categorias.includes(row.Categoria))
+            .filter(row => catSet.has(row.Categoria.toLowerCase().trim()))
             .reduce((sum, row) => {
                 let rowSum = 0;
                 cols.forEach(col => {
@@ -815,8 +904,9 @@ function calculateDRE() {
     };
 
     const sumByCatAndMonth = (categorias, col) => {
+        const catSet = new Set(categorias.map(c => c.toLowerCase().trim()));
         return df
-            .filter(row => categorias.includes(row.Categoria))
+            .filter(row => catSet.has(row.Categoria.toLowerCase().trim()))
             .reduce((sum, row) => sum + parseFloat(row[col]?.toString().replace(',', '.') || 0), 0);
     };
 
@@ -3168,22 +3258,14 @@ function updatePrivacyIcon() {
     }
 }
 
-// Initialize on startup
-document.addEventListener('DOMContentLoaded', () => {
-    const isPrivacyActive = localStorage.getItem('privacyMode') === 'true';
-    if (isPrivacyActive) {
-        document.body.classList.add('privacy-active');
-    }
-    updatePrivacyIcon();
-    loadStateFromStorage();
-});
-
 // Função para carregar dados do localStorage
 function loadStateFromStorage() {
     const savedData = localStorage.getItem('dre_raw_data');
     if (savedData) {
         try {
             const data = JSON.parse(savedData);
+            if (!Array.isArray(data) || data.length === 0) return;
+
             console.log("Dados carregados do localStorage:", data.length, "registros");
             state.rawData = data;
 
@@ -3197,7 +3279,9 @@ function loadStateFromStorage() {
             if (fileStatus) fileStatus.textContent = `✅ ${data.length} registros (cache)`;
 
             const lastUpdate = document.getElementById('lastUpdate');
-            if (lastUpdate) lastUpdate.textContent = `Carregado do cache local`;
+            if (lastUpdate && lastUpdate.textContent.includes('Aguardando')) {
+                lastUpdate.textContent = `Vibrando do cache local`;
+            }
 
         } catch (e) {
             console.error("Erro ao carregar cache local:", e);

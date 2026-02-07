@@ -15,8 +15,11 @@ const FILE_JUN25 = 'dados_tratado_jun25_em_diante.csv';
 
 // Função para ler CSV com encoding correto (Windows-1252)
 function readCSVFile(filename) {
+    if (!fs.existsSync(filename)) {
+        throw new Error(`Arquivo não encontrado: ${filename}`);
+    }
     const buffer = fs.readFileSync(filename);
-    const content = iconv.decode(buffer, 'win1252'); // Windows-1252
+    const content = iconv.decode(buffer, 'win1252');
     return content;
 }
 
@@ -152,7 +155,12 @@ function saveMergedData(data) {
 try {
     const mergedData = mergeDataSources();
     saveMergedData(mergedData);
-    console.log('\n✨ Importação concluída com sucesso!');
+    console.log('\n=========================================');
+    console.log('✨ IMPORTAÇÃO CONCLUÍDA COM SUCESSO!');
+    console.log('   O sistema agora usará os novos dados.');
+    console.log('=========================================\n');
 } catch (error) {
-    console.error('❌ Erro:', error.message);
+    console.error('\n❌ ERRO DURANTE A IMPORTAÇÃO:');
+    console.error(`   ${error.message}`);
+    process.exit(1);
 }
