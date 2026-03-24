@@ -4,11 +4,11 @@
 
 
 // Detecção de ambiente
-const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('192.168');
+const IS_LOCAL = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('192.168');
 const GEMINI_API_URL = IS_LOCAL ? null : "/api/chat";
 
 // CONFIGURAÇÃO LOCAL: Insira sua API key aqui para desenvolvimento local
-const LOCAL_API_KEY = "AIzaSyCjyjw_pwuLC6gcrdhUEst_JdJh4zUDAt0"; // Coloque sua chave da API Gemini aqui para testar localmente
+const LOCAL_API_KEY = "AIzaSyBkZ294OldnJ7SpULDLGTPhOjUGN7ChvWs"; // Coloque sua chave da API Gemini aqui para testar localmente
 
 class GeminiService {
     constructor() {

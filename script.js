@@ -2,7 +2,7 @@
 
 // Configuration
 const CONFIG = {
-    VERSION: "28.3",
+    VERSION: "28.4",
     LAST_UPDATE: "23/02/2026",
     COLORS: {
         primary: '#F2911B',
@@ -2018,10 +2018,14 @@ function updateCharts() {
                 plugins: {
                     legend: { position: 'bottom' },
                     tooltip: mainTooltip,
-                    datalabels: { clamp: true } // Apply to all
+                    datalabels: { clamp: true, clip: false } // Apply to all
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { borderDash: [2, 4] },
+                        grace: '10%' // Adiciona espaço no topo para os rótulos
+                    },
                     x: { grid: { display: false } }
                 }
             }
@@ -2153,11 +2157,16 @@ function updateCharts() {
                         font: { size: 10, weight: 'bold' },
                         color: '#555',
                         anchor: 'end',
-                        align: 'top'
+                        align: 'top',
+                        clip: false
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { borderDash: [2, 4] },
+                        grace: '10%' // Adiciona espaço no topo para os rótulos
+                    },
                     x: { grid: { display: false } }
                 }
             }
