@@ -9,7 +9,10 @@ import socketserver
 import webbrowser
 import os
 
-PORT = 8000
+import sys
+
+# Porta padrão é 8000, mas aceita argumento via terminal (ex: python server.py 8001)
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 
 class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):

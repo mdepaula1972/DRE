@@ -173,7 +173,7 @@
                         <th>SETOR / FUNÇÃO</th>
                         <th>REMUNERAÇÃO</th>
                         <th class="text-warning">MARGEM</th>
-                        <th class="text-warning">SALDO</th>
+                        <th class="text-warning">TOMADO</th>
                         <th>STATUS</th>
                         <th class="text-center">ADIT.</th>
                         <th class="text-center">AÇÕES</th>
@@ -603,59 +603,10 @@
 
                             <div class="col-12 mt-3">
                                 <hr class="my-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="hud-font text-warning mb-0">MÓDULO DE EMPRÉSTIMOS E FINANÇAS</h6>
-                                    <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-warning"
-                                            onclick="generateDebtTermPDF()">
-                                            <i class="bi bi-file-earmark-pdf"></i> GERAR TERMO
-                                        </button>
-                                        <button type="button" id="btnPrivacyModal" class="btn btn-sm btn-outline-info"
-                                            onclick="toggleModalFinancials()">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-md-3">
-                                        <label class="form-label text-warning">Valor do Empréstimo (R$)</label>
-                                        <input type="number" id="loanAmount" class="form-control border-warning"
-                                            placeholder="0.00" step="0.01">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label text-warning">Total de Parcelas</label>
-                                        <input type="number" id="loanInstallments" class="form-control border-warning"
-                                            placeholder="Ex: 12">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label text-warning">Início Pagamento</label>
-                                        <input type="month" id="loanStartCycle" class="form-control border-warning">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label text-warning">Data Solicitação</label>
-                                        <input type="date" id="loanRequestDate" class="form-control border-warning">
-                                    </div>
-
-                                    <!-- Empréstimos Diversos (JSON) -->
-                                    <div class="col-12 mt-2">
-                                        <div id="loansContainer"
-                                            class="p-2 border border-warning-subtle rounded bg-dark-subtle"
-                                            style="display:none;">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <small class="text-warning fw-bold">EMPRÉSTIMOS DIVERSOS (HISTÓRICO /
-                                                    ADICIONAIS)</small>
-                                                <button type="button" class="btn btn-xs btn-outline-warning p-0 px-1"
-                                                    onclick="addLoanRow()">+ ITEM</button>
-                                            </div>
-                                            <div id="loansList"></div>
-                                        </div>
-                                        <div class="text-end mt-1">
-                                            <button type="button" class="btn btn-link btn-sm text-warning p-0"
-                                                onclick="toggleLoansContainer()">
-                                                <i class="bi bi-plus-circle"></i> Gerenciar Empréstimos Diversos
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div class="alert alert-info d-flex align-items-center gap-2 py-2">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                    <small>Empréstimos são gerenciados na página <a href="emprestimos.html"
+                                            class="alert-link fw-bold">Empréstimos</a>.</small>
                                 </div>
                             </div>
                         </div>
@@ -794,11 +745,12 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="people.js?v=27.90"></script>
+    <script src="timbrado_b64.js"></script>
+    <script src="people.js?v=28.10"></script>
 
     <!-- BrisinhAI Scripts Oficial -->
-    <script src="ai.service.v2.js?v=27.90"></script>
-    <script src="brisinhai.js?v=27.90"></script>
+    <script src="ai.service.v2.js?v=28.10"></script>
+    <script src="brisinhai.js?v=28.10"></script>
 </body>
 
 </html>

@@ -204,181 +204,179 @@ window.generateTermoPDF = async function () {
     const vencimentoFormatado = formatDateFull(vencimentoDate.toISOString().split('T')[0]);
 
     try {
-        const img = new Image();
-        img.src = 'Timbrado Mar Brasil.png';
+        const timbrado = window.TIMBRADO_B64;
+        if (!timbrado) {
+            alert("Erro ao carregar o papel timbrado. Verifique se timbrado_b64.js foi carregado corretamente.");
+            return;
+        }
 
-        img.onload = function () {
-            const doc = new jsPDF();
-            const pageWidth = 210;
-            const marginLeft = 20;
-            const marginRight = 20;
-            const contentWidth = pageWidth - marginLeft - marginRight;
-            let y = 55; // Início após o cabeçalho do timbrado
+        const doc = new jsPDF();
+        const pageWidth = 210;
+        const marginLeft = 20;
+        const marginRight = 20;
+        const contentWidth = pageWidth - marginLeft - marginRight;
+        let y = 55; // Início após o cabeçalho do timbrado
 
-            const addPage = () => {
-                doc.addPage();
-                doc.addImage(img, 'PNG', 0, 0, 210, 297);
-                y = 40;
-            };
+        const addPage = () => {
+            doc.addPage();
+            doc.addImage(timbrado, 'JPEG', 0, 0, 210, 297);
+            y = 40;
+        };
 
-            const checkPage = (need) => { if (y + need > 270) addPage(); };
+        const checkPage = (need) => { if (y + need > 270) addPage(); };
 
-            doc.addImage(img, 'PNG', 0, 0, 210, 297);
+        doc.addImage(timbrado, 'JPEG', 0, 0, 210, 297);
 
-            // Título
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("CONTRATO DE MÚTUO", pageWidth / 2, y, { align: "center" });
-            y += 12;
+        // Título
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("CONTRATO DE MÚTUO", pageWidth / 2, y, { align: "center" });
+        y += 12;
 
-            // Partes
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
+        // Partes
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
 
-            const partes = `Pelo presente instrumento particular, de um lado MAR BRASIL SERVIÇOS E LOCAÇÕES LTDA, pessoa jurídica de direito privado, inscrita no CNPJ/MF sob nº. 02.233.923/0001-19, com sede à Rua Tupi, 782 – andar 1, Vila Tupi – Praia Grande - SP CEP: 11703-260, neste ato representada por seu sócio administrador, a Sra. PRISCILLA COELHO MONTEIRO, inscrita no CPF sob o nº. 320.421.118-56, doravante simplesmente denominada MUTUANTE; e do outro
+        const partes = `Pelo presente instrumento particular, de um lado MAR BRASIL SERVIÇOS E LOCAÇÕES LTDA, pessoa jurídica de direito privado, inscrita no CNPJ/MF sob nº. 02.233.923/0001-19, com sede à Rua Tupi, 782 – andar 1, Vila Tupi – Praia Grande - SP CEP: 11703-260, neste ato representada por seu sócio administrador, a Sra. PRISCILLA COELHO MONTEIRO, inscrita no CPF sob o nº. 320.421.118-56, doravante simplesmente denominada MUTUANTE; e do outro
 
 CONECTIUS DO BRASIL EIRELI, pessoa jurídica de direito privado, inscrita no CNPJ/MF sob nº. 05.559.293/0001-65, com sede à Rua Tupi, nº 782, Andar 1, bairro Vila Tupi, Praia Grande/SP, CEP: 11.703-200, neste ato representada por seu sócio administrador, o Sr. DAUREN ZILLETI MONTEIRO, inscrito no CPF sob o nº. 269.606.618-38, doravante simplesmente denominada MUTUÁRIA;
 
 Têm entre si justo e contratado as cláusulas e condições abaixo enumeradas:`;
 
-            const splitPartes = doc.splitTextToSize(partes, contentWidth);
-            doc.text(splitPartes, marginLeft, y);
-            y += splitPartes.length * 4.5 + 5;
+        const splitPartes = doc.splitTextToSize(partes, contentWidth);
+        doc.text(splitPartes, marginLeft, y);
+        y += splitPartes.length * 4.5 + 5;
 
-            // Cláusula Primeira
-            checkPage(40);
-            doc.setFont("helvetica", "bold");
-            doc.text("Cláusula Primeira –", marginLeft, y);
+        // Cláusula Primeira
+        checkPage(40);
+        doc.setFont("helvetica", "bold");
+        doc.text("Cláusula Primeira –", marginLeft, y);
+        doc.setFont("helvetica", "normal");
+        const clausula1 = ` A MUTUANTE efetuará empréstimo à MUTUÁRIA no valor de ${formatCurrency(totalValor)} (${valorPorExtenso(totalValor)}), com pagamentos realizados conforme tabela abaixo, a ser depositada na conta de titularidade da MUTUÁRIA, na Fit Bank – Banco 450 – Agência 0001, conta corrente 8629997361-1, chave pix.omiecash@marbr.com.br, com prazo de devolução de até 01 ano (um ano) a contar a partir da data de assinatura deste contrato:`;
+        const splitC1 = doc.splitTextToSize(clausula1, contentWidth - 35);
+        doc.text(splitC1, marginLeft + 35, y);
+        y += splitC1.length * 4.5 + 8;
+
+        // Tabela de Lançamentos
+        checkPage(30);
+        doc.setFillColor(240, 240, 240);
+        doc.rect(marginLeft, y, contentWidth, 7, 'F');
+        doc.setFont("helvetica", "bold");
+        doc.text("DATA", marginLeft + 5, y + 5);
+        doc.text("VALOR", marginLeft + contentWidth - 40, y + 5);
+        y += 10;
+
+        doc.setFont("helvetica", "normal");
+        mutuos.forEach(m => {
+            checkPage(8);
+            doc.text(formatDate(m.data_registro), marginLeft + 5, y);
+            doc.text(formatCurrency(m.valor), marginLeft + contentWidth - 40, y);
+            y += 6;
+        });
+
+        // Total
+        doc.setFont("helvetica", "bold");
+        doc.setFillColor(200, 200, 200);
+        doc.rect(marginLeft, y - 2, contentWidth, 7, 'F');
+        doc.text("TOTAL", marginLeft + 5, y + 3);
+        doc.text(formatCurrency(totalValor), marginLeft + contentWidth - 40, y + 3);
+        y += 15;
+
+        // Demais Cláusulas
+        checkPage(50);
+        const clausulas = [
+            `Cláusula Segunda: Para pagamento, a MUTUÁRIA entregará à MUTUANTE uma nota promissória que constará o valor do empréstimo, a taxa de juros e a data de vencimento da obrigação.`,
+            `Cláusula Terceira – Se a MUTUÁRIA deixar de pagar no prazo sem informar a MUTUANTE, a MUTUANTE poderá levar a protesto e/ou notificar a MUTUÁRIA para que, no prazo de 60 (sessenta) dias, purge a mora acrescida de juros moratórios de 0,5% (cinco décimos de percentual) ao mês ou fração de mês desde a data do vencimento até o efetivo pagamento, sob pena de ação de execução judicial ou rescisão deste contrato por inadimplência.`,
+            `Cláusula Quarta – As partes elegem o foro da Comarca de Praia Grande - SP, como o único competente para dirimir qualquer procedimento que porventura venha envolver futura discussão sobre o presente contrato, quer de natureza extrajudicial, ou judicial, em detrimento de qualquer outro porventura mais privilegiado.`
+        ];
+
+        clausulas.forEach(c => {
+            checkPage(25);
+            const split = doc.splitTextToSize(c, contentWidth);
             doc.setFont("helvetica", "normal");
-            const clausula1 = ` A MUTUANTE efetuará empréstimo à MUTUÁRIA no valor de ${formatCurrency(totalValor)} (${valorPorExtenso(totalValor)}), com pagamentos realizados conforme tabela abaixo, a ser depositada na conta de titularidade da MUTUÁRIA, na Fit Bank – Banco 450 – Agência 0001, conta corrente 8629997361-1, chave pix.omiecash@marbr.com.br, com prazo de devolução de até 01 ano (um ano) a contar a partir da data de assinatura deste contrato:`;
-            const splitC1 = doc.splitTextToSize(clausula1, contentWidth - 35);
-            doc.text(splitC1, marginLeft + 35, y);
-            y += splitC1.length * 4.5 + 8;
+            doc.text(split, marginLeft, y);
+            y += split.length * 4.5 + 5;
+        });
 
-            // Tabela de Lançamentos
-            checkPage(30);
-            doc.setFillColor(240, 240, 240);
-            doc.rect(marginLeft, y, contentWidth, 7, 'F');
-            doc.setFont("helvetica", "bold");
-            doc.text("DATA", marginLeft + 5, y + 5);
-            doc.text("VALOR", marginLeft + contentWidth - 40, y + 5);
-            y += 10;
+        // Fechamento
+        checkPage(20);
+        const fechamento = `E assim, estando justas e contratadas, as partes firmam o presente instrumento na presença de duas testemunhas, em 02 (duas) vias de igual teor e forma, para que produza os seus efeitos legais.`;
+        const splitFech = doc.splitTextToSize(fechamento, contentWidth);
+        doc.text(splitFech, marginLeft, y);
+        y += splitFech.length * 4.5 + 10;
 
-            doc.setFont("helvetica", "normal");
-            mutuos.forEach(m => {
-                checkPage(8);
-                doc.text(formatDate(m.data_registro), marginLeft + 5, y);
-                doc.text(formatCurrency(m.valor), marginLeft + contentWidth - 40, y);
-                y += 6;
-            });
+        doc.text(`Praia Grande/SP, ${dataFormatada}.`, marginLeft, y);
+        y += 25;
 
-            // Total
-            doc.setFont("helvetica", "bold");
-            doc.setFillColor(200, 200, 200);
-            doc.rect(marginLeft, y - 2, contentWidth, 7, 'F');
-            doc.text("TOTAL", marginLeft + 5, y + 3);
-            doc.text(formatCurrency(totalValor), marginLeft + contentWidth - 40, y + 3);
-            y += 15;
+        // Assinaturas
+        checkPage(50);
+        doc.setFont("helvetica", "bold");
+        doc.text("_______________________________________", marginLeft, y);
+        doc.text("_______________________________________", marginLeft + 100, y);
+        y += 5;
+        doc.setFontSize(9);
+        doc.text("MAR BRASIL SERVIÇOS E LOCAÇÕES LTDA", marginLeft, y);
+        doc.text("CONECTIUS DO BRASIL EIRELI", marginLeft + 100, y);
+        y += 4;
+        doc.setFont("helvetica", "normal");
+        doc.text("Mutuante", marginLeft, y);
+        doc.text("Mutuária", marginLeft + 100, y);
+        y += 20;
 
-            // Demais Cláusulas
-            checkPage(50);
-            const clausulas = [
-                `Cláusula Segunda: Para pagamento, a MUTUÁRIA entregará à MUTUANTE uma nota promissória que constará o valor do empréstimo, a taxa de juros e a data de vencimento da obrigação.`,
-                `Cláusula Terceira – Se a MUTUÁRIA deixar de pagar no prazo sem informar a MUTUANTE, a MUTUANTE poderá levar a protesto e/ou notificar a MUTUÁRIA para que, no prazo de 60 (sessenta) dias, purge a mora acrescida de juros moratórios de 0,5% (cinco décimos de percentual) ao mês ou fração de mês desde a data do vencimento até o efetivo pagamento, sob pena de ação de execução judicial ou rescisão deste contrato por inadimplência.`,
-                `Cláusula Quarta – As partes elegem o foro da Comarca de Praia Grande - SP, como o único competente para dirimir qualquer procedimento que porventura venha envolver futura discussão sobre o presente contrato, quer de natureza extrajudicial, ou judicial, em detrimento de qualquer outro porventura mais privilegiado.`
-            ];
+        // Testemunhas
+        doc.text("Testemunhas:", marginLeft, y);
+        y += 8;
+        doc.text("Nome: _______________________________   CPF: ___________________", marginLeft, y);
+        y += 8;
+        doc.text("Nome: _______________________________   CPF: ___________________", marginLeft, y);
+        y += 15;
 
-            clausulas.forEach(c => {
-                checkPage(25);
-                const split = doc.splitTextToSize(c, contentWidth);
-                doc.setFont("helvetica", "normal");
-                doc.text(split, marginLeft, y);
-                y += split.length * 4.5 + 5;
-            });
+        // --- NOTA PROMISSÓRIA ---
+        addPage();
+        y = 55;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("NOTA PROMISSÓRIA", pageWidth / 2, y, { align: "center" });
+        y += 15;
 
-            // Fechamento
-            checkPage(20);
-            const fechamento = `E assim, estando justas e contratadas, as partes firmam o presente instrumento na presença de duas testemunhas, em 02 (duas) vias de igual teor e forma, para que produza os seus efeitos legais.`;
-            const splitFech = doc.splitTextToSize(fechamento, contentWidth);
-            doc.text(splitFech, marginLeft, y);
-            y += splitFech.length * 4.5 + 10;
+        doc.setFontSize(11);
+        doc.text(`Vencimento: ${vencimentoFormatado}`, marginLeft, y);
+        y += 8;
+        doc.text(`Valor: ${formatCurrency(totalValor)} (${valorPorExtenso(totalValor)})`, marginLeft, y);
+        y += 15;
 
-            doc.text(`Praia Grande/SP, ${dataFormatada}.`, marginLeft, y);
-            y += 25;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        const notaTexto = `No dia ${vencimentoFormatado} pagarei por esta única via de nota promissória na praça de Praia Grande/SP à MAR BRASIL SERVIÇOS E LOCAÇÕES ou a sua ordem a quantia de ${formatCurrency(totalValor)} (${valorPorExtenso(totalValor)}) em moeda corrente deste país.`;
+        const splitNota = doc.splitTextToSize(notaTexto, contentWidth);
+        doc.text(splitNota, marginLeft, y);
+        y += splitNota.length * 4.5 + 15;
 
-            // Assinaturas
-            checkPage(50);
-            doc.setFont("helvetica", "bold");
-            doc.text("_______________________________________", marginLeft, y);
-            doc.text("_______________________________________", marginLeft + 100, y);
-            y += 5;
-            doc.setFontSize(9);
-            doc.text("MAR BRASIL SERVIÇOS E LOCAÇÕES LTDA", marginLeft, y);
-            doc.text("CONECTIUS DO BRASIL EIRELI", marginLeft + 100, y);
-            y += 4;
-            doc.setFont("helvetica", "normal");
-            doc.text("Mutuante", marginLeft, y);
-            doc.text("Mutuária", marginLeft + 100, y);
-            y += 20;
+        doc.text(`Praia Grande - SP, ${dataFormatada}.`, marginLeft, y);
+        y += 20;
 
-            // Testemunhas
-            doc.text("Testemunhas:", marginLeft, y);
-            y += 8;
-            doc.text("Nome: _______________________________   CPF: ___________________", marginLeft, y);
-            y += 8;
-            doc.text("Nome: _______________________________   CPF: ___________________", marginLeft, y);
-            y += 15;
+        doc.setFont("helvetica", "bold");
+        doc.text("CONECTIUS DO BRASIL EIRELI", marginLeft, y);
+        y += 5;
+        doc.setFont("helvetica", "normal");
+        doc.text("CNPJ nº 05.559.293/0001-65", marginLeft, y);
+        y += 5;
+        doc.text("AV. PRES. KENNEDY, nº. 5251, sala 32", marginLeft, y);
+        y += 5;
+        doc.text("Bairro Vila Tupy, CEP 11703-200", marginLeft, y);
+        y += 5;
+        doc.text("Praia Grande/SP", marginLeft, y);
+        y += 10;
+        doc.setFont("helvetica", "bold");
+        doc.text("Dauren Zilleti Monteiro", marginLeft, y);
+        y += 5;
+        doc.setFont("helvetica", "normal");
+        doc.text("Administrador", marginLeft, y);
 
-            // --- NOTA PROMISSÓRIA ---
-            addPage();
-            y = 55;
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("NOTA PROMISSÓRIA", pageWidth / 2, y, { align: "center" });
-            y += 15;
-
-            doc.setFontSize(11);
-            doc.text(`Vencimento: ${vencimentoFormatado}`, marginLeft, y);
-            y += 8;
-            doc.text(`Valor: ${formatCurrency(totalValor)} (${valorPorExtenso(totalValor)})`, marginLeft, y);
-            y += 15;
-
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-            const notaTexto = `No dia ${vencimentoFormatado} pagarei por esta única via de nota promissória na praça de Praia Grande/SP à MAR BRASIL SERVIÇOS E LOCAÇÕES ou a sua ordem a quantia de ${formatCurrency(totalValor)} (${valorPorExtenso(totalValor)}) em moeda corrente deste país.`;
-            const splitNota = doc.splitTextToSize(notaTexto, contentWidth);
-            doc.text(splitNota, marginLeft, y);
-            y += splitNota.length * 4.5 + 15;
-
-            doc.text(`Praia Grande - SP, ${dataFormatada}.`, marginLeft, y);
-            y += 20;
-
-            doc.setFont("helvetica", "bold");
-            doc.text("CONECTIUS DO BRASIL EIRELI", marginLeft, y);
-            y += 5;
-            doc.setFont("helvetica", "normal");
-            doc.text("CNPJ nº 05.559.293/0001-65", marginLeft, y);
-            y += 5;
-            doc.text("AV. PRES. KENNEDY, nº. 5251, sala 32", marginLeft, y);
-            y += 5;
-            doc.text("Bairro Vila Tupy, CEP 11703-200", marginLeft, y);
-            y += 5;
-            doc.text("Praia Grande/SP", marginLeft, y);
-            y += 10;
-            doc.setFont("helvetica", "bold");
-            doc.text("Dauren Zilleti Monteiro", marginLeft, y);
-            y += 5;
-            doc.setFont("helvetica", "normal");
-            doc.text("Administrador", marginLeft, y);
-
-            // Salvar
-            doc.save(`Contrato_Mutuo_${dataContrato}.pdf`);
-            bootstrap.Modal.getInstance(document.getElementById('modalTermo')).hide();
-        };
-
-        img.onerror = () => {
-            alert("Erro ao carregar o papel timbrado 'Timbrado Mar Brasil.png'. Verifique se o arquivo existe na pasta.");
-        };
+        // Salvar
+        doc.save(`Contrato_Mutuo_${dataContrato}.pdf`);
+        bootstrap.Modal.getInstance(document.getElementById('modalTermo')).hide();
+        // onload fechamento removido
 
     } catch (e) {
         console.error("Erro no PDF:", e);

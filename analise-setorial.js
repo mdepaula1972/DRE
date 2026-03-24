@@ -558,26 +558,188 @@ function showLoading(b) { document.getElementById('loadingOverlay')?.classList.t
 function handleError(m) { showLoading(false); alert(m); }
 
 // Função Auto-Load
-function tryAutoLoad() {
+async function tryAutoLoad() {
+    console.log("Iniciando carregamento automático (Análise Setorial Híbrida)...");
+
+    let supabaseData = [];
+    let localData = [];
+
+    // 1. Tentar Supabase (Prioridade)
+    if (window.authSupabase) {
+        supabaseData = await loadFromSupabase();
+    }
+
     const defaultFile = 'dados-analise.csv';
-    console.log(`Tentando auto-load (${defaultFile})...`);
-    fetch(defaultFile)
-        .then(response => {
-            if (!response.ok) throw new Error("Arquivo padrão não encontrado");
-            return response.text();
-        })
-        .then(text => {
-            console.log("Auto-load sucesso!");
-            safeSetText('fileStatus', 'Arquivo padrão carregado automaticamente');
-            Papa.parse(text, {
-                header: true, skipEmptyLines: true,
-                complete: (results) => processData(results),
-                error: (err) => handleError(err.message)
+    console.log(`Tentando arquivo local para histórico (${defaultFile})...`);
+
+    try {
+        const response = await fetch(defaultFile);
+        if (response.ok) {
+            const text = await response.text();
+            localData = await new Promise((resolve) => {
+                Papa.parse(text, {
+                    header: true, skipEmptyLines: true,
+                    complete: (results) => resolve(results.data)
+                });
             });
-        })
-        .catch(err => {
-            console.warn("Auto-load indisponível ou arquivo não encontrado:", err.message);
+        }
+    } catch (err) {
+        console.warn("Auto-load de dados locais falhou:", err.message);
+    }
+
+    // Se não tem nada
+    if (supabaseData.length === 0 && localData.length === 0) {
+        console.warn("Nenhum dado encontrado para carregar.");
+        return;
+    }
+
+    // 2. SMART MERGE: Mesclar dados
+    const mergedData = smartMergeDataSetorial(localData, supabaseData);
+
+    // Processar dados finais
+    processData({ data: mergedData });
+}
+
+/**
+ * Lógica de mesclagem para análise setorial (Setor, Categoria, Descrição)
+ */
+function smartMergeDataSetorial(localRows, supabaseFormatted) {
+    if (supabaseFormatted.length === 0) return localRows;
+    if (localRows.length === 0) return supabaseFormatted;
+
+    // Identificar meses auditados no Supabase
+    const supabaseMonths = new Set();
+    supabaseFormatted.forEach(row => {
+        Object.keys(row).forEach(k => {
+            if (k.includes('/')) supabaseMonths.add(k);
         });
+    });
+
+    console.log("📅 Meses auditados via Supabase (Análise Setorial):", Array.from(supabaseMonths));
+
+    const mergeMap = new Map();
+
+    // 1. Adicionar locais limpando meses auditados
+    localRows.forEach(row => {
+        const s = row['Setor'] || row['setor'] || 'N/A';
+        const c = row['Categoria'] || row['categoria'] || 'Sem Categoria';
+        const d = row['Descrição'] || row['descricao'] || 'Item';
+        const key = `${s}|${c}|${d}`;
+
+        const newEntry = { 'Setor': s, 'Categoria': c, 'Descrição': d };
+        Object.keys(row).forEach(k => {
+            if (k.includes('/') && !supabaseMonths.has(k)) {
+                newEntry[k] = row[k];
+            }
+        });
+        mergeMap.set(key, newEntry);
+    });
+
+    // 2. Adicionar/Sobrescrever com Supabase
+    supabaseFormatted.forEach(row => {
+        const key = `${row['Setor']}|${row['Categoria']}|${row['Descrição']}`;
+        if (!mergeMap.has(key)) {
+            mergeMap.set(key, { ...row });
+        } else {
+            const entry = mergeMap.get(key);
+            Object.keys(row).forEach(k => {
+                if (k.includes('/')) entry[k] = row[k];
+            });
+        }
+    });
+
+    return Array.from(mergeMap.values());
+}
+
+/**
+ * Busca dados da nova tabela financeiro_detalhado e transforma para o formato Análise Setorial
+ */
+async function loadFromSupabase() {
+    try {
+        showLoading(true);
+        safeSetText('fileStatus', "Conectando ao Supabase...");
+
+        const { data, error } = await window.authSupabase
+            .from('financeiro_detalhado')
+            .select('*')
+            .order('data_registro', { ascending: true });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            console.warn("Nenhum dado encontrado no Supabase.");
+            return [];
+        }
+
+        console.log(`✅ ${data.length} registros recuperados do Supabase.`);
+        state.rawSupabaseRows = data; // SAVE FOR AUDIT
+
+        // Agrupar no formato Wide (Setor|Categoria|Descrição)
+        const result = {};
+        const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+        data.forEach(row => {
+            const [year, month, day] = row.data_registro.split('-');
+            const date = new Date(year, month - 1, day);
+            const periodo = `${months[date.getMonth()]}/${year.toString().slice(-2)}`;
+            const tipo = (row.tipo || 'P').toUpperCase();
+
+            // REGRAS ESTRITAS DE MAPEAMENTO OMIE -> APP (v2)
+
+            // 1. Extração de nomes originais
+            const omieCat = (row.categoria || '').trim();
+            const omieCatLower = omieCat.toLowerCase();
+            const contaDre = (row.conta_dre || '').trim();
+
+            // 2. FILTROS DE EXCLUSÃO (Ignorar Lançamento)
+            // a) Sem Conta DRE (se categoria Omie existir)
+            if (omieCat && !contaDre) return;
+
+            // b) Mútuos, Dividendos e Intermediação
+            if (omieCatLower.includes('mútuo') || omieCatLower.includes('mutuo') ||
+                omieCatLower.includes('dividendo') ||
+                omieCatLower.includes('intermediação') || omieCatLower.includes('intermediacao')) {
+                return;
+            }
+
+            // c) Terceirização de Serviços (Receitas não entram)
+            if (omieCatLower.includes('terceirização de serviços') && tipo === 'R') {
+                return;
+            }
+
+            // 3. MAPEAMENTO DE CATEGORIA (Exceções Estritas)
+            let c = contaDre || 'Sem Categoria';
+
+            const isPreventivaB2G = omieCatLower.includes('preventiva b2g');
+            const isCorretivaB2G = omieCatLower.includes('corretiva b2g');
+            const isCredenciado = omieCatLower.includes('credenciado') || omieCatLower.includes('adiantamento credenciado');
+            const isConsorcioAContemplar = omieCatLower.includes('consórcios - a contemplar') || omieCatLower.includes('consorcios - a contemplar');
+            const isTerceirizacaoServicos = omieCatLower.includes('terceirização de serviços') || omieCatLower.includes('terceirizacao de servicos');
+
+            if (isPreventivaB2G || isCorretivaB2G || isCredenciado || isConsorcioAContemplar || isTerceirizacaoServicos) {
+                c = omieCat;
+            }
+
+            // 4. Setor/Projeto app = departamento Omie
+            const s = row.departamento || 'N/A';
+            const d = row.fornecedor_cliente || 'Item';
+            const key = `${s}|${c}|${d}`;
+
+            if (!result[key]) {
+                result[key] = { 'Setor': s, 'Categoria': c, 'Descrição': d };
+            }
+            if (!result[key][periodo]) result[key][periodo] = 0;
+            result[key][periodo] += (row.valor || 0);
+        });
+
+        return Object.values(result);
+
+    } catch (err) {
+        console.error("Erro ao carregar do Supabase (Análise Setorial):", err);
+        return [];
+    } finally {
+        showLoading(false);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -796,5 +958,152 @@ async function exportToPDF() {
     }
 }
 
-// Expose globally
-window.exportToPDF = exportToPDF;
+// ========================================
+// DATA AUDIT TOOL (Health Check)
+// ========================================
+function runDataAudit() {
+    if (!state.rawSupabaseRows || state.rawSupabaseRows.length === 0) {
+        alert("Carregue os dados do Supabase primeiro (Sincronizar Supabase) para realizar a auditoria.");
+        return;
+    }
+
+    const tbody = document.querySelector('#auditTable tbody');
+    const countNoDreEl = document.getElementById('auditCountNoDre');
+    const countNoProjEl = document.getElementById('auditCountNoProj');
+
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    let countNoDre = 0;
+    let countNoProj = 0;
+    const issues = [];
+
+    state.rawSupabaseRows.forEach(row => {
+        const omieCat = (row.categoria || '').trim();
+        const contaDre = (row.conta_dre || '').trim();
+        const departamento = (row.departamento || '').trim();
+        const projetoRaiz = (row.projeto_raiz || '').trim();
+
+        let rowIssue = '';
+
+        // Critério 1: Categoria sem Conta DRE (Lançamentos com categorias que não têm vínculos com Conta DRE no Omie)
+        if (omieCat && !contaDre) {
+            countNoDre++;
+            rowIssue = '<span class="badge bg-danger">Sem Conta DRE</span>';
+        }
+
+        // Critério 2: Sem Departamento ou Projeto
+        if (!departamento || !projetoRaiz || departamento === 'N/A' || departamento.toLowerCase().includes('sem rateio')) {
+            countNoProj++;
+            rowIssue += (rowIssue ? ' ' : '') + '<span class="badge bg-warning text-dark">Sem Projeto/Dep</span>';
+        }
+
+        if (rowIssue) {
+            issues.push({
+                data: row.data_registro,
+                id: row.omie_id,
+                cliente: row.fornecedor_cliente || 'N/A',
+                valor: row.valor || 0,
+                issue: rowIssue
+            });
+        }
+    });
+
+    // Populate Table
+    if (issues.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-success py-4"><i class="bi bi-patch-check-fill me-2"></i>Nenhuma inconsistência detectada nos dados sincronizados!</td></tr>';
+    } else {
+        issues.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="small">${item.data}</td>
+                <td class="small text-muted">${item.id}</td>
+                <td>${item.cliente}</td>
+                <td class="fw-bold text-end">${item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                <td>${item.issue}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Update Counters
+    if (countNoDreEl) countNoDreEl.textContent = countNoDre;
+    if (countNoProjEl) countNoProjEl.textContent = countNoProj;
+
+    // Show Modal
+    const modalEl = document.getElementById('auditModal');
+    if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+}
+
+// Exportadores de CSV para Auditoria
+function exportAuditCSV() {
+    if (!state.rawSupabaseRows) return;
+
+    const issues = [];
+    state.rawSupabaseRows.forEach(row => {
+        const omieCat = (row.categoria || '').trim();
+        const contaDre = (row.conta_dre || '').trim();
+        const departamento = (row.departamento || '').trim();
+        const projetoRaiz = (row.projeto_raiz || '').trim();
+
+        let problem = '';
+        if (omieCat && !contaDre) problem = 'Sem Conta DRE';
+        if (!departamento || !projetoRaiz || departamento === 'N/A' || departamento.toLowerCase().includes('sem rateio')) {
+            problem += (problem ? ' | ' : '') + 'Sem Projeto/Dep';
+        }
+
+        if (problem) {
+            issues.push({ ...row, problema_auditoria: problem });
+        }
+    });
+
+    if (issues.length === 0) {
+        alert("Nenhuma inconsistência para exportar.");
+        return;
+    }
+
+    _downloadCSV(issues, "auditoria_setorial_inconsistencias.csv");
+}
+
+function exportAllSupabaseCSV() {
+    if (!state.rawSupabaseRows || state.rawSupabaseRows.length === 0) {
+        alert("Nenhum dado carregado para exportar.");
+        return;
+    }
+    _downloadCSV(state.rawSupabaseRows, "dados_brutos_setorial_supabase.csv");
+}
+
+function _downloadCSV(data, filename) {
+    const headers = Object.keys(data[0]);
+    const csvRows = [headers.join(',')];
+
+    for (const row of data) {
+        const values = headers.map(header => {
+            let val = row[header] === null || row[header] === undefined ? '' : row[header];
+            const escaped = ('' + val).replace(/"/g, '""');
+            return `"${escaped}"`;
+        });
+        csvRows.push(values.join(','));
+    }
+
+    const csvString = '\uFEFF' + csvRows.join('\n'); // Add BOM for Excel
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// Global exposure
+window.exportAuditCSV = exportAuditCSV;
+window.exportAllSupabaseCSV = exportAllSupabaseCSV;
+window.runDataAudit = runDataAudit;

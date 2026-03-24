@@ -1,1102 +1,461 @@
-Empresa;Projeto;Categoria;jan/24;fev/24;mar/24;abr/24;mai/24;jun/24;jul/24;ago/24;set/24;out/24;nov/24;dez/24;jan/25;fev/25;mar/25;abr/25;mai/25;jun/25;jul/25;ago/25;set/25;out/25;nov/25;dez/25
-Conectius;Conectius - Rateio;Ativos;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;8261;10900;7076;7432;6590;
-Conectius;Conectius - Rateio;Consórcios - a contemplar;694;694;694;694;694;694;694;694;694;694;694;694;694;694;694;694;694;694;694;710;681;686;699;
-Conectius;Conectius - Rateio;Custo dos Serviços Prestados;;;;9982;7366;7305;7305;7305;7305;7305;1290;7305;8262;8362;8262;8262;8707;8262;0;1016;;;;
-Conectius;Conectius - Rateio;Despesas Administrativas;3524;3927;0;1748;1079;989;1555;1753;1710;1465;2423;4549;4457;860;2967;3420;2139;1940;5950;1844;3691;4001;2635;
-Conectius;Conectius - Rateio;Despesas com Pessoal;45755;33709;12608;3458;2547;3152;2576;3014;3162;4231;3494;6540;9594;9138;8052;6224;8489;3561;1418;0;8668;167;;
-Conectius;Conectius - Rateio;Despesas Financeiras;;;;;;;;;;;;;;;;;;;8521;9316;7678,5;6152;6207;
-Conectius;Conectius - Rateio;Despesas Variáveis;0;0;0;1646;921;831;1397;1595;1595;1063;2308;4434;4342;745;2852;3296;1887;1809;5950;1844;;;;
-Conectius;Conectius - Rateio;Impostos;24600;15051;2497;701;816;446;2151;1376;1470;375;355;371;892;1731;446;446;446;870;881;0;;515;167;
-Conectius;Conectius - Rateio;Outras Receitas;0;0;0;0;0;0;0;0;0;0;0;0;3591;3591;3591;3591;3591;3591;3591;3591;3591;;;
-Conectius;Conectius - Rateio;Plano de Saúde;0;0;0;0;0;0;0;0;0;0;0;0;5395;5395;5395;5395;5395;5395;5395;6179,14;9485;1314;6785;
-Conectius;Conectius - Rateio;Receita Bruta de Vendas;168883;102034;7916;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;8587;;;
-Conectius;Conectius - Rateio;Receitas Financeiras;;;;;;;;;;;;;;;;;;0;0,02;0,77;0,14;0,49;0;
-DZM;DZM - Alcalinas;Despesas Administrativas;966;1111;1347;1684;2022;850;1024;919;1390;991;897;543;1498;930;484;484;484;;;;;;;
-DZM;DZM - Audiovisual;Despesas Administrativas;0;0;0;0;0;175;61;83;83;157;496;287;130;446;176;127;0;;;;;;;
-DZM;DZM - Imóveis Guilhermina;Despesas Administrativas;0;0;0;0;74;4;2;112;294;117;202;497;515;554;420;231;14;;;;;;;
-DZM;DZM - Rancho da Praia;Despesas Administrativas;9037;6235;3270;3996;7788;2998;1841;6663;23003;33226;53884;46072;19672;12349;5128;14443;10500;;;;;;;
-DZM;DZM - Terceirização;Despesas Administrativas;0;0;0;314;1115;1684;1368;1447;1502;1870;2357;3370;1963;8104;334;1206;1668;;;;;;;
-DZM;DZM - Alcalinas;Custo dos Serviços Prestados;4642;10026;6302;11579;4889;3590;3918;717;3171;0;0;0;0;0;0;0;0;;;;;;;
-DZM;DZM - Audiovisual;Custo dos Serviços Prestados;0;0;0;0;0;55;463;0;0;0;0;0;0;87;0;0;0;;;;;;;
-DZM;DZM - Imóveis Guilhermina;Custo dos Serviços Prestados;0;0;0;0;0;5;33;0;0;0;0;0;0;6;0;0;0;;;;;;;
-DZM;DZM - Rancho da Praia;Custo dos Serviços Prestados;2994;3750;4237;3935;3931;4331;4357;5313;7970;27602;10974;17015;19093;1056;5225;22127;3133;;;;;;;
-DZM;DZM - Terceirização;Custo dos Serviços Prestados;0;0;26979;23096;36264;37177;34895;39097;39813;41486;86617;33042;31171;21875;31978;32768;39661;;;;;;;
-DZM;DZM - Alcalinas;Impostos;49;172;1016;716;516;234;4;202;1307;0;0;0;0;0;0;0;0;;;;;;;
-DZM;DZM - Audiovisual;Impostos;0;0;0;0;0;649;715;737;787;920;953;945;1021;1080;1005;1085;0;;;;;;;
-DZM;DZM - Imóveis Guilhermina;Impostos;0;0;0;0;67;2;0;212;217;226;228;234;1490;723;405;418;270;;;;;;;
-DZM;DZM - Rancho da Praia;Impostos;331;141;500;214;165;71;58;956;69;81;467;2250;29;45;116;48;341;;;;;;;
-DZM;DZM - Terceirização;Impostos;0;0;0;0;0;4372;2659;3356;3154;4468;4571;0;13560;5009;0;3830;10902;;;;;;;
-DZM;DZM - Alcalinas;Receita Bruta de Vendas;432;3226;5382;13983;6677;3811;0;6677;16590;0;0;0;0;0;0;0;0;;;;;;;
-DZM;DZM - Audiovisual;Receita Bruta de Vendas;0;0;0;0;0;10400;10400;10400;10400;10400;10400;10400;10400;10400;10400;10400;0;;;;;;;
-DZM;DZM - Imóveis Guilhermina;Receita Bruta de Vendas;0;0;0;0;874;944;869;879;858;864;905;891;919;972;981;930;844;;;;;;;
-DZM;DZM - Rancho da Praia;Receita Bruta de Vendas;2854;2688;2688;4088;2162;10572;8529;14817;14842;16695;6749;22772;14134;14400;13282;14190;3215;;;;;;;
-DZM;DZM - Terceirização;Receita Bruta de Vendas;0;0;0;0;0;72197;38731;47623;41603;50702;50073;0;138423;47106;0;36665;95774;;;;;;;
-Mar_BR;Rossi Advogados;Ativos;27883;32055;32055;34895;34120;34120;34295;34295;35052;36671;37788;34199;34199;35693;36027;36027;148385,2;;;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Corretiva - B2B;3338;3347;3338;0;0;0;2147;48;7;0;0;0;0;0;0;0;2260;;;;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;48;408;288;619;588;2159;;;;;;;
-Mar_BR;Mar Brasil - Rateio;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;;;;;;;
-Mar_BR;Mar Brasil - Estoque;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;;;;;;;
-Mar_BR;Oftalmo;Corretiva - B2G;0;0;0;0;8;61;74;61;60;60;61;78;225;179;349;181;0;;;;;;;
-Mar_BR;Eventuais B2G;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;;;;;;;
-Mar_BR;PG - 171;Corretiva - B2G;33467;13252;29059;36038;14233;18788;2820;4017;5821;3480;5425;891;0;0;0;0;0;;;;;;;
-Mar_BR;PG - Chiller;Corretiva - B2G;9370;2631;4511;7569;5518;5168;1222;2410;7094;2103;2855;976;0;0;0;0;0;;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Corretiva - B2G;1169;0;1438;8580;5963;13241;15366;8648;13589;13581;23574;3181;23209;14640;21685;42689;29229;;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;6516;636;4879;;;;;;;
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Corretiva - B2G;0;0;0;0;0;0;0;0;0;588;61;281;1376;13539;14508;1795;2339;;;;;;;
-Ybox;Ybox;Despesas Administrativas;1029;821;578;2006;7984;4228;4282;506;506;506;568;3763;2826;1891;2071;1953;3347;1987;29453;7680,47;9501;4332,32;19672,47;
-Ybox;Ybox;Dividendos;17749;19067;19640;19640;19328;19328;19328;19328;19328;27840;8977;9115;19112;17899;15003;17899;17899;17899;24795;35284;24398;29398,22;22224,93;
-Ybox;Ybox;Impostos;6472;6078;6068;6059;6049;6038;6334;6015;6004;6045;6084;6107;6149;6174;6158;6151;6144;8990;2846;4880;4802;4802;3526,88;
-Ybox;Ybox;Jurídico;3500;3500;3500;3587;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;;;;;
-Ybox;Ybox;Juros e devoluções;7626;8319;7626;7626;7626;3500;3500;3500;0;3500;0;0;3500;3500;3500;3500;3500;3500;3500;;;;1258,04;
-Ybox;Ybox;Receita Bruta de Vendas;41592;41592;41592;41592;41592;45718;45718;41592;45718;46473;45258;45258;43118;43694;43118;43118;43118;43118;43118;43118;44357;46137,03;49160,62;
-DZM;DZM - Mar Brasil;Recuperação de Despesas Variáveis;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Custo dos Serviços Prestados;0;0;0;0;0;0;0;0;0;0;2538;179;2447;5939;628;0;1834;;;;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Custo dos Serviços Prestados;0;0;0;0;0;0;0;0;0;0;0;2079;1112;968;1200;1671;1710;;;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Custo dos Serviços Prestados;35871;81350;36282;144;131;415;2104;1773;4581;72;72;0;0;0;0;0;1672;;;;;;;
-Mar_BR;Oftalmo;Custo dos Serviços Prestados;563;970;602;784;2184;702;283;584;853;995;565;579;545;539;621;640;0;;;;;;;
-Mar_BR;PG - 171;Custo dos Serviços Prestados;10042;12289;7690;5850;15427;3923;1898;4028;7602;8399;4101;120;0;0;0;0;0;;;;;;;
-Mar_BR;PG - Chiller;Custo dos Serviços Prestados;2622;3636;1131;475;1409;475;343;394;715;853;443;444;0;0;0;0;0;;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Custo dos Serviços Prestados;13632;10000;24999;20998;56787;18759;10601;17654;24968;29944;91931;13517;11729;9301;23823;20000;17015;;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Custo dos Serviços Prestados;0;0;0;0;0;0;0;0;0;0;0;0;0;0;6971;8333;1421;;;;;;;
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Despesas Administrativas;0;0;0;0;0;0;0;0;0;78896;12340;7917;23954;42979;979;524;12234;;;;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas Administrativas;0;0;0;0;0;0;0;0;0;0;0;12897;10002;9366;11630;10720;3784;;;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas Administrativas;10908;7847;177;625;787;9230;13532;8632;9143;60;0;0;0;0;0;0;4840;;;;;;;
-Mar_BR;Oftalmo;Despesas Administrativas;4300;2692;3132;5350;4466;2158;3889;3869;3873;3726;3369;3612;4587;4076;3584;7697;0;;;;;;;
-Mar_BR;PG - 171;Despesas Administrativas;41402;31596;25028;44846;36647;31975;35549;32850;41778;40329;15764;3577;0;0;0;0;0;;;;;;;
-Mar_BR;PG - Chiller;Despesas Administrativas;10936;5598;1673;5682;5864;5710;4813;5593;5719;4728;2515;2406;0;0;0;0;0;;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Despesas Administrativas;8617;24605;45606;106479;79212;78718;74295;71182;91577;88132;80804;110405;109134;120672;111486;133010;96586;;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas Administrativas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;7195;8559;6364;;;;;;;
-Mar_BR;Oftalmo;Despesas com Pessoal;0;0;0;0;0;0;0;0;0;261;0;0;43;0;1;0;0;;;;;;;
-Mar_BR;PG - 171;Despesas com Pessoal;35482;32205;36193;37228;36222;34094;45586;50456;40376;41118;34080;20451;0;0;0;0;0;;;;;;;
-Mar_BR;PG - Chiller;Despesas com Pessoal;4696;6794;7879;7526;9652;3896;13583;8527;9056;9025;8102;2812;0;0;0;0;0;;;;;;;
-Mar_BR;Rede Alpha;Despesas com Pessoal;0;0;0;0;0;0;0;0;0;0;0;0;274;274;274;274;274;;;;;;;
-Mar_BR;Rossi Advogados;Despesas com Pessoal;0;0;0;0;0;0;0;0;0;0;0;0;96;96;96;96;96;;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas com Pessoal;0;0;0;0;0;0;0;0;0;0;0;0;0;0;14269;24633;19277;;;;;;;
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Equipamentos;;;;;;;615;615;615;615;615;615;615;615;615;615;615;615;615;615;615;615;615;
-Mar_BR;Bertioga 3151;Equipamentos;;;;;;;;;;;;;;;;;;;;;;;;639
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Equipamentos;;;;;;;;;;;245;245;245;245;245;245;245;245;245;245;245;245;245;
-Mar_BR;Oftalmo;Equipamentos;12;12;12;12;12;12;12;12;12;12;12;12;12;12;12;12;;;;;;;;
-Mar_BR;PG - 171;Equipamentos;1820;1820;1820;1820;1820;1820;1820;1820;1820;1820;1820;;;;;;;;;;;;;
-Mar_BR;PG - Chiller;Equipamentos;301;301;301;301;301;301;301;301;301;301;301;301;;;;;;;;;;;;
-Mar_BR;Rede Alpha;Equipamentos;27;27;27;27;27;27;27;27;24;24;24;24;18;18;18;18;18;18;18;18;18;18;18;24
-Mar_BR;Rossi Advogados;Equipamentos;;;;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Equipamentos;;1904;1904;1904;1904;1904;1904;1904;1904;1904;1904;1904;1904;1904;2284;2284;2284;2284;2284;2284;2284;2284;2284;2284
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Equipamentos;;;;;;;;;;;;;;;408;408;408;408;408;408;408;408;408;381
-Mar_BR;Ybox-MarBR;Honorários;6952;5904;5976;5976;5906;5906;8838;2975;5404;2975;3051;8666;3051;5644;5618;5644;5644;5966;3634;7260;3545;3545;;
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Impostos;0;0;0;0;0;0;0;0;0;6777;6840;6782;27122;1497;0;0;5545;;;;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Impostos;0;0;0;0;0;0;0;0;0;0;0;3616;3616;3851;3616;3616;2668;;;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Impostos;8577;15621;10445;0;0;543;26037;12503;462;0;0;136;109;4000;104;1904;1930;;;;;;;
-Mar_BR;Oftalmo;Impostos;2068;1632;1680;960;960;1220;1653;1653;1220;1653;1653;1220;1220;1220;1220;1337;0;;;;;;;
-Mar_BR;PG - 171;Impostos;23687;22093;22784;15250;10103;14153;14153;14129;14137;1429;165;0;0;0;0;0;0;;;;;;;
-Mar_BR;PG - Chiller;Impostos;8011;6479;2310;1748;1020;1488;1488;1488;1488;1488;1488;1488;0;0;0;0;0;;;;;;;
-Mar_BR;Rede Alpha;Impostos;0;0;0;0;0;0;227;227;202;202;251;153;166;1006;151;151;151;;;;;;;
-Mar_BR;Rossi Advogados;Impostos;0;0;0;25,27;53;53;53;53;53;53;53;0;29;67;67;67;67;;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Impostos;0;0;70589;51647;51677;43992;43992;43992;43992;43992;43992;43992;43992;43992;52772;52772;52772;;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Impostos;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3710;5229;5705;;;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Preventiva - B2B;0;0;0;0;0;0;67;0;5;0;0;0;0;0;0;0;25;;;;;;;
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Preventiva - B2G;0;0;0;0;0;0;0;0;0;0;27;1407;1206;1326;1025;112;25;;;;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Preventiva - B2G;0;0;0;0;0;0;0;0;0;0;0;66;1701;264;459;49;480;;;;;;;
-Mar_BR;Oftalmo;Preventiva - B2G;0;1;0;18;12;1;7;0;1;8;7;16;220;111;213;25;0;;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Preventiva - B2G;0;34;0;421;747;116;894;377;230;208;174;423;5977;4036;5724;697;1830;;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Preventiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;70;49;22;;;;;;;
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;3377;3409;3444;13772;733;0;0;2798;;;;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;0;0;1836;1815;1815;1804;1824;1819;;;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;0;0;398;312;9536;299;5517;5584;;;;;;;
-Mar_BR;Oftalmo;Provisão - IRPJ e CSSL Trimestral;0;0;0;825;824;824;838;831;824;824;824;839;810;830;825;333;0;;;;;3460;;
-Mar_BR;Eventuais B2G;Provisão - IRPJ e CSSL Trimestral;0;0;0;8459;7057;7062;7179;7107;7051;7044;0;0;0;0;0;0;0;;;;;;;
-Mar_BR;PG - 171;Provisão - IRPJ e CSSL Trimestral;0;0;0;8459;7057;7062;7179;7107;7051;7044;0;0;0;0;0;0;0;;;;;;;
-Mar_BR;PG - Chiller;Provisão - IRPJ e CSSL Trimestral;0;0;0;743;742;743;755;748;742;742;741;755;0;0;0;0;0;;;;;;;
-Mar_BR;Rede Alpha;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;362;359;319;319;396;245;261;1846;239;241;240;;;;;;;
-Mar_BR;Rossi Advogados;Provisão - IRPJ e CSSL Trimestral;0;0;0;40;84;84;84;84;84;84;84;0;83;45;45;46;46;;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Provisão - IRPJ e CSSL Trimestral;0;0;0;22430;21935;21964;22315;22129;21942;21934;21924;22339;21553;22085;26332;26628;26548;;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1851;2638;2870;;;;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;0;0;1836;1815;1815;1804;1824;1819;;;;;;;
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Receita Bruta de Vendas;0;0;0;0;0;0;0;0;0;59190;1488;59240;236878;13080;0;0;48432;;;;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Receita Bruta de Vendas;0;0;0;0;0;0;0;0;0;0;0;38947;35344;38026;31583;31583;31583;;;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Receita Bruta de Vendas;57500;57500;80583;0;0;2828;138349;45242;95092;0;0;3750;3000;90410;2850;52166;52886;;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Receita Bruta de Vendas;0;0;384217;384217;384217;384217;384217;384217;384217;384217;384217;384217;384217;384217;460899;460899;460899;;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Receita Bruta de Vendas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;32409;45673;49831;;;;;;;
-Mar_BR;Oftalmo;Receita Bruta de Vendas;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;5776;0;;;;;;;
-Mar_BR;Rede Alpha;Receita Bruta de Vendas;0;0;0;0;0;0;3420;3420;3040;3040;3775;2312;2508;17509;2280;2280;2280;;;;;;;
-Mar_BR;Rossi Advogados;Receita Bruta de Vendas;0;0;0;380;800;800;800;800;800;800;800;0;800;800;800;800;800;;;;;;;
-Mar_BR;PG - 171;Receita Bruta de Vendas;120824;126028;125760;136335;123608;123538;123608;123398;123468;123398;0;0;0;0;0;0;0;;;;;;;
-Mar_BR;PG - Chiller;Receita Bruta de Vendas;40069;38143;13000;13000;13000;13000;13000;13000;13000;13000;13000;13000;0;0;0;0;0;0;0;0;0;0;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;180;;589
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas com Pessoal;;;;;;;;;;;;;;;;;;88;40;40;41;38;33;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas com Pessoal;;;;;;;;;;;;;;;;;;157;58;66;;;112;50
-Mar_BR;Eventuais B2G; Despesas com Pessoal;;;;;;;;;;;;;;;;;;76;;;42;;;
-Mar_BR;Rede Alpha; Despesas com Pessoal;;;;;;;;;;;;;;;;;;6;3;3;4;;3;5
-Mar_BR;Rossi Advogados; Despesas com Pessoal;;;;;;;;;;;;;;;;;;2;1;1;1;;1;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1293;582;577;598;480;518;682
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;128;65;63;65;53;56;74
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;64
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;27;35
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;2520;;3516
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;451;805;412;525;416;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;660;1347;;;1405;299
-Mar_BR;Eventuais B2G;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;418;;;
-Mar_BR;Rede Alpha;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;35;63;37;;34;29
-Mar_BR;Rossi Advogados;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;12;21;11;;12;7
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;6577;11736;6016;6720;6496;4067
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;735;1278;655;735;707;443
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;;;380
-Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;;335;209
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Adiantamento - Credenciado Operacional;;;;;;;;;;;;;;;;;;;6500;;;;;
-Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;;4500;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;;;;600;;10606
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;80;;27;125;133;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;117;;;;448;899
-Mar_BR;Eventuais B2G;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;;;28;;;
-Mar_BR;Rede Alpha;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;6;;2;;11;86
-Mar_BR;Rossi Advogados;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;2;;1;;4;22
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;1165;;398;1600;2072;12269
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;130;;43;175;226;1337
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;;1148
-Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;107;634
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;4556;4407;4983;2998;7383;4586;3239
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;2053;2253;;3189;3189;5173;5173
-DZM;DZM - Imóveis Guilhermina; Despesas Administrativas;;;;;;;;;;;;;;;;;;76;79;;;;;
-DZM;DZM - Mar Brasil; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;44
-DZM;DZM - Pessoal; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;38;
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;38;;38;;;52;24
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;500;;289;;44;39;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;37;;478
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;8;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;41
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;4
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;99;;553
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;11;;60
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;52
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;29
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1600;117;;;;;
-DZM;DZM - Mar Brasil; Despesas Administrativas;;;;;;;;;;;;;;;;;;;90;80;;;;
-DZM;DZM - Pessoal; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;683;379;;129;
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;187;106;450;529;797;264;364
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;686;12;1089
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;67;117;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;84;144;368;60;143;120;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;148;212;615;;;316;74
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;71;;;61;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;6;11;28;5;;9;7
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;2;4;10;2;;3;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;1297;2104;5424;963;1932;1695;1095
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;121;234;584;134;337;383;150
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;37;;237
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;87;56
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;300;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;89;;145
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;12;32;32;21;19;16;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;21;47;54;;;55;12
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;10;;;21;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;2;2;2;;1;1
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;1;1;1;;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;172;468;467;301;237;256;168
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;17;52;51;33;26;28;18
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;16
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;13;9
-DZM;Tchandra Coelho; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;2000
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;27;23;22;2;;28;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;47;33;37;;;;
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;23;;;2;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;2;2;2;0;;2;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;1;1;0;;1;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;388;328;325;33;;441;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;38;37;35;4;;48;
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;23;
-DZM;DZM - Mar Brasil; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1000;;;350;;;
-DZM;DZM - Rancho da Praia; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;100
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;610;;1610;;610;610;610
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas com Pessoal;;;;;;;;;;;;;;;;;;505;;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas com Pessoal;;;;;;;;;;;;;;;;;;896;;;;;;
-Mar_BR;Eventuais B2G; Despesas com Pessoal;;;;;;;;;;;;;;;;;;432;;;;;;
-Mar_BR;Rede Alpha; Despesas com Pessoal;;;;;;;;;;;;;;;;;;37;;;;;;
-Mar_BR;Rossi Advogados; Despesas com Pessoal;;;;;;;;;;;;;;;;;;13;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas com Pessoal;;;;;;;;;;;;;;;;;;7387;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;730;;;;;;
-DZM;DZM - Terceirização; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;1160;496;500;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;4;;4;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;7;;7;;;;
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;3;;;;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;;0;;;;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;;0;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;56;;60;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;5;;7;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Serviços;;;;;;;;;;;;;;;;;;;;303;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Serviços;;;;;;;;;;;;;;;;;;;;506;;;;
-Mar_BR;Rede Alpha; Serviços;;;;;;;;;;;;;;;;;;;;23;;;;
-Mar_BR;Rossi Advogados; Serviços;;;;;;;;;;;;;;;;;;;;8;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Serviços;;;;;;;;;;;;;;;;;;;;4410;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Serviços;;;;;;;;;;;;;;;;;;;;480;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;935;;1270
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;;109;162;228;195;166;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;;160;272;172;;260;108
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;;;;120;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;;8;13;11;;;10
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;;3;4;3;;;3
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;;1593;2367;3329;2493;2432;1469
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;;178;258;347;273;240;160
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;137
-Mar_BR;São Paulo CRSN PSP 6018/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;76
-Mar_BR;Eventuais B2G; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;26948;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;;;617
-Mar_BR;Eventuais B2G; Impostos;;;;;;;;;;;;;;;;;;4851;;;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;;;111
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;55886;46259;52879;39170;7306;;2916
-Mar_BR;Rede Alpha; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;2280;2425;2425;2830;3234;3234;3210
-Mar_BR;Rossi Advogados; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;800;850;850;850;850;850;850
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Impostos;;;;;;;;;;;;;;;;;;234;;;;570;;227
-Mar_BR;Rede Alpha; Impostos;;;;;;;;;;;;;;;;;;68;73;73;104;116;116;92
-Mar_BR;Rossi Advogados; Impostos;;;;;;;;;;;;;;;;;;62;66;66;66;66;66;66
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;170636;;398442
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;31583;31583;31583;31583;31583;29478;
-Mar_BR;Eventuais B2G; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;32058;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;460899;460899;460899;460899;460899;460899;460899
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;46658;50207;50207;50207;50207;50207;70052
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;;;86256
-Mar_BR;São Paulo CRSN PSP 6018/2025; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;;23768;23768
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;10;;27094
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Impostos;;;;;;;;;;;;;;;;;;2463;2463;2463;2463;2148;2004;
-Mar_BR;Eventuais B2G; Impostos;;;;;;;;;;;;;;;;;;;;;2831;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Impostos;;;;;;;;;;;;;;;;;;35950;35950;35950;35950;35950;35950;35950
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Impostos;;;;;;;;;;;;;;;;;;8305;8937;8937;8937;8937;8937;15026
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;;;9165
-Mar_BR;São Paulo CRSN PSP 6018/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;;4231;4231
-DZM;DZM - Mar Brasil; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;72;;570;;
-DZM;DZM - Pessoal; Despesas Variáveis;;;;;;;;;;;;;;;;;;;341;250;156;;;
-DZM;DZM - Rancho da Praia; Despesas Variáveis;;;;;;;;;;;;;;;;;;194;150;;38;263;;
-DZM;DZM - RATEIO; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;700
-DZM;DZM - Terceirização; Despesas Variáveis;;;;;;;;;;;;;;;;;;;83;;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;31;;205
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;11;15;6;2;6;26;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;19;21;11;;;72;17
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;9;;;2;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;1;1;0;;2;2
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;0;0;0;;1;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;155;212;95;24;82;412;287
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;15;24;10;3;9;45;26
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;22
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;21;12
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;518;120;645
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Outros Custos;;;;;;;;;;;;;;;;;;;;410;100;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outros Custos;;;;;;;;;;;;;;;;;;42;243;92;78;108;256;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outros Custos;;;;;;;;;;;;;;;;;;74;75;153;;;;55
-Mar_BR;Eventuais B2G; Outros Custos;;;;;;;;;;;;;;;;;;36;;;79;;;
-Mar_BR;Rede Alpha; Outros Custos;;;;;;;;;;;;;;;;;;3;4;7;7;;11;5
-Mar_BR;Rossi Advogados; Outros Custos;;;;;;;;;;;;;;;;;;1;1;2;2;;4;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outros Custos;;;;;;;;;;;;;;;;;;614;962;1337;2274;3076;2134;1196
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outros Custos;;;;;;;;;;;;;;;;;;61;84;206;192;269;468;281
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;70
-Mar_BR;São Paulo CRSN PSP 6018/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;110;38
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;435;;2822
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;91;89;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;302;240
-Mar_BR;Rede Alpha; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;7;23
-Mar_BR;Rossi Advogados; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;3;6
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;1159;1395;3264
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;127;152;356
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;;305
-Mar_BR;São Paulo CRSN PSP 6018/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;72;168
-DZM;DZM - Mar Brasil; Despesas Variáveis;;;;;;;;;;;;;;;;;;143;;;;40;40;
-DZM;DZM - Pessoal; Despesas Variáveis;;;;;;;;;;;;;;;;;;2579;7303;6945;3228;2033;5775;1979
-DZM;DZM - Rancho da Praia; Despesas Variáveis;;;;;;;;;;;;;;;;;;515;383;;;;2225;2568
-DZM;DZM - RATEIO; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;40;;;
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;40;3779;40;60;
-DZM;Tchandra Coelho; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;2665
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;317;;894
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outros Custos;;;;;;;;;;;;;;;;;;167;280;281;278;80;50;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outros Custos;;;;;;;;;;;;;;;;;;296;410;470;267;22;189;76
-Mar_BR;D.Z.M; Outros Custos;;;;;;;;;;;;;;;;;;;619;;118;;;
-Mar_BR;Eventuais B2G; Outros Custos;;;;;;;;;;;;;;;;;;143;;;108;;;
-Mar_BR;Rede Alpha; Outros Custos;;;;;;;;;;;;;;;;;;12;22;22;10;;5;7
-Mar_BR;Rossi Advogados; Outros Custos;;;;;;;;;;;;;;;;;;4;7;7;3;;2;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outros Custos;;;;;;;;;;;;;;;;;;2444;4083;4099;4053;1054;1027;1034
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outros Custos;;;;;;;;;;;;;;;;;;242;456;446;416;113;113;113
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;97
-Mar_BR;São Paulo CRSN PSP 6018/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;61;53
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;;1127
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;76;177;79;198;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;134;258;132;;;;
-Mar_BR;Eventuais B2G; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;65;;;201;;3623;
-Mar_BR;Rede Alpha; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;6;14;6;18;;;
-Mar_BR;Rossi Advogados; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;2;5;2;5;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;1108;2571;1154;2887;;;1303
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;110;287;126;314;;;142
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;;122
-Mar_BR;São Paulo CRSN PSP 6018/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;;67
-DZM;DZM - Mar Brasil; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;140;;;;
-DZM;DZM - Rancho da Praia; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;150;585;655;125;410;855
-DZM;DZM - Rancho da Praia; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;169;;;;;;
-DZM;DZM - Ribeirópolis - Galpão 0643; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;665;;;;;;
-DZM;DZM - Rancho da Praia; Ativos;;;;;;;;;;;;;;;;;;;244;244;244;244;244;334
-DZM;DZM - Terceirização; Ativos;;;;;;;;;;;;;;;;;;;;;758;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;129;;542
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;57;103;98;29;27;59;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;100;151;164;;;135;46
-Mar_BR;D.Z.M; Ativos;;;;;;;;;;;;;;;;;;;;;;;;289
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;48;;;30;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;4;8;8;3;;2;4
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;1;3;3;1;;1;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;827;1505;1433;429;345;884;628
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;82;168;156;47;38;91;68
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;59
-Mar_BR;São Paulo CRSN PSP 6018/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;19;32
-DZM;DZM - Imóveis Guilhermina; Despesas Administrativas;;;;;;;;;;;;;;;;;;30;;;;;;
-DZM;DZM - Mar Brasil; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;400;400;;;
-DZM;DZM - Mar Brasil - Climatização; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;700;800;1000
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;;;;;682;;1129
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;143;151;150;155;142;126;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;254;221;252;;;424;96
-Mar_BR;Eventuais B2G;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;123;;;157;;;
-Mar_BR;Rede Alpha;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;11;12;;14;;10;9
-Mar_BR;Rossi Advogados;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;4;4;;4;;4;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;2098;2205;2193;2263;1818;1962;1306
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;207;247;245;247;199;214;142
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;;;;;;;122
-Mar_BR;São Paulo CRSN PSP 6018/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;;;;;;101;67
-DZM;Tchandra Coelho; Ativos;;;;;;;;;;;;;;;;;;;;;;2569;2631;2631
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;579;579;948
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;246;260;386;266;121;227;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;437;380;645;;;360;81
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;211;;;270;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;18;20;30;24;;9;8
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;6;7;10;7;;3;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;3603;3787;5619;3886;1544;3211;1096
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;356;423;612;423;169;350;119
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;103
-Mar_BR;São Paulo CRSN PSP 6018/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;86;56
-DZM;DZM - Imóveis Guilhermina; Despesas Administrativas;;;;;;;;;;;;;;;;;;15;7;;;;;
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;149;169;;;;;
-DZM;DZM - RATEIO; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;367;367;367;367;367
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;;191;;;;;
-DZM;DZM - Terceirização; Despesas Administrativas;;;;;;;;;;;;;;;;;;363;;;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;527;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;119;117;127;120;110;291;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;211;171;212;;;984;
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;102;;;122;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;9;9;10;11;;24;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;3;3;3;3;;9;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;1741;1705;1852;1750;1406;4551;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;172;191;202;191;154;495;
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;235;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;13;7504;4576;12755
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Corretiva - B2G;;;;;;;;;;;;;;;;;;5885;2764;3356;228;225;228;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Corretiva - B2G;;;;;;;;;;;;;;;;;;1227;1305;1195;1497;1771;677;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Corretiva - B2G;;;;;;;;;;;;;;;;;;;1233;1064;;;;
-Mar_BR;Eventuais B2G;Corretiva - B2G;;;;;;;;;;;;;;;;;;1077;;;1516;;1500;
-Mar_BR;Mar Brasil - Estoque;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;3352;;;
-Mar_BR;Rede Alpha;Corretiva - B2G;;;;;;;;;;;;;;;;;;;65;49;134;;26;742
-Mar_BR;Rossi Advogados;Corretiva - B2G;;;;;;;;;;;;;;;;;;;22;17;41;;9;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Corretiva - B2G;;;;;;;;;;;;;;;;;;19212;22993;13071;28422;19795;14537;20119
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;1681;1841;1154;2594;2250;7069;2945
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;;;913;883
-Mar_BR;São Paulo CRSN PSP 6018/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;;;546;485
-DZM;DZM - Rancho da Praia;Credenciado Administrativo;;;;;;;;;;;;;;;;;;2996;3493;3056;3721;2500;3300;3800
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;4421;9092;;16399
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado Administrativo;;;;;;;;;;;;;;;;;;2107;1852;2378;2921;2403;2175;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado Administrativo;;;;;;;;;;;;;;;;;;3738;2706;3977;101;1137;5442;1394
-Mar_BR;Eventuais B2G;Credenciado Administrativo;;;;;;;;;;;;;;;;;;1802;;;1932;;;
-Mar_BR;Rede Alpha;Credenciado Administrativo;;;;;;;;;;;;;;;;;;154;142;185;180;42;178;134
-Mar_BR;Rossi Advogados;Credenciado Administrativo;;;;;;;;;;;;;;;;;;54;49;63;55;15;64;33
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Credenciado Administrativo;;;;;;;;;;;;;;;;;;30819;26976;34662;41008;32200;33996;18971
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;3046;3016;3774;4474;3518;3702;2067
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;;;1774
-Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;410;1752;977
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;1652;1956;5091;5985
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Credenciado Operacional;;;;;;;;;;;;;;;;;;3944;7934;8500;4100;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado Operacional;;;;;;;;;;;;;;;;;;4329;84;130;344;536;2354;174
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado Operacional;;;;;;;;;;;;;;;;;;141;122;218;;;;138
-Mar_BR;Eventuais B2G;Credenciado Operacional;;;;;;;;;;;;;;;;;;68;;;;;;
-Mar_BR;Rede Alpha;Credenciado Operacional;;;;;;;;;;;;;;;;;;6;6;10;;11;12;13
-Mar_BR;Rossi Advogados;Credenciado Operacional;;;;;;;;;;;;;;;;;;2;2;3;;4;4;3
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Credenciado Operacional;;;;;;;;;;;;;;;;;;25905;22537;40154;27221;23576;29637;31137
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;114;136;206;482;789;4053;4249
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;;;;176
-Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;;103;119;97
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado TI;;;;;;;;;;;;;;;;;;;;;;3540;;4623
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado TI;;;;;;;;;;;;;;;;;;854;800;660;1065;738;583;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado TI;;;;;;;;;;;;;;;;;;1516;1169;1104;;;1192;393
-Mar_BR;Eventuais B2G;Credenciado TI;;;;;;;;;;;;;;;;;;731;;;1080;;;
-Mar_BR;Rede Alpha;Credenciado TI;;;;;;;;;;;;;;;;;;63;62;51;96;;13;38
-Mar_BR;Rossi Advogados;Credenciado TI;;;;;;;;;;;;;;;;;;22;21;17;29;;5;9
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Credenciado TI;;;;;;;;;;;;;;;;;;12496;11648;9620;15538;9441;8675;5348
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado TI;;;;;;;;;;;;;;;;;;1235;1302;1048;1693;1033;882;583
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;;500
-Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;125;275
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;15;16;;218;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;27;23;;;;;
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;13;;;222;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;1;;20;;;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;0;;6;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;219;231;;3187;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;22;26;;347;;;
-DZM;DZM - Rancho da Praia; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;24;;;;1
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Receitas Financeiras;;;;;;;;;;;;;;;;;;;;;;;30;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Receitas Financeiras;;;;;;;;;;;;;;;;;;72;5;;;;6;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Receitas Financeiras;;;;;;;;;;;;;;;;;;227;7;;;;;
-Mar_BR;Eventuais B2G; Receitas Financeiras;;;;;;;;;;;;;;;;;;58;;;;;;
-Mar_BR;Rede Alpha; Receitas Financeiras;;;;;;;;;;;;;;;;;;5;0;;;;;
-Mar_BR;Rossi Advogados; Receitas Financeiras;;;;;;;;;;;;;;;;;;2;0;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Receitas Financeiras;;;;;;;;;;;;;;;;;;1213;71;;;;79;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Receitas Financeiras;;;;;;;;;;;;;;;;;;104;8;;;;9;
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;2572
-DZM;DZM - Ybox; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;34;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outras Receitas;;;;;;;;;;;;;;;;;;;175;466;22;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outras Receitas;;;;;;;;;;;;;;;;;;;182;780;37;;;
-Mar_BR;Rede Alpha; Outras Receitas;;;;;;;;;;;;;;;;;;;16;;;;;
-Mar_BR;Rossi Advogados; Outras Receitas;;;;;;;;;;;;;;;;;;;5;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outras Receitas;;;;;;;;;;;;;;;;;;;2486;6795;324;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outras Receitas;;;;;;;;;;;;;;;;;;;337;759;36;;184;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;244;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;21;;51;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;34;;;;
-Mar_BR;Rede Alpha; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;2;;;;
-Mar_BR;Rossi Advogados; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;1;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;300;;652;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;33;;71;;
-DZM;DZM - Rancho da Praia; Ativos;;;;;;;;;;;;;;;;;;;;;;;203;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;222;;1082
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;7;48;24;49;46;6;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;13;70;40;26;;22;92
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;6;;;33;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;1;4;2;3;;1;9
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;0;1;1;1;;0;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;106;696;346;710;593;99;1252
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;11;78;38;75;65;11;136
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;117
-Mar_BR;São Paulo CRSN PSP 6018/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;5;64
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;133;;424
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;17;7;28;48;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;28;;;161;36
-Mar_BR;Eventuais B2G; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;7;;;
-Mar_BR;Rede Alpha; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;1;1;;4;3
-Mar_BR;Rossi Advogados; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;0;0;;1;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;243;98;354;746;491
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;26;11;39;81;53
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;46
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;38;25
-DZM;DZM - Imóveis Guilhermina; Despesas Administrativas;;;;;;;;;;;;;;;;;;79;156;;169;173;168;87
-DZM;DZM - Mar Brasil; Despesas Administrativas;;;;;;;;;;;;;;;;;;315;319;;;;;
-DZM;DZM - Pessoal; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;192;
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;268;277;;359;532;1136;271
-DZM;DZM - RATEIO; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;399;728;;
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;418;;;362;495
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;321;;446
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;108;112;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;37;33;32;32;67;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;65;48;54;;;;29
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;31;;;33;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;3;3;3;3;;;3
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;1;1;1;;;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;538;474;469;468;855;;389
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;53;53;51;51;94;;42
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;36
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;20
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;560;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outros Custos;;;;;;;;;;;;;;;;;;35;36;;4;117;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outros Custos;;;;;;;;;;;;;;;;;;62;52;;;;;
-Mar_BR;Eventuais B2G; Outros Custos;;;;;;;;;;;;;;;;;;30;;;4;;;
-Mar_BR;Rede Alpha; Outros Custos;;;;;;;;;;;;;;;;;;3;3;;0;;;
-Mar_BR;Rossi Advogados; Outros Custos;;;;;;;;;;;;;;;;;;1;1;;0;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outros Custos;;;;;;;;;;;;;;;;;;510;520;;60;1492;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outros Custos;;;;;;;;;;;;;;;;;;50;58;;7;163;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;790;;848
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;33;88;123;172;165;94;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;58;129;206;116;;189;72
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;28;;;91;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;2;7;10;10;;4;7
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;1;2;3;3;;1;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;480;1288;1794;2513;2106;1414;981
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;47;144;195;265;230;147;107
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;92
-Mar_BR;São Paulo CRSN PSP 6018/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;36;51
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;810;;963
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;53;162;70;165;579;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;77;270;94;;12;3
-Mar_BR;D.Z.M; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;757;757;;500;;;
-Mar_BR;Eventuais B2G; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;9;;;
-Mar_BR;Rede Alpha; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;4;13;1;;44;0
-Mar_BR;Rossi Advogados; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;1;4;0;;15;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;890;2356;1017;1580;10886;1113
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;86;257;102;173;988;121
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;;104
-Mar_BR;São Paulo CRSN PSP 6018/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;467;57
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;107;96;1233
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;41;26;240;249;22;181;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;74;38;402;73;;446;105
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;35;;;205;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;3;2;19;18;;13;10
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;1;1;6;6;;5;3
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;606;381;3500;3638;286;2769;1426
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;60;43;381;389;31;302;155
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;133
-Mar_BR;São Paulo CRSN PSP 6018/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;130;73
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;3
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;15;16;18;22;;4;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;27;23;30;;;1;0
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;13;;;23;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;1;1;2;;0;0
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;0;0;1;;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;222;233;262;326;;58;4
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;22;26;28;36;;71;0
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;96
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;3;0
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;10061
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;185;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;625;856
-Mar_BR;Rede Alpha; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;15;82
-Mar_BR;Rossi Advogados; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;5;20
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;2891;11639
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;315;1268
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;1089
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;149;599
-DZM;DZM - Mar Brasil; Despesas Variáveis;;;;;;;;;;;;;;;;;;2875;;;;;;
-DZM;DZM - Rancho da Praia; Despesas Variáveis;;;;;;;;;;;;;;;;;;2750;1900;1900;3100;1900;3994;4180
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Variáveis;;;;;;;;;;;;;;;;;;4800;200;;;;;3400
-DZM;Tchandra Coelho; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;300;7187;5590;5780;16537
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;3915
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;38;204;;90;;199;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Variáveis;;;;;;;;;;;;;;;;;;;298;;;;257;333
-Mar_BR;Eventuais B2G; Despesas Variáveis;;;;;;;;;;;;;;;;;;33;;;91;;;
-Mar_BR;Rede Alpha; Despesas Variáveis;;;;;;;;;;;;;;;;;;;16;;8;;4;32
-Mar_BR;Rossi Advogados; Despesas Variáveis;;;;;;;;;;;;;;;;;;;5;;2;;1;8
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;500;2968;;1315;;2953;4529
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;52;332;;143;;299;493
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;16885
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;34;233
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1976;1815;5253;2583;3718;4486;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1341;1399;1410;1491;1632;2150;2162
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;1931;;3160
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;220;402;178;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;601;269
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;223;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;20;;14;26
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;6;;5;6
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;3205;5149;2778;3656
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;349;563;303;398
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;342
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;143;188
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;823;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;32;172;;
-Mar_BR;Eventuais B2G; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;32;;;
-Mar_BR;Rede Alpha; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;3;;;
-Mar_BR;Rossi Advogados; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;1;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;466;2196;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;51;240;;
-DZM;DZM - Ribeirópolis - Galpão 0643; Impostos;;;;;;;;;;;;;;;;;;91;;;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;360;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;75;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;4000;;4500;1500;3960;4000;6000
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;105;1000;1000
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1631;1548;4750;2322;2165;1631;3499
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;27;27;;;1197;2269;6854
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;;105;220;110;110;110;110
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;89;;101
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;71;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;13;8;6;14;19;82;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;23;11;10;;;38;9
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;11;;;14;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;1;0;1;;1;1
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;0;0;0;;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;189;110;89;204;238;177;117
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;19;12;10;22;26;19;13
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;11
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;9;6
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;3;;26
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;1;1;1;1;0;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;1;2;;;0;2
-Mar_BR;Eventuais B2G; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;;;1;;;
-Mar_BR;Rede Alpha; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;0;0;0;;0;0
-Mar_BR;Rossi Advogados; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;0;0;0;;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;1;8;18;15;7;2;30
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;1;2;2;1;0;3
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;3
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;0;2
-DZM;DZM - Imóveis Guilhermina; Despesas Administrativas;;;;;;;;;;;;;;;;;;317;781;157;157;157;157;519
-DZM;DZM - Mar Brasil; Despesas Administrativas;;;;;;;;;;;;;;;;;;383;183;183;;;;
-DZM;DZM - RATEIO; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;851;430;933
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;;679;430;183;183;183;367
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outros Tributos;;;;;;;;;;;;;;;;;;;;14;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outros Tributos;;;;;;;;;;;;;;;;;;;;23;;;;
-Mar_BR;Rede Alpha; Outros Tributos;;;;;;;;;;;;;;;;;;;;1;;;;
-Mar_BR;Rossi Advogados; Outros Tributos;;;;;;;;;;;;;;;;;;;;0;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outros Tributos;;;;;;;;;;;;;;;;;;;;200;;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outros Tributos;;;;;;;;;;;;;;;;;;;;22;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;240;;20
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Impostos;;;;;;;;;;;;;;;;;;;20;7;5;50;12;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Impostos;;;;;;;;;;;;;;;;;;;29;12;;;40;2
-Mar_BR;Eventuais B2G; Impostos;;;;;;;;;;;;;;;;;;;;;6;;;
-Mar_BR;Rede Alpha; Impostos;;;;;;;;;;;;;;;;;;;2;1;0;;1;0
-Mar_BR;Rossi Advogados; Impostos;;;;;;;;;;;;;;;;;;;1;0;0;;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Impostos;;;;;;;;;;;;;;;;;;;293;105;79;640;186;23
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Impostos;;;;;;;;;;;;;;;;;;;33;11;9;70;20;2
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;;;2
-Mar_BR;São Paulo CRSN PSP 6018/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;;10;1
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;68;2;164
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;;3;;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;4;7;0;14;15;0
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Financeiras;;;;;;;;;;;;;;;;;;;5;12;;;52;14
-Mar_BR;Eventuais B2G; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;;;0;;;
-Mar_BR;Mar Brasil - Estoque; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;20
-Mar_BR;Rede Alpha; Despesas Financeiras;;;;;;;;;;;;;;;;;;;0;1;0;;1;1
-Mar_BR;Rossi Advogados; Despesas Financeiras;;;;;;;;;;;;;;;;;;;0;0;0;;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;5;71;105;1;176;243;196
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;1;6;12;0;19;27;21
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;0;18
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;13;10
-DZM;DZM - Imóveis Guilhermina; Receitas Financeiras;;;;;;;;;;;;;;;;;;0;;1;1;;6;
-Mar_BR;Rossi Advogados; Receitas Financeiras;;;;;;;;;;;;;;;;;;4;;;;;;
-DZM;DZM - Alcalinas; Despesas Administrativas;;;;;;;;;;;;;;;;;;;484;;345;374;374;374
-DZM;DZM - G2; Despesas Administrativas;;;;;;;;;;;;;;;;;;15000;9143;9143;9143;9143;9143;9143
-DZM;DZM - Imóveis Guilhermina; Despesas Administrativas;;;;;;;;;;;;;;;;;;6;44;;12;39;24;
-DZM;DZM - Mar Brasil; Despesas Administrativas;;;;;;;;;;;;;;;;;;637;;;;;;9143
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;60;1048;70;283;1000;741;68
-DZM;DZM - RATEIO; Despesas Administrativas;;;;;;;;;;;;;;;;;;;657;1577;935;1660;2269;997
-DZM;DZM - Terceirização; Despesas Administrativas;;;;;;;;;;;;;;;;;;2450;1526;1153;3768;3054;2635;2195
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;1566;;4229
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;290;304;443;403;444;574;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;515;444;545;13;184;1939;360
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;248;;119;397;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;21;23;36;36;;47;34
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;7;8;12;11;;17;9
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;4245;4424;6461;5856;5898;8962;4892
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;854;743;952;638;1169;976;827
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;458
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;462;252
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;51;;108
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;9;17;7;11;11;17;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;16;25;12;;;57;9
-Mar_BR;Eventuais B2G; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;8;;;12;;;
-Mar_BR;Rede Alpha; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;1;1;1;1;;1;1
-Mar_BR;Rossi Advogados; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;0;0;0;0;;1;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;128;245;107;166;137;262;125
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;13;27;12;18;15;28;14
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;12
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;13;6
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;1506;;1497
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outros Custos;;;;;;;;;;;;;;;;;;159;127;95;142;314;191;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outros Custos;;;;;;;;;;;;;;;;;;282;186;160;;;;127
-Mar_BR;Eventuais B2G; Outros Custos;;;;;;;;;;;;;;;;;;136;;;144;;;
-Mar_BR;Rede Alpha; Outros Custos;;;;;;;;;;;;;;;;;;12;10;7;13;;16;12
-Mar_BR;Rossi Advogados; Outros Custos;;;;;;;;;;;;;;;;;;4;3;3;4;;6;3
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outros Custos;;;;;;;;;;;;;;;;;;2328;1857;1391;2077;4017;2993;1731
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outros Custos;;;;;;;;;;;;;;;;;;230;208;151;226;1320;326;189
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;162
-Mar_BR;São Paulo CRSN PSP 6018/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;154;89
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;299;;1259
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;249;148;100;166;62;43;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;441;217;168;;;145;107
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;213;;;169;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;18;11;8;15;;3;10
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;6;4;3;5;;1;3
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;3638;2163;1460;2427;796;670;1456
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;359;242;159;512;87;73;159
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;136
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;35;75
-Mar_BR;Ybox; Despesas Administrativas;;;;;;;;;;;;;;;;;;;74;;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;56;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;70;101;128;12;10;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;103;169;;;35;
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;130;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;5;8;11;;1;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;2;3;4;;0;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;1024;1470;1864;149;161;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;115;160;203;16;18;
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;8;
-DZM;DZM - Mar Brasil; Despesas Administrativas;;;;;;;;;;;;;;;;;;;900;300;;;180;180
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;1902;;900;1180;1286;1642;2200
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;360;1200;938;180;900
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;689;;483
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;400;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;45;32;491;526;144;496;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;81;47;153;;;318;41
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;39;;;128;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;3;2;7;11;;8;4
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;1;2;3;;3;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;665;471;1333;1836;1837;1504;559
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;66;53;145;200;201;164;61
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;52
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;78;29
-Mar_BR;Ybox; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;76;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;1312;;473
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;250;;628;378;;125;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;294;358;181;273;125;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;63;180;;;;
-Mar_BR;Eventuais B2G; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;184;;477;
-Mar_BR;Rede Alpha; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;3;8;16;;;
-Mar_BR;Rossi Advogados; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;1;3;5;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;2357;2302;5115;4776;8498;2781;1096
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;71;171;288;383;;14
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;;12
-Mar_BR;São Paulo CRSN PSP 6018/2025; Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;;6
-DZM;DZM - Rancho da Praia; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;7100;;4280
-DZM;DZM - Rancho da Praia; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;16848;42059;13518;22030;15600;10943;2136
-DZM;DZM - Rancho da Praia; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;1930;1930;1330;1810;1330;9802;2842
-DZM;DZM - Imóveis Guilhermina; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;1822;1859;1834;1899;816;768;776
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;176;;;
-DZM;DZM - RATEIO; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;747;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;2037;;5759
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;2200;2200;2200;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;238;226;334;352;424;93;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;422;330;558;;;316;279
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;203;;;357;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;17;17;26;32;;8;27
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;6;6;9;10;;3;7
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;3478;3285;4865;5132;5433;1459;3794
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;344;367;530;559;594;159;413
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;355
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;75;195
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;2000;1439;3450;4250;2700;5983;
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;500
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;10262;;6
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;108;1152;1025;2138;35;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;159;1841;;;3;0
-Mar_BR;D.Z.M; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;343;;;;
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;1040;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;8;79;92;;3;0
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;3;27;28;;1;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;1580;16081;17953;28216;548;7
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;177;1691;1629;2993;60;1
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;1
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;28;0
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;59;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;2;;;12;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;3;;;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;0;;;;;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;0;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;26;;;157;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;3;;;17;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;2394;;134
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outros Custos;;;;;;;;;;;;;;;;;;32;268;;175;499;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outros Custos;;;;;;;;;;;;;;;;;;58;391;;;;;11
-Mar_BR;Eventuais B2G; Outros Custos;;;;;;;;;;;;;;;;;;28;;;177;;;
-Mar_BR;Rede Alpha; Outros Custos;;;;;;;;;;;;;;;;;;2;21;;16;37;;1
-Mar_BR;Rossi Advogados; Outros Custos;;;;;;;;;;;;;;;;;;1;7;;5;14;;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outros Custos;;;;;;;;;;;;;;;;;;474;3901;;2549;8033;;155
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outros Custos;;;;;;;;;;;;;;;;;;47;436;;278;698;;17
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;14
-Mar_BR;São Paulo CRSN PSP 6018/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;8
-DZM;DZM - Rancho da Praia; Ativos;;;;;;;;;;;;;;;;;;;1369;;;;;
-DZM;DZM - RATEIO; Ativos;;;;;;;;;;;;;;;;;;;;139;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;1287;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;9;12;;;268;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;5380;5381;5363;5363;;5363;5363
-Mar_BR;D.Z.M; Ativos;;;;;;;;;;;;;;;;;;287;;;;;;
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;8;;;;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;1;1;;;;;
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;0;0;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;136;173;;;3433;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;13;19;;;375;;
-DZM;DZM - RATEIO; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;20000;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;263
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;9;;;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;13;;;;;22
-Mar_BR;Rede Alpha; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;1;;;;;2
-Mar_BR;Rossi Advogados; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;0;;;;;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;129;;;;;304
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;14;;;;;33
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;28
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;16
-DZM;DZM - Pessoal; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;344;1976;3278;;
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;18;2132;3601;595;2522;5562;1508
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;1976;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;258;;854
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;284;57;82;54;130;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;416;95;;;;
-Mar_BR;D.Z.M; Despesas Administrativas;;;;;;;;;;;;;;;;;;2382;49;;;;1470;1470
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;;;83;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;22;4;7;;11;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;7;2;2;;4;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;10;4144;829;1315;783;2029;988
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;463;90;131;75;221;108
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;93
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;104;51
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;942;;757
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;10;114;83;121;196;30;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;18;166;139;19;;101;64
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;9;;;111;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;1;9;6;10;;2;6
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;0;3;2;3;;1;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;149;1658;1210;1771;2512;466;876
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;15;185;132;191;275;51;95
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;82
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;24;45
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1704;;1765;1755;2287;747;1224
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;285;1122;920;832;2204;520;1043
-DZM;DZM - Rancho da Praia; Ativos;;;;;;;;;;;;;;;;;;;;;2270;583;810;1300
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;326;;3332
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;23;78;63;323;68;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;41;114;106;;;;283
-Mar_BR;D.Z.M; Ativos;;;;;;;;;;;;;;;;;;;;393;676;;;
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;20;;;328;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;2;6;5;29;;;27
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;1;2;2;9;;;7
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;341;1138;925;4719;868;;3854
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;34;127;101;514;95;;420
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;361
-Mar_BR;São Paulo CRSN PSP 6018/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;198
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;24;754;13;;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;35;1262;;;;
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;13;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;2;33;1;;;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;1;11;0;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;354;10996;187;;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;40;1211;20;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;14;2;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;1;3;1;1
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;1;
-Mar_BR;Eventuais B2G; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;1;;;
-Mar_BR;Mar Brasil - Estoque; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;34
-Mar_BR;Rede Alpha; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;0;;0;0
-Mar_BR;Rossi Advogados; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;0;;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;;115;;13;;11;36
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;11;4;1;;31;6
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;0;1
-DZM;DZM - Imóveis Guilhermina; Receitas Financeiras;;;;;;;;;;;;;;;;;;7;;17;17;;33;
-Mar_BR;Rossi Advogados; Receitas Financeiras;;;;;;;;;;;;;;;;;;15;;;;;;
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;341;;1198;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;1837;;3007
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;493;408;509;429;383;338;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Financeiras;;;;;;;;;;;;;;;;;;874;596;850;;;1144;256
-Mar_BR;Eventuais B2G; Despesas Financeiras;;;;;;;;;;;;;;;;;;421;;;436;;;
-Mar_BR;Rede Alpha; Despesas Financeiras;;;;;;;;;;;;;;;;;;36;31;39;39;;28;24
-Mar_BR;Rossi Advogados; Despesas Financeiras;;;;;;;;;;;;;;;;;;13;11;13;12;;10;6
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;7205;5944;7412;6267;4899;5287;3478
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;712;664;807;683;536;576;379
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;325
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;273;179
-DZM;DZM - Mar Brasil - Climatização; Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;1290
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;174;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;2;26;32;15;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;3;43;47;49;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;3;1;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;1;0;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;25;377;470;227;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;3;42;51;25;
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;12;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;9;;281
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Outros Custos;;;;;;;;;;;;;;;;;;;;;11;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outros Custos;;;;;;;;;;;;;;;;;;4;132;85;5;2;15;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outros Custos;;;;;;;;;;;;;;;;;;7;193;143;;;30;22
-Mar_BR;Eventuais B2G; Outros Custos;;;;;;;;;;;;;;;;;;3;;;6;;;
-Mar_BR;Rede Alpha; Outros Custos;;;;;;;;;;;;;;;;;;0;10;7;1;;1;2
-Mar_BR;Rossi Advogados; Outros Custos;;;;;;;;;;;;;;;;;;0;3;2;0;;0;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outros Custos;;;;;;;;;;;;;;;;;;59;1922;1253;80;96;230;355
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outros Custos;;;;;;;;;;;;;;;;;;6;215;135;9;41;116;83
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;119;;28
-Mar_BR;São Paulo CRSN PSP 6018/2025; Outros Custos;;;;;;;;;;;;;;;;;;;;;;;12;16
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;762;762;;1567;811;1755;9319
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;5697;;9579
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Impostos;;;;;;;;;;;;;;;;;;1144;1149;1157;1088;1187;1169;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Impostos;;;;;;;;;;;;;;;;;;2029;1679;1934;;;3952;815
-Mar_BR;Eventuais B2G; Impostos;;;;;;;;;;;;;;;;;;978;;;1104;;;
-Mar_BR;Rede Alpha; Impostos;;;;;;;;;;;;;;;;;;84;88;90;98;;95;78
-Mar_BR;Rossi Advogados; Impostos;;;;;;;;;;;;;;;;;;29;30;31;30;;34;20
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Impostos;;;;;;;;;;;;;;;;;;16727;16733;16859;15878;15192;18270;11081
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Impostos;;;;;;;;;;;;;;;;;;1653;1870;1836;1730;1662;1989;1207
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;;;1036
-Mar_BR;São Paulo CRSN PSP 6018/2025; Impostos;;;;;;;;;;;;;;;;;;;;;;;942;571
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Preventiva - B2G;;;;;;;;;;;;;;;;;;;;;;738;46;208
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Preventiva - B2G;;;;;;;;;;;;;;;;;;;;;110;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Preventiva - B2G;;;;;;;;;;;;;;;;;;20;139;289;250;266;56;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Preventiva - B2G;;;;;;;;;;;;;;;;;;;204;484;;;;
-Mar_BR;Eventuais B2G;Preventiva - B2G;;;;;;;;;;;;;;;;;;18;;;254;;;
-Mar_BR;Rede Alpha;Preventiva - B2G;;;;;;;;;;;;;;;;;;;11;22;22;4;3;
-Mar_BR;Rossi Advogados;Preventiva - B2G;;;;;;;;;;;;;;;;;;;4;8;7;1;1;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Preventiva - B2G;;;;;;;;;;;;;;;;;;270;2247;4434;3654;2644;879;240
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Preventiva - B2G;;;;;;;;;;;;;;;;;;1828;227;459;398;1143;96;26
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Preventiva - B2G;;;;;;;;;;;;;;;;;;;;;;;;22
-Mar_BR;São Paulo CRSN PSP 6018/2025;Preventiva - B2G;;;;;;;;;;;;;;;;;;;;;;;45;12
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;2212;2212;2212;2212;2212;2212;7797
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1774;1774;1774;1774;1774;1774;3469
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;738;738;738;738;738;738;1640
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;591;591;591;591;591;1156
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;;;;;4387;;23440
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;1574;1683;1653;1729;2747;1704;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;8694;7335;8342;;;10549;3610
-Mar_BR;Eventuais B2G;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;1347;;;3605;;;
-Mar_BR;Rede Alpha;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;115;129;128;155;343;342;190
-Mar_BR;Rossi Advogados;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;41;44;44;48;49;49;91
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;23030;24512;24097;25238;38450;26643;27114
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;2276;2740;2624;2749;4194;2902;2954
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;;;;;;;2537
-Mar_BR;São Paulo CRSN PSP 6018/2025;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;;;;;;1374;1398
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Outras Receitas;;;;;;;;;;;;;;;;;;115;;0;0;;0;0
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Outras Receitas;;;;;;;;;;;;;;;;;;175;;0;0;;0;0
-Mar_BR;Eventuais B2B; Outras Receitas;;;;;;;;;;;;;;;;;;36;;0;0;;0;0
-Mar_BR;Eventuais B2G; Outras Receitas;;;;;;;;;;;;;;;;;;37;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Outras Receitas;;;;;;;;;;;;;;;;;;1529;;0;0;;0;1
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Outras Receitas;;;;;;;;;;;;;;;;;;162;;0;0;;0;0
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Serviços;;;;;;;;;;;;;;;;;;3;;3;;;3;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Serviços;;;;;;;;;;;;;;;;;;4;;4;;;4;7
-Mar_BR;Eventuais B2G; Serviços;;;;;;;;;;;;;;;;;;2;;;;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Serviços;;;;;;;;;;;;;;;;;;37;;39;;;39;39
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Serviços;;;;;;;;;;;;;;;;;;4;;4;;;4;4
-DZM;DZM - Imóveis Guilhermina; Outras Receitas;;;;;;;;;;;;;;;;;;0;0;;;;;
-DZM;DZM - Rancho da Praia; Outras Receitas;;;;;;;;;;;;;;;;;;0;1;;;;;
-DZM;DZM - RATEIO; Outras Receitas;;;;;;;;;;;;;;;;;;;;0;0;2;1;3
-DZM;DZM - Terceirização; Outras Receitas;;;;;;;;;;;;;;;;;;1;1;;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Receitas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;2
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Receitas Financeiras;;;;;;;;;;;;;;;;;;1;0;1;0;0;1;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Receitas Financeiras;;;;;;;;;;;;;;;;;;1;0;1;0;0;1;0
-Mar_BR;Eventuais B2G; Receitas Financeiras;;;;;;;;;;;;;;;;;;0;;;;;;
-Mar_BR;Rede Alpha; Receitas Financeiras;;;;;;;;;;;;;;;;;;0;0;0;0;0;0;0
-Mar_BR;Rossi Advogados; Receitas Financeiras;;;;;;;;;;;;;;;;;;0;0;0;0;0;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Receitas Financeiras;;;;;;;;;;;;;;;;;;8;2;6;3;4;6;3
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Receitas Financeiras;;;;;;;;;;;;;;;;;;1;0;1;0;0;1;0
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Receitas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;0
-Mar_BR;São Paulo CRSN PSP 6018/2025; Receitas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;0
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;783;;;922;9841;;456
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;6931;;
-DZM;DZM - Rancho da Praia; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;1298
-DZM;DZM - RATEIO; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;1595;;;
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;16669;26828;20868;16264;17392;25084;22132
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;10814;13040;13532;11967;9286;10492;10682
-Mar_BR;Locação Oftalmológico 14/2021 033/2021; Outros Custos;;;;;;;;;;;;;;;;;;565;565;;565;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;191;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;42;42;43;40;35;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;62;70;;;119;
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;44;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;3;3;4;;3;
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;1;1;1;;1;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;617;612;633;509;549;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;69;67;69;56;60;
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;28;
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;241;241;;569;284;569;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;139;139;139;139;139;278
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;28;;;9;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;47;;;29;
-Mar_BR;Rede Alpha; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;2;;;1;
-Mar_BR;Rossi Advogados; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;1;;;0;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;413;;;134;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;45;;;15;
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;170;
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;231;7;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;126;;205
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;28;29;26;27;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;46;;;14;17
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;29;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;2;3;;2;2
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;1;1;;1;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;403;417;335;420;238
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;44;45;37;44;26
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;22
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;15;12
-DZM;DZM - Imóveis Guilhermina; Impostos;;;;;;;;;;;;;;;;;;;140;;;;;
-DZM;DZM - RATEIO; Impostos;;;;;;;;;;;;;;;;;;5343;;10532;16983;21438;21068;20563
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;565;;939
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;116;122;122;127;118;105;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;206;179;204;;;355;80
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;99;;;129;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;8;9;9;11;;9;8
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;3;3;3;4;;3;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;1695;1781;1781;1859;1506;1639;1086
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;167;199;194;203;165;178;118
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;102
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;84;56
-DZM;DZM - Imóveis Guilhermina; Despesas Financeiras;;;;;;;;;;;;;;;;;;3;4;;;;;
-DZM;DZM - Mar Brasil; Despesas Financeiras;;;;;;;;;;;;;;;;;;3;15;;;;;
-DZM;DZM - Pessoal; Despesas Financeiras;;;;;;;;;;;;;;;;;;;6;;;;;
-DZM;DZM - Rancho da Praia; Despesas Financeiras;;;;;;;;;;;;;;;;;;3;114;30;29;;;
-DZM;DZM - RATEIO; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;239;239;265;271;274
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Financeiras;;;;;;;;;;;;;;;;;;3;;;;;;
-DZM;DZM - Terceirização; Despesas Financeiras;;;;;;;;;;;;;;;;;;194;108;;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;9;1;134
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;;2;1;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;46;29;27;130;38;21;0
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Financeiras;;;;;;;;;;;;;;;;;;62;46;45;40;41;66;12
-Mar_BR;Eventuais B2G; Despesas Financeiras;;;;;;;;;;;;;;;;;;19;;;96;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;54
-Mar_BR;Rede Alpha; Despesas Financeiras;;;;;;;;;;;;;;;;;;1;6;0;11;2;15;2
-Mar_BR;Rossi Advogados; Despesas Financeiras;;;;;;;;;;;;;;;;;;0;0;2;3;1;3;3
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Financeiras;;;;;;;;;;;;;;;;;;521;436;397;1738;388;326;161
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;59;49;48;174;27;46;32
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;16
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;15;9
-Mar_BR;Ybox; Despesas Financeiras;;;;;;;;;;;;;;;;;;;1;14;;;;
-DZM;DZM - Mar Brasil; Despesas Variáveis;;;;;;;;;;;;;;;;;;124;49;;;;;
-DZM;DZM - Pessoal; Despesas Variáveis;;;;;;;;;;;;;;;;;;250;32;10;;;;
-DZM;DZM - Rancho da Praia; Despesas Variáveis;;;;;;;;;;;;;;;;;;49;97;;;;;
-DZM;DZM - RATEIO; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;24;;;94
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;171;;234
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;5;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;4;;8;10;36;15;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Variáveis;;;;;;;;;;;;;;;;;;7;;14;;;26;20
-Mar_BR;D.Z.M; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;11
-Mar_BR;Eventuais B2G; Despesas Variáveis;;;;;;;;;;;;;;;;;;4;;;10;;;
-Mar_BR;Rede Alpha; Despesas Variáveis;;;;;;;;;;;;;;;;;;0;;1;1;;1;2
-Mar_BR;Rossi Advogados; Despesas Variáveis;;;;;;;;;;;;;;;;;;0;;0;0;;0;0
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;61;;123;141;456;145;271
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;6;;13;36;50;16;30
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;25
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;7;14
-DZM;DZM - Mar Brasil; Despesas Administrativas;;;;;;;;;;;;;;;;;;1100;300;1100;;100;;
-DZM;DZM - Rancho da Praia; Despesas Administrativas;;;;;;;;;;;;;;;;;;295;295;295;295;591;;294
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;961;;1065
-Mar_BR;Bertioga SEDUC 378/2024 54/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;760;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;182;213;191;197;200;;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Administrativas;;;;;;;;;;;;;;;;;;323;311;319;;;;57
-Mar_BR;Eventuais B2G; Despesas Administrativas;;;;;;;;;;;;;;;;;;156;;;200;;;
-Mar_BR;Rede Alpha; Despesas Administrativas;;;;;;;;;;;;;;;;;;13;16;15;18;;;5
-Mar_BR;Rossi Advogados; Despesas Administrativas;;;;;;;;;;;;;;;;;;5;6;5;5;;;1
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Administrativas;;;;;;;;;;;;;;;;;;2664;3102;2779;2875;2562;;780
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;263;347;303;313;280;;85
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;73
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;40
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Terceirização de Mão de Obra;;;;;;;;;;;;;;;;;;;;;;12894;;34726
-Mar_BR;Bertioga SEDUC 378/2024 54/2024;Terceirização de Mão de Obra;;;;;;;;;;;;;;;;;;912;742;1306;;;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024;Terceirização de Mão de Obra;;;;;;;;;;;;;;;;;;7117;6829;5668;8924;2686;3274;
-Mar_BR;Eventuais B2G;Terceirização de Mão de Obra;;;;;;;;;;;;;;;;;;1123;1234;864;864;;;
-Mar_BR;Rede Alpha;Terceirização de Mão de Obra;;;;;;;;;;;;;;;;;;96;106;0;74;;;
-Mar_BR;Rossi Advogados;Terceirização de Mão de Obra;;;;;;;;;;;;;;;;;;34;37;0;26;;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024;Terceirização de Mão de Obra;;;;;;;;;;;;;;;;;;34947;40780;47253;41740;34385;51202;40163
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Terceirização de Mão de Obra;;;;;;;;;;;;;;;;;;;;;;3761;;
-DZM;DZM - Terceirização; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;44229;49728;55090;51628;53726;63276;74889
-DZM;Ybox - Terceirização; Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;12220;3464;3345;6714
-DZM;DZM - Ribeirópolis - Galpão 0643; Despesas Variáveis;;;;;;;;;;;;;;;;;;;450;;;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;111;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;23;;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;296;;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;32;;
-DZM;DZM - Rancho da Praia; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;1174;;;;252
-DZM;DZM - RATEIO; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;253;;;
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;3790;;1068
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas com Pessoal;;;;;;;;;;;;;;;;;;116;123;223;273;790;81;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas com Pessoal;;;;;;;;;;;;;;;;;;206;179;373;;;275;91
-Mar_BR;D.Z.M; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;619
-Mar_BR;Eventuais B2G; Despesas com Pessoal;;;;;;;;;;;;;;;;;;99;;;277;;;
-Mar_BR;Eventuais B2G; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;240
-Mar_BR;Rede Alpha; Despesas com Pessoal;;;;;;;;;;;;;;;;;;9;9;17;25;;7;9
-Mar_BR;Rossi Advogados; Despesas com Pessoal;;;;;;;;;;;;;;;;;;3;3;6;8;;2;2
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas com Pessoal;;;;;;;;;;;;;;;;;;1700;1787;3253;3987;10108;1271;1236
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;168;200;354;434;1106;138;135
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;116
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;66;64
-DZM;DZM - Pessoal; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;500;
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;91;4666;4741;4674;4976;5370;5677
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;240;4013;3831;6449;6641;5869;5869
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;838;838
-DZM;DZM - Rancho da Praia; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;619;;84;311;;
-DZM;DZM - Terceirização; Despesas com Pessoal;;;;;;;;;;;;;;;;;;677;5289;5223;6817;6876;5903;6914
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;3005;2869;3004;3142;2595;2595
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;338;;338
-DZM;DZM - Mar Brasil; Ativos;;;;;;;;;;;;;;;;;;;;;771;;;1500
-DZM;Tchandra Coelho; Ativos;;;;;;;;;;;;;;;;;;;;;;;;94
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;1104;;17259
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Ativos;;;;;;;;;;;;;;;;;;232;;243;251;263;209;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Ativos;;;;;;;;;;;;;;;;;;412;;406;;43;708;1468
-Mar_BR;Eventuais B2G; Ativos;;;;;;;;;;;;;;;;;;199;;;255;;;
-Mar_BR;Rede Alpha; Ativos;;;;;;;;;;;;;;;;;;17;;19;23;2;17;141
-Mar_BR;Rossi Advogados; Ativos;;;;;;;;;;;;;;;;;;6;;6;7;1;6;35
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Ativos;;;;;;;;;;;;;;;;;;3399;;3541;3666;3445;3273;20015
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Ativos;;;;;;;;;;;;;;;;;;336;;386;399;375;356;2175
-Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;;1867
-Mar_BR;São Paulo CRSN PSP 6018/2025; Ativos;;;;;;;;;;;;;;;;;;;;;;;169;1028
-Mar_BR;Bertioga SEDUC 3151/2025 135/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;1404;;
-Mar_BR;Bertioga SESAP 1390/2024 71/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;44;;293;603;
-Mar_BR;Capina Elétrica / MAM / Crestani / Zasso; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;73;;;2038;
-Mar_BR;Rede Alpha; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;3;;;49;
-Mar_BR;Rossi Advogados; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;1;;;18;
-Mar_BR;Santos STS Seduc 36693/2022 12/2024; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;638;;3744;9421;
-Mar_BR;São Paulo CMSP CSP 274/2024 03/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;69;;410;1026;
-Mar_BR;São Paulo CRSN PSP 6018/2025; Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;486;
+Empresa;Projeto;Categoria;jan/24;fev/24;mar/24;abr/24;mai/24;jun/24;jul/24;ago/24;set/24;out/24;nov/24;dez/24;jan/25;fev/25;mar/25;abr/25;mai/25;jun/25;jul/25;ago/25;set/25;out/25;nov/25;dez/25;jan/26;fev/26
+Mar_BR;Oftalmo;Equipamentos;12;12;12;12;12;12;12;12;12;12;12;12;12;12;12;12;;;;;;;;;;
+Mar_BR;PG - 171;Equipamentos;1820;1820;1820;1820;1820;1820;1820;1820;1820;1820;1820;;;;;;;;;;;;;;;
+Mar_BR;PG - Chiller;Equipamentos;301;301;301;301;301;301;301;301;301;301;301;301;;;;;;;;;;;;;;
+Mar_BR;Rede Alpha;Equipamentos;27;27;27;27;27;27;27;27;24;24;24;24;18;18;18;18;18;18;18;18;18;18;18;24;24;24
+Mar_BR;Rossi Advogados;Equipamentos;;;;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5;5
+Mar_BR;Santos STS Seduc 36693/2022 12/2024;Equipamentos;;1904;1904;1904;1904;1904;1904;1904;1904;1904;1904;1904;1904;1904;2284;2284;2284;2284;2284;2284;2284;2284;2284;2284;2284;2284
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Equipamentos;;;;;;;;;;;;;;;408;408;408;408;408;408;408;408;408;381;381;381
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Equipamentos;;;;;;;;;;;;;;;;;;;;;;;;;;64
+Conectius;Conectius - Rateio;Ativos;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;6333;8261;10900;7076;7432;6590;6608;6540;
+Conectius;Conectius - Rateio;Consórcios - a contemplar;694;694;694;694;694;694;1384;1384;1384;1384;1384;1384;676;663;683;686;693;707;695;710;681;686;699;685;689;
+Conectius;Conectius - Rateio;Custo dos Serviços Prestados;;;;9982;7366;7305;7305;7305;7305;7305;1290;7305;8262;8362;8262;8262;8707;8262;0;1016;;;;;;
+Conectius;Conectius - Rateio;Despesas Administrativas;3524;3927;0;1748;1079;989;1555;1753;1710;1465;2423;4549;4457;860;2967;3420;2139;1940;5950;1844;3691;4001;2635;4652;1184,28;
+Conectius;Conectius - Rateio;Despesas com Pessoal;45755;33709;12608;3458;2547;3152;2576;3014;3162;4231;3494;6540;9594;9138;8052;6224;8489;3561;1418;0;8668;167;;;;
+Conectius;Conectius - Rateio;Despesas Financeiras;;;;;;;;;;;;;;;;;;;8521;9316;7678,5;6152;6207;7810;6281;
+Conectius;Conectius - Rateio;Despesas Variáveis;0;0;0;1646;921;831;1397;1595;1595;1063;2308;4434;4342;745;2852;3296;1887;1809;5950;1844;;;;;;
+Conectius;Conectius - Rateio;Impostos;24600;15051;2497;701;816;446;2151;1376;1470;375;355;371;892;1731;446;446;446;870;881;0;;515;167;;;
+Conectius;Conectius - Rateio;Outras Receitas;0;0;0;0;0;0;0;0;0;0;0;0;3591;3591;3591;3591;3591;3591;3591;3591;3591;;;;;
+Conectius;Conectius - Rateio;Plano de Saúde;0;0;0;0;0;0;0;0;0;0;0;0;5395;5395;5395;5395;5395;5395;5395;6179,14;9485;1314;6785;6785;6785;
+Conectius;Conectius - Rateio;Receita Bruta de Vendas;168883;102034;7916;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;8587;;;100000;15622,58;
+Conectius;Conectius - Rateio;Receitas Financeiras;;;;;;;;;;;;;;;;;;0;0,02;0,77;0,14;0,49;0;;0,36;
+Ybox;Ybox;Despesas Administrativas;1029;821;578;2006;7984;4228;4282;506;506;506;568;3763;2826;1891;2071;1953;3347;1987;29453;7680,47;9501;4332,32;19672,47;18569,3;21944;
+Ybox;Ybox;Dividendos;17749;19067;19640;19640;19328;19328;19328;19328;19328;27840;8977;9115;19112;17899;15003;17899;17899;17899;24795;35284;24398;29398,22;22224,93;24333;25146;
+Ybox;Ybox;Impostos;6472;6078;6068;6059;6049;6038;6334;6015;6004;6045;6084;6107;6149;6174;6158;6151;6144;8990;2846;4880;4802;4802;3526,88;3526,88;3243;
+Ybox;Ybox;Jurídico;3500;3500;3500;3587;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;3500;;;;;;;
+Ybox;Ybox;Juros e devoluções;7626;8319;7626;7626;7626;3500;3500;3500;0;3500;0;0;3500;3500;3500;3500;3500;3500;3500;;;;1258,04;;;
+Ybox;Ybox;Receita Bruta de Vendas;41592;41592;41592;41592;41592;45718;45718;41592;45718;46473;45258;45258;43118;43694;43118;43118;43118;43118;43118;43118;44357;46137,03;49160,62;46759,18;46759;
+DZM;DZM - Alcalinas;Despesas Administrativas;966;1111;1347;1684;2022;850;1024;919;1390;991;897;543;1498;930;484;484;484;;;;;;;;;
+DZM;DZM - Audiovisual;Despesas Administrativas;0;0;0;0;0;175;61;83;83;157;496;287;130;446;176;127;0;;;;;;;;;
+DZM;DZM - Imóveis Guilhermina;Despesas Administrativas;0;0;0;0;74;4;2;112;294;117;202;497;515;554;420;231;14;;;;;;;;;
+DZM;DZM - Rancho da Praia;Despesas Administrativas;9037;6235;3270;3996;7788;2998;1841;6663;23003;33226;53884;46072;19672;12349;5128;14443;10500;;;;;;;;;
+DZM;DZM - Terceirização;Despesas Administrativas;0;0;0;314;1115;1684;1368;1447;1502;1870;2357;3370;1963;8104;334;1206;1668;;;;;;;;;
+DZM;DZM - Alcalinas;Custo dos Serviços Prestados;4642;10026;6302;11579;4889;3590;3918;717;3171;0;0;0;0;0;0;0;0;;;;;;;;;
+DZM;DZM - Audiovisual;Custo dos Serviços Prestados;0;0;0;0;0;55;463;0;0;0;0;0;0;87;0;0;0;;;;;;;;;
+DZM;DZM - Imóveis Guilhermina;Custo dos Serviços Prestados;0;0;0;0;0;5;33;0;0;0;0;0;0;6;0;0;0;;;;;;;;;
+DZM;DZM - Rancho da Praia;Custo dos Serviços Prestados;2994;3750;4237;3935;3931;4331;4357;5313;7970;27602;10974;17015;19093;1056;5225;22127;3133;;;;;;;;;
+DZM;DZM - Terceirização;Custo dos Serviços Prestados;0;0;26979;23096;36264;37177;34895;39097;39813;41486;86617;33042;31171;21875;31978;32768;39661;;;;;;;;;
+DZM;DZM - Alcalinas;Impostos;49;172;1016;716;516;234;4;202;1307;0;0;0;0;0;0;0;0;;;;;;;;;
+DZM;DZM - Audiovisual;Impostos;0;0;0;0;0;649;715;737;787;920;953;945;1021;1080;1005;1085;0;;;;;;;;;
+DZM;DZM - Imóveis Guilhermina;Impostos;0;0;0;0;67;2;0;212;217;226;228;234;1490;723;405;418;270;;;;;;;;;
+DZM;DZM - Rancho da Praia;Impostos;331;141;500;214;165;71;58;956;69;81;467;2250;29;45;116;48;341;;;;;;;;;
+DZM;DZM - Terceirização;Impostos;0;0;0;0;0;4372;2659;3356;3154;4468;4571;0;13560;5009;0;3830;10902;;;;;;;;;
+DZM;DZM - Alcalinas;Receita Bruta de Vendas;432;3226;5382;13983;6677;3811;0;6677;16590;0;0;0;0;0;0;0;0;;;;;;;;;
+DZM;DZM - Audiovisual;Receita Bruta de Vendas;0;0;0;0;0;10400;10400;10400;10400;10400;10400;10400;10400;10400;10400;10400;0;;;;;;;;;
+DZM;DZM - Imóveis Guilhermina;Receita Bruta de Vendas;0;0;0;0;874;944;869;879;858;864;905;891;919;972;981;930;844;;;;;;;;;
+DZM;DZM - Rancho da Praia;Receita Bruta de Vendas;2854;2688;2688;4088;2162;10572;8529;14817;14842;16695;6749;22772;14134;14400;13282;14190;3215;;;;;;;;;
+DZM;DZM - Terceirização;Receita Bruta de Vendas;0;0;0;0;0;72197;38731;47623;41603;50702;50073;0;138423;47106;0;36665;95774;;;;;;;;;
+DZM;DZM - Mar Brasil;Recuperação de Despesas Variáveis;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363;5363
+Mar_BR;Rossi Advogados;Ativos;27883;32055;32055;34895;34120;34120;34295;34295;35052;36671;37788;34199;34199;35693;36027;36027;148385,2;;;;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Corretiva - B2B;3338;3347;3338;0;0;0;2147;48;7;0;0;0;0;0;0;0;2260;;;;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;48;408;288;619;588;2159;;;;;;;;;
+Mar_BR;Mar Brasil - Rateio;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;;;;;;;;;
+Mar_BR;Mar Brasil - Estoque;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;;;;;;;;;
+Mar_BR;Oftalmo;Corretiva - B2G;0;0;0;0;8;61;74;61;60;60;61;78;225;179;349;181;0;;;;;;;;;
+Mar_BR;Eventuais B2G;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - 171;Corretiva - B2G;33467;13252;29059;36038;14233;18788;2820;4017;5821;3480;5425;891;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - Chiller;Corretiva - B2G;9370;2631;4511;7569;5518;5168;1222;2410;7094;2103;2855;976;0;0;0;0;0;;;;;;;;;
+Mar_BR;Santos STS Seduc 36693/2022 12/2024;Corretiva - B2G;1169;0;1438;8580;5963;13241;15366;8648;13589;13581;23574;3181;23209;14640;21685;42689;29229;;;;;;;;;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Corretiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;6516;636;4879;;;;;;;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Corretiva - B2G;0;0;0;0;0;0;0;0;0;588;61;281;1376;13539;14508;1795;2339;;;;;;;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Custo dos Serviços Prestados;0;0;0;0;0;0;0;0;0;0;2538;179;2447;5939;628;0;1834;;;;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Custo dos Serviços Prestados;0;0;0;0;0;0;0;0;0;0;0;2079;1112;968;1200;1671;1710;;;;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Custo dos Serviços Prestados;35871;81350;36282;144;131;415;2104;1773;4581;72;72;0;0;0;0;0;1672;;;;;;;;;
+Mar_BR;Oftalmo;Custo dos Serviços Prestados;563;970;602;784;2184;702;283;584;853;995;565;579;545;539;621;640;0;;;;;;;;;
+Mar_BR;PG - 171;Custo dos Serviços Prestados;10042;12289;7690;5850;15427;3923;1898;4028;7602;8399;4101;120;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - Chiller;Custo dos Serviços Prestados;2622;3636;1131;475;1409;475;343;394;715;853;443;444;0;0;0;0;0;;;;;;;;;
+Mar_BR;Santos STS Seduc 36693/2022 12/2024;Custo dos Serviços Prestados;13632;10000;24999;20998;56787;18759;10601;17654;24968;29944;91931;13517;11729;9301;23823;20000;17015;;;;;;;;;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Custo dos Serviços Prestados;0;0;0;0;0;0;0;0;0;0;0;0;0;0;6971;8333;1421;;;;;;;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Despesas Administrativas;0;0;0;0;0;0;0;0;0;78896;12340;7917;23954;42979;979;524;12234;;;;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas Administrativas;0;0;0;0;0;0;0;0;0;0;0;12897;10002;9366;11630;10720;3784;;;;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas Administrativas;10908;7847;177;625;787;9230;13532;8632;9143;60;0;0;0;0;0;0;4840;;;;;;;;;
+Mar_BR;Oftalmo;Despesas Administrativas;4300;2692;3132;5350;4466;2158;3889;3869;3873;3726;3369;3612;4587;4076;3584;7697;0;;;;;;;;;
+Mar_BR;PG - 171;Despesas Administrativas;41402;31596;25028;44846;36647;31975;35549;32850;41778;40329;15764;3577;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - Chiller;Despesas Administrativas;10936;5598;1673;5682;5864;5710;4813;5593;5719;4728;2515;2406;0;0;0;0;0;;;;;;;;;
+Mar_BR;Santos STS Seduc 36693/2022 12/2024;Despesas Administrativas;8617;24605;45606;106479;79212;78718;74295;71182;91577;88132;80804;110405;109134;120672;111486;133010;96586;;;;;;;;;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas Administrativas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;7195;8559;6364;;;;;;;;;
+Mar_BR;Oftalmo;Despesas com Pessoal;0;0;0;0;0;0;0;0;0;261;0;0;43;0;1;0;0;;;;;;;;;
+Mar_BR;PG - 171;Despesas com Pessoal;35482;32205;36193;37228;36222;34094;45586;50456;40376;41118;34080;20451;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - Chiller;Despesas com Pessoal;4696;6794;7879;7526;9652;3896;13583;8527;9056;9025;8102;2812;0;0;0;0;0;;;;;;;;;
+Mar_BR;Rede Alpha;Despesas com Pessoal;0;0;0;0;0;0;0;0;0;0;0;0;274;274;274;274;274;;;;;;;;;
+Mar_BR;Rossi Advogados;Despesas com Pessoal;0;0;0;0;0;0;0;0;0;0;0;0;96;96;96;96;96;;;;;;;;;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas com Pessoal;0;0;0;0;0;0;0;0;0;0;0;0;0;0;14269;24633;19277;;;;;;;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Impostos;0;0;0;0;0;0;0;0;0;6777;6840;6782;27122;1497;0;0;5545;;;;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Impostos;0;0;0;0;0;0;0;0;0;0;0;3616;3616;3851;3616;3616;2668;;;;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Impostos;8577;15621;10445;0;0;543;26037;12503;462;0;0;136;109;4000;104;1904;1930;;;;;;;;;
+Mar_BR;Oftalmo;Impostos;2068;1632;1680;960;960;1220;1653;1653;1220;1653;1653;1220;1220;1220;1220;1337;0;;;;;;;;;
+Mar_BR;PG - 171;Impostos;23687;22093;22784;15250;10103;14153;14153;14129;14137;1429;165;0;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - Chiller;Impostos;8011;6479;2310;1748;1020;1488;1488;1488;1488;1488;1488;1488;0;0;0;0;0;;;;;;;;;
+Mar_BR;Rede Alpha;Impostos;0;0;0;0;0;0;227;227;202;202;251;153;166;1006;151;151;151;;;;;;;;;
+Mar_BR;Rossi Advogados;Impostos;0;0;0;25,27;53;53;53;53;53;53;53;0;29;67;67;67;67;;;;;;;;;
+Mar_BR;Santos STS Seduc 36693/2022 12/2024;Impostos;0;0;70589;51647;51677;43992;43992;43992;43992;43992;43992;43992;43992;43992;52772;52772;52772;;;;;;;;;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Impostos;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3710;5229;5705;;;;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Preventiva - B2B;0;0;0;0;0;0;67;0;5;0;0;0;0;0;0;0;25;;;;;;;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Preventiva - B2G;0;0;0;0;0;0;0;0;0;0;27;1407;1206;1326;1025;112;25;;;;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Preventiva - B2G;0;0;0;0;0;0;0;0;0;0;0;66;1701;264;459;49;480;;;;;;;;;
+Mar_BR;Oftalmo;Preventiva - B2G;0;1;0;18;12;1;7;0;1;8;7;16;220;111;213;25;0;;;;;;;;;
+Mar_BR;Santos STS Seduc 36693/2022 12/2024;Preventiva - B2G;0;34;0;421;747;116;894;377;230;208;174;423;5977;4036;5724;697;1830;;;;;;;;;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Preventiva - B2G;0;0;0;0;0;0;0;0;0;0;0;0;0;0;70;49;22;;;;;;;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;3377;3409;3444;13772;733;0;0;2798;;;;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;0;0;1836;1815;1815;1804;1824;1819;;;;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;0;0;398;312;9536;299;5517;5584;;;;;;;;;
+Mar_BR;Oftalmo;Provisão - IRPJ e CSSL Trimestral;0;0;0;825;824;824;838;831;824;824;824;839;810;830;825;333;0;;;;;;;;;
+Mar_BR;Eventuais B2G;Provisão - IRPJ e CSSL Trimestral;0;0;0;8459;7057;7062;7179;7107;7051;7044;0;0;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - 171;Provisão - IRPJ e CSSL Trimestral;0;0;0;8459;7057;7062;7179;7107;7051;7044;0;0;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - Chiller;Provisão - IRPJ e CSSL Trimestral;0;0;0;743;742;743;755;748;742;742;741;755;0;0;0;0;0;;;;;;;;;
+Mar_BR;Rede Alpha;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;362;359;319;319;396;245;261;1846;239;241;240;;;;;;;;;
+Mar_BR;Rossi Advogados;Provisão - IRPJ e CSSL Trimestral;0;0;0;40;84;84;84;84;84;84;84;0;83;45;45;46;46;;;;;;;;;
+Mar_BR;Santos STS Seduc 36693/2022 12/2024;Provisão - IRPJ e CSSL Trimestral;0;0;0;22430;21935;21964;22315;22129;21942;21934;21924;22339;21553;22085;26332;26628;26548;;;;;;;;;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1851;2638;2870;;;;;;;;;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Provisão - IRPJ e CSSL Trimestral;0;0;0;0;0;0;0;0;0;0;0;1836;1815;1815;1804;1824;1819;;;;;;;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Receita Bruta de Vendas;0;0;0;0;0;0;0;0;0;59190;1488;59240;236878;13080;0;0;48432;;;;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Receita Bruta de Vendas;0;0;0;0;0;0;0;0;0;0;0;38947;35344;38026;31583;31583;31583;;;;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Receita Bruta de Vendas;57500;57500;80583;0;0;2828;138349;45242;95092;0;0;3750;3000;90410;2850;52166;52886;;;;;;;;;
+Mar_BR;Santos STS Seduc 36693/2022 12/2024;Receita Bruta de Vendas;0;0;384217;384217;384217;384217;384217;384217;384217;384217;384217;384217;384217;384217;460899;460899;460899;;;;;;;;;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Receita Bruta de Vendas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;32409;45673;49831;;;;;;;;;
+Mar_BR;Oftalmo;Receita Bruta de Vendas;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;14441;5776;0;;;;;;;;;
+Mar_BR;Rede Alpha;Receita Bruta de Vendas;0;0;0;0;0;0;3420;3420;3040;3040;3775;2312;2508;17509;2280;2280;2280;;;;;;;;;
+Mar_BR;Rossi Advogados;Receita Bruta de Vendas;0;0;0;380;800;800;800;800;800;800;800;0;800;800;800;800;800;;;;;;;;;
+Mar_BR;PG - 171;Receita Bruta de Vendas;120824;126028;125760;136335;123608;123538;123608;123398;123468;123398;0;0;0;0;0;0;0;;;;;;;;;
+Mar_BR;PG - Chiller;Receita Bruta de Vendas;40069;38143;13000;13000;13000;13000;13000;13000;13000;13000;13000;13000;0;0;0;0;0;;;;;;;;;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;2520;;3516;1333;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;;;;600;;10606;198;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;;;;;682;;1129;285;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;13;7504;4576;12755;15046;9372
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;4421;9092;;14199;7192;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;1652;1956;5091;5985;10134;8049
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Credenciado TI;;;;;;;;;;;;;;;;;;;;;;3540;;4623;1386;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Preventiva - B2G;;;;;;;;;;;;;;;;;;;;;;738;46;208;337;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;;;;;4387;;23440;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Corretiva - B2G;;;;;;;;;;;;;;;;;;5885;2764;3356;228;225;228;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Credenciado Operacional;;;;;;;;;;;;;;;;;;3944;7934;8500;4100;;;;;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Preventiva - B2G;;;;;;;;;;;;;;;;;;;;;110;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;451;779;412;525;416;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;80;26;27;125;133;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;143;151;150;155;142;126;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Corretiva - B2G;;;;;;;;;;;;;;;;;;1227;1305;1195;1497;1771;677;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado Administrativo;;;;;;;;;;;;;;;;;;2107;1852;2378;2921;2403;2175;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado Operacional;;;;;;;;;;;;;;;;;;4329;84;130;344;536;2354;174;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Credenciado TI;;;;;;;;;;;;;;;;;;854;800;660;1065;738;583;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Preventiva - B2G;;;;;;;;;;;;;;;;;;20;139;289;250;266;56;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;1574;1683;1653;1729;2747;1704;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;660;1302;;;1405;299;;57
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;117;44;;;448;899;;14
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;254;221;252;;;424;96;;14
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Corretiva - B2G;;;;;;;;;;;;;;;;;;;1233;1064;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado Administrativo;;;;;;;;;;;;;;;;;;3738;2706;3977;101;1137;5442;1207;194;249
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado Operacional;;;;;;;;;;;;;;;;;;141;122;218;;;;138;;27
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Credenciado TI;;;;;;;;;;;;;;;;;;1516;1169;1104;;;1192;393;;65
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Preventiva - B2G;;;;;;;;;;;;;;;;;;;204;484;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;8694;7335;8342;;;10549;3610;;
+Mar_BR;Eventuais B2G;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;418;;;;;
+Mar_BR;Eventuais B2G;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;;;28;;;;;
+Mar_BR;Eventuais B2G;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;123;;;157;;;;;
+Mar_BR;Eventuais B2G;Corretiva - B2G;;;;;;;;;;;;;;;;;;1077;;;1516;;1500;;;
+Mar_BR;Eventuais B2G;Credenciado Administrativo;;;;;;;;;;;;;;;;;;1802;;;1932;;;;;
+Mar_BR;Eventuais B2G;Credenciado Operacional;;;;;;;;;;;;;;;;;;68;;;;;;;;
+Mar_BR;Eventuais B2G;Credenciado TI;;;;;;;;;;;;;;;;;;731;;;1080;;;;;
+Mar_BR;Eventuais B2G;Preventiva - B2G;;;;;;;;;;;;;;;;;;18;;;254;;;;;
+Mar_BR;Eventuais B2G;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;1347;;;3605;;;;;
+Mar_BR;Mar Brasil - Estoque;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;3352;;;;3619;16481
+Mar_BR;Rede Alpha;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;35;60;37;;34;29;73;62
+Mar_BR;Rede Alpha;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;6;2;2;;11;86;11;15
+Mar_BR;Rede Alpha;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;11;12;;14;;10;9;16;15
+Mar_BR;Rede Alpha;Corretiva - B2G;;;;;;;;;;;;;;;;;;;65;49;134;;26;742;271;
+Mar_BR;Rede Alpha;Credenciado Administrativo;;;;;;;;;;;;;;;;;;154;142;185;180;42;178;116;298;270
+Mar_BR;Rede Alpha;Credenciado Operacional;;;;;;;;;;;;;;;;;;6;6;10;;11;12;13;204;352
+Mar_BR;Rede Alpha;Credenciado TI;;;;;;;;;;;;;;;;;;63;62;51;96;;13;38;76;71
+Mar_BR;Rede Alpha;Preventiva - B2G;;;;;;;;;;;;;;;;;;;11;22;22;4;3;;;
+Mar_BR;Rede Alpha;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;115;129;128;155;343;342;190;186;186
+Mar_BR;Rossi Advogados;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;12;21;11;;12;7;19;16
+Mar_BR;Rossi Advogados;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;2;1;1;;4;22;3;4
+Mar_BR;Rossi Advogados;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;4;4;;4;;4;2;4;4
+Mar_BR;Rossi Advogados;Corretiva - B2G;;;;;;;;;;;;;;;;;;;22;17;41;;9;;3;
+Mar_BR;Rossi Advogados;Credenciado Administrativo;;;;;;;;;;;;;;;;;;54;49;63;55;15;64;29;77;72
+Mar_BR;Rossi Advogados;Credenciado Operacional;;;;;;;;;;;;;;;;;;2;2;3;;4;4;3;393;146
+Mar_BR;Rossi Advogados;Credenciado TI;;;;;;;;;;;;;;;;;;22;21;17;29;;5;9;20;19
+Mar_BR;Rossi Advogados;Preventiva - B2G;;;;;;;;;;;;;;;;;;;4;8;7;1;1;;;
+Mar_BR;Rossi Advogados;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;41;44;44;48;49;49;91;90;90
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;6577;11352;6016;6720;6496;4067;10376;8881
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Adiantamento - Credenciado Operacional;;;;;;;;;;;;;;;;;;;6500;;;;;;3500;
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;1165;385;398;1600;2072;12269;1541;2107
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;2098;2205;2193;2263;1818;1962;1306;2215;2181
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Corretiva - B2G;;;;;;;;;;;;;;;;;;19212;22993;13071;28422;19795;14537;20119;15424;16724
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Credenciado Administrativo;;;;;;;;;;;;;;;;;;30819;26976;34662;41008;32200;33996;16426;42492;38678
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Credenciado Operacional;;;;;;;;;;;;;;;;;;25905;22537;40154;27221;23576;29637;31137;41766;30799
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Credenciado TI;;;;;;;;;;;;;;;;;;12496;11648;9620;15538;9441;8675;5348;10787;10139
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Preventiva - B2G;;;;;;;;;;;;;;;;;;270;2247;4434;3654;2644;879;240;2607;
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;23030;24512;24097;25238;38450;26643;27114;26482;26482
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;735;1236;655;735;707;443;1131;1073
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;130;42;43;175;226;1337;168;252
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;207;247;245;247;199;214;142;242;264
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;1681;1841;1154;2594;2250;7069;2945;2689;2585
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;3046;3016;3774;4474;3518;3702;1789;4644;4666
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;114;136;206;482;789;4053;4249;5482;4299
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Credenciado TI;;;;;;;;;;;;;;;;;;1235;1302;1048;1693;1033;882;583;1176;1225
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Preventiva - B2G;;;;;;;;;;;;;;;;;;1828;227;459;398;1143;96;26;282;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;2276;2740;2624;2749;4194;2902;2954;2885;2885
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;;;380;;
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;;1148;;
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;;;;;;;122;;
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;;;913;883;913;1013
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;;;1536;238;
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;;;;176;;
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;;500;;
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Preventiva - B2G;;;;;;;;;;;;;;;;;;;;;;;;22;;
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;;;;;;;2537;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;;335;209;535;458
+Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;;4500;;;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Adiantamento - Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;107;634;79;109
+Mar_BR;São Paulo CRSN PSP 6018/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;;;;;;101;67;114;112
+Mar_BR;São Paulo CRSN PSP 6018/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;;;546;485;5827;5853
+Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;410;1752;846;2189;1994
+Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;;103;119;97;795;215
+Mar_BR;São Paulo CRSN PSP 6018/2025;Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;125;275;556;523
+Mar_BR;São Paulo CRSN PSP 6018/2025;Preventiva - B2G;;;;;;;;;;;;;;;;;;;;;;;45;12;134;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Provisão - IRPJ e CSSL Trimestral;;;;;;;;;;;;;;;;;;;;;;;1374;1398;1366;1366
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Adiantamento - Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;;;;;1158
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Consórcios - a contemplar;;;;;;;;;;;;;;;;;;;;;;;;;;284
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Corretiva - B2G;;;;;;;;;;;;;;;;;;;;;;;;;;27
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Credenciado Administrativo;;;;;;;;;;;;;;;;;;;;;;;;;;4007
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Credenciado Operacional;;;;;;;;;;;;;;;;;;;;;;;;;;5250
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Credenciado TI;;;;;;;;;;;;;;;;;;;;;;;;;;1322
+DZM;DZM - Mar Brasil;Ativos;;;;;;;;;;;;;;;;;;;;;771;;;1500;;
+DZM;DZM - Rancho da Praia;Ativos;;;;;;;;;;;;;;;;;;;1613;244;2514;827;1257;1390;244;244
+DZM;DZM - RATEIO;Ativos;;;;;;;;;;;;;;;;;;;;139;;;;;;
+DZM;DZM - Terceirização;Ativos;;;;;;;;;;;;;;;;;;;;;758;;;;;
+Mar_BR;Tchandra Coelho;Ativos;;;;;;;;;;;;;;;;;;;;;;2569;2631;2726;3895;10240
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Ativos;;;;;;;;;;;;;;;;;;;;;;5480;675;11459;4355;1308
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Ativos;;;;;;;;;;;;;;;;;;649;725;1340;1568;1174;943;;;29
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Ativos;;;;;;;;;;;;;;;;;;6515;6423;7603;5750;43;7483;6338;5363;117
+Mar_BR;Casa Tupi 771 - Anexo;Ativos;;;;;;;;;;;;;;;;;;;;;;;;2213;12856;2331
+Mar_BR;D.Z.M;Ativos;;;;;;;;;;;;;;;;;;287;;393;676;;;289;;
+Mar_BR;Eventuais B2G;Ativos;;;;;;;;;;;;;;;;;;555;;;1332;;;;;
+Mar_BR;Mar Brasil - Estoque;Ativos;;;;;;;;;;;;;;;;;;;;;;;;;;685
+Mar_BR;Rede Alpha;Ativos;;;;;;;;;;;;;;;;;;48;56;104;120;2;45;93;172;129
+Mar_BR;Rossi Advogados;Ativos;;;;;;;;;;;;;;;;;;17;19;36;37;1;16;23;45;34
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Ativos;;;;;;;;;;;;;;;;;;9499;10561;19525;22891;15113;14082;13306;24525;18550
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Ativos;;;;;;;;;;;;;;;;;;939;1181;2126;2460;1651;1498;1444;2673;2232
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Ativos;;;;;;;;;;;;;;;;;;;;;;;;1240;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Ativos;;;;;;;;;;;;;;;;;;;;;;;445;683;1264;956
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Ativos;;;;;;;;;;;;;;;;;;;;;;;;;;1841
+DZM;DZM - Locação 647;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;;3272;3272
+DZM;DZM - Mar Brasil;Despesas com Pessoal;;;;;;;;;;;;;;;;;;1000;;;350;;;;;
+DZM;DZM - Pessoal;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;500;;;
+DZM;DZM - Rancho da Praia;Despesas com Pessoal;;;;;;;;;;;;;;;;;;2996;4112;4229;3805;2811;3300;5450;;1650
+DZM;DZM - RATEIO;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;1848;;;;;
+DZM;DZM - Terceirização;Despesas com Pessoal;;;;;;;;;;;;;;;;;;33829;47862;53341;41855;58482;51935;52643;54048;70809
+DZM;Tchandra Coelho;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;;933;933
+DZM;Ybox - Terceirização;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;;;252
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;4421;19723;;34307;11892;2000
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas com Pessoal;;;;;;;;;;;;;;;;;;3671;3345;4106;4739;4618;3420;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas com Pessoal;;;;;;;;;;;;;;;;;;6513;4889;6867;101;1137;8874;2915;194;408
+Mar_BR;D.Z.M;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;619;;
+Mar_BR;Eventuais B2G;Despesas com Pessoal;;;;;;;;;;;;;;;;;;3140;;;3777;;;;;
+Mar_BR;Mar Brasil - Rateio;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;240;847;847
+Mar_BR;Rede Alpha;Despesas com Pessoal;;;;;;;;;;;;;;;;;;269;257;319;343;42;245;279;498;442
+Mar_BR;Rossi Advogados;Despesas com Pessoal;;;;;;;;;;;;;;;;;;95;88;109;105;15;88;70;129;117
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas com Pessoal;;;;;;;;;;;;;;;;;;53695;48735;59849;67544;60549;53028;39687;77859;63221
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas com Pessoal;;;;;;;;;;;;;;;;;;22604;33574;31583;38369;44156;39041;52250;41118;37018
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;3712;896;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;748;3248;3223;5232;4611
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Despesas com Pessoal;;;;;;;;;;;;;;;;;;;;;;;;;574;10153
+DZM;DZM - Mar Brasil;Despesas Variáveis;;;;;;;;;;;;;;;;;;3142;49;72;;610;40;;314;519
+DZM;DZM - Mar Brasil - Climatização;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;;12199;25600
+DZM;DZM - Pessoal;Despesas Variáveis;;;;;;;;;;;;;;;;;;2829;7676;7205;3384;2033;5775;1979;750;839
+DZM;DZM - Rancho da Praia;Despesas Variáveis;;;;;;;;;;;;;;;;;;3508;2530;1900;3138;2163;6219;6748;2734;3384
+DZM;DZM - RATEIO;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;64;;;794;105;
+DZM;DZM - Ribeirópolis - Galpão 0643;Despesas Variáveis;;;;;;;;;;;;;;;;;;4800;650;40;3779;40;60;3400;779;1555
+DZM;DZM - Terceirização;Despesas Variáveis;;;;;;;;;;;;;;;;;;;83;;;;;;;
+DZM;Tchandra Coelho;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;300;7187;5590;5780;21202;14001;16734
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;2754;;14210;491;
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;5;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas Variáveis;;;;;;;;;;;;;;;;;;42;204;73;132;574;1002;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas Variáveis;;;;;;;;;;;;;;;;;;7;298;122;;;2945;1208;;19
+Mar_BR;Casa Tupi 771 - Anexo;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;;;14
+Mar_BR;D.Z.M;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;11;;
+Mar_BR;Eventuais B2G;Despesas Variáveis;;;;;;;;;;;;;;;;;;37;;;134;;;;;
+Mar_BR;Rede Alpha;Despesas Variáveis;;;;;;;;;;;;;;;;;;0;16;6;12;;68;116;27;20
+Mar_BR;Rossi Advogados;Despesas Variáveis;;;;;;;;;;;;;;;;;;0;5;2;4;;25;29;7;5
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas Variáveis;;;;;;;;;;;;;;;;;;561;2968;1062;1922;7343;15409;16439;7324;6124
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas Variáveis;;;;;;;;;;;;;;;;;;58;332;116;407;803;1655;1791;490;353
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;17999;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;676;847;197;151
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Despesas Variáveis;;;;;;;;;;;;;;;;;;;;;;;;;;368
+DZM;DZM - Imóveis Guilhermina;Outras Receitas;;;;;;;;;;;;;;;;;;0;0;;;;;;;
+DZM;DZM - Pessoal;Outras Receitas;;;;;;;;;;;;;;;;;;;;129;129;129;;;;
+DZM;DZM - Rancho da Praia;Outras Receitas;;;;;;;;;;;;;;;;;;0;1;;;;;;;
+DZM;DZM - RATEIO;Outras Receitas;;;;;;;;;;;;;;;;;;;;0;0;2;1;3;4;118
+DZM;DZM - Terceirização;Outras Receitas;;;;;;;;;;;;;;;;;;1;1;;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Outras Receitas;;;;;;;;;;;;;;;;;;115;175;466;22;;0;0;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Outras Receitas;;;;;;;;;;;;;;;;;;175;182;780;37;;0;0;0;
+Mar_BR;Eventuais B2B;Outras Receitas;;;;;;;;;;;;;;;;;;36;;0;0;;0;0;0;
+Mar_BR;Eventuais B2G;Outras Receitas;;;;;;;;;;;;;;;;;;37;;;;;;;;
+Mar_BR;Rede Alpha;Outras Receitas;;;;;;;;;;;;;;;;;;;16;;;;;;;
+Mar_BR;Rossi Advogados;Outras Receitas;;;;;;;;;;;;;;;;;;;5;;;;;;;
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Outras Receitas;;;;;;;;;;;;;;;;;;1529;2486;6796;325;;0;1;0;
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Outras Receitas;;;;;;;;;;;;;;;;;;162;337;759;36;;184;0;0;
+DZM;DZM - Imóveis Guilhermina;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;1822;1859;1834;1899;816;768;776;773;894
+DZM;DZM - Locação 647;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;;;;29167;35000
+DZM;DZM - Rancho da Praia;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;18778;43989;14848;23840;24030;20745;6416;5683;600
+DZM;DZM - Terceirização;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;44229;49728;55090;51628;53726;63276;74889;78819;70669
+DZM;Ybox - Terceirização;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;12220;3464;3345;6714;5221;3404
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;170636;;398442;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;31583;31583;31583;31583;31583;29478;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;55886;46259;52879;39170;7306;;2916;;
+Mar_BR;Eventuais B2G;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;26948;;;32058;;;;;
+Mar_BR;Rede Alpha;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;2280;2425;2425;2830;3234;3234;3210;5171;3880
+Mar_BR;Rossi Advogados;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;800;850;850;850;850;850;850;850;850
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;460899;460899;460899;460899;460899;460899;460899;460899;460899
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;46658;50207;50207;50207;50207;50207;70669;55168;52928
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;;;43128;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Receita Bruta de Vendas;;;;;;;;;;;;;;;;;;;;;;;47535;47535;23768;23768
+DZM;DZM - Mar Brasil;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;140;;;;;;
+DZM;DZM - Rancho da Praia;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;169;150;585;655;125;410;855;285;1020
+DZM;DZM - Ribeirópolis - Galpão 0643;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;665;;;;;;;;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;1665;26009;9713;59412;36497;29577
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;10992;11441;13789;4815;225;353;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;12770;8879;7881;11463;5863;7155;174;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;275;1957;2348;94;;314;411;;36
+Mar_BR;D.Z.M;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;757;757;;500;;;;;
+Mar_BR;Eventuais B2B;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;950;;;
+Mar_BR;Eventuais B2G;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;2351;1234;864;3027;;5600;;;
+Mar_BR;Mar Brasil - Estoque;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;3352;;;;3619;16481
+Mar_BR;Mar Brasil - Rateio;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;2850;;;
+Mar_BR;Rede Alpha;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;108;209;109;265;15;92;781;521;366
+Mar_BR;Rossi Advogados;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;38;72;37;85;5;32;10;408;150
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;87798;100820;118039;111217;95597;115317;104844;145751;115503
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;3733;2648;2372;4177;8730;13357;8897;10302;8124
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;913;1663;913;1013
+Mar_BR;São Paulo CRSN PSP 6018/2025;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;4603;1249;915;7767;6175
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Custo dos Serviços Prestados;;;;;;;;;;;;;;;;;;;;;;;;;;6370
+DZM;Casa Tupi 771 - Anexo;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;;745;4896
+DZM;DZM - Alcalinas;Despesas Administrativas;;;;;;;;;;;;;;;;;;;484;;345;374;374;374;374;374
+DZM;DZM - G2;Despesas Administrativas;;;;;;;;;;;;;;;;;;15000;9143;9143;9143;9143;9143;9143;240;2550
+DZM;DZM - Imóveis Guilhermina;Despesas Administrativas;;;;;;;;;;;;;;;;;;523;1068;157;338;369;192;605;3329;1714
+DZM;DZM - Mar Brasil;Despesas Administrativas;;;;;;;;;;;;;;;;;;2435;1792;2063;400;100;180;9366;;100
+DZM;DZM - Mar Brasil - Climatização;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;700;800;1000;1000;1000
+DZM;DZM - Obra Rancho;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;;;8474
+DZM;DZM - Pessoal;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;1027;2355;3278;359;;2716;2795
+DZM;DZM - Rancho da Praia;Despesas Administrativas;;;;;;;;;;;;;;;;;;4917;5466;8805;7491;9428;15380;4728;19408;4383
+DZM;DZM - RATEIO;Despesas Administrativas;;;;;;;;;;;;;;;;;;;657;1944;1701;4353;3066;2297;4774;2960
+DZM;DZM - Ribeirópolis - Galpão 0643;Despesas Administrativas;;;;;;;;;;;;;;;;;;500;975;1716;1493;3251;874;4943;8384;9749
+DZM;DZM - Terceirização;Despesas Administrativas;;;;;;;;;;;;;;;;;;2812;1526;1153;3768;3054;2635;2195;1009;3150
+DZM;DZM - Ybox;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;34;;;;;;
+DZM;Tchandra Coelho;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;;1658;2055
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;20250;1014;18225;10330;2832
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Despesas Administrativas;;;;;;;;;;;;;;;;;;;2308;3139;2317;;471;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas Administrativas;;;;;;;;;;;;;;;;;;1370;1981;4302;3711;4563;2105;247;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas Administrativas;;;;;;;;;;;;;;;;;;2722;2963;6197;447;232;3965;2030;;197
+Mar_BR;Casa Tupi 771 - Anexo;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;2112;2221;2292;2112;4383;5611
+Mar_BR;D.Z.M;Despesas Administrativas;;;;;;;;;;;;;;;;;;2382;49;343;;;1470;1470;;1077
+Mar_BR;Diretoria - Pessoal;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;;;4689
+Mar_BR;Eventuais B2G;Despesas Administrativas;;;;;;;;;;;;;;;;;;1160;182;119;3083;234;;;;
+Mar_BR;Mar Brasil - Rateio;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;;8310;4605
+Mar_BR;Rede Alpha;Despesas Administrativas;;;;;;;;;;;;;;;;;;100;151;268;291;24;115;141;226;212
+Mar_BR;Rossi Advogados;Despesas Administrativas;;;;;;;;;;;;;;;;;;35;52;91;90;7;41;38;59;56
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas Administrativas;;;;;;;;;;;;;;;;;;19594;28877;56240;51489;60139;24764;22167;33162;30692
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas Administrativas;;;;;;;;;;;;;;;;;;2415;3435;6328;5546;7123;2960;2734;4126;3958
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;37;;1852;45;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;1132;1139;1772;1566
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Despesas Administrativas;;;;;;;;;;;;;;;;;;;;;;;;;341;3064
+Mar_BR;Ybox;Despesas Administrativas;;;;;;;;;;;;;;;;;;;74;;76;;;;;
+DZM;DZM - Imóveis Guilhermina;Impostos;;;;;;;;;;;;;;;;;;;140;;;;;;;
+DZM;DZM - RATEIO;Impostos;;;;;;;;;;;;;;;;;;5343;;10532;16983;21438;21068;20563;22564;27493
+DZM;DZM - Ribeirópolis - Galpão 0643;Impostos;;;;;;;;;;;;;;;;;;91;;;;;;;;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Impostos;;;;;;;;;;;;;;;;;;;;;;10334;;60132;14;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Impostos;;;;;;;;;;;;;;;;;;5181;5315;5281;5286;6132;4890;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Impostos;;;;;;;;;;;;;;;;;;10957;9043;10288;;570;14541;4654;;0
+Mar_BR;Eventuais B2G;Impostos;;;;;;;;;;;;;;;;;;7176;;;7545;;;;;
+Mar_BR;Rede Alpha;Impostos;;;;;;;;;;;;;;;;;;268;292;292;358;459;555;361;779;630
+Mar_BR;Rossi Advogados;Impostos;;;;;;;;;;;;;;;;;;132;141;141;144;116;150;177;187;187
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Impostos;;;;;;;;;;;;;;;;;;75707;77488;77011;77146;90232;81049;74168;79360;79292
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Impostos;;;;;;;;;;;;;;;;;;12234;13580;13408;13425;14862;13848;18093;14249;17469
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Impostos;;;;;;;;;;;;;;;;;;;;;;;;9808;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Impostos;;;;;;;;;;;;;;;;;;;;;;;11892;11536;6707;6703
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Impostos;;;;;;;;;;;;;;;;;;;;;;;;;;9720
+DZM;DZM - Imóveis Guilhermina;Receitas financeiras;;;;;;;;;;;;;;;;;;8;;19;18;;38;;34;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Receitas financeiras;;;;;;;;;;;;;;;;;;;;;;;30;2;9;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Receitas financeiras;;;;;;;;;;;;;;;;;;73;5;1;0;0;7;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Receitas financeiras;;;;;;;;;;;;;;;;;;228;7;1;0;0;1;0;;0
+Mar_BR;Eventuais B2G;Receitas financeiras;;;;;;;;;;;;;;;;;;58;;;;;;;;
+Mar_BR;Rede Alpha;Receitas financeiras;;;;;;;;;;;;;;;;;;5;0;0;0;0;0;0;0;0
+Mar_BR;Rossi Advogados;Receitas financeiras;;;;;;;;;;;;;;;;;;21;0;0;0;0;0;0;0;0
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Receitas financeiras;;;;;;;;;;;;;;;;;;1222;72;6;3;4;85;3;69;4
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Receitas financeiras;;;;;;;;;;;;;;;;;;105;8;1;0;0;9;0;8;1
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Receitas financeiras;;;;;;;;;;;;;;;;;;;;;;;;0;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Receitas financeiras;;;;;;;;;;;;;;;;;;;;;;;;0;4;0
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Serviços;;;;;;;;;;;;;;;;;;;;;;682;;1129;290;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Serviços;;;;;;;;;;;;;;;;;;146;151;153;155;142;128;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Serviços;;;;;;;;;;;;;;;;;;259;221;256;;;429;103;;14
+Mar_BR;Casa Tupi 771 - Anexo;Serviços;;;;;;;;;;;;;;;;;;;;5730;;;;;;
+Mar_BR;Eventuais B2G;Serviços;;;;;;;;;;;;;;;;;;124;;;157;;;;;
+Mar_BR;Rede Alpha;Serviços;;;;;;;;;;;;;;;;;;11;12;;14;;10;9;16;15
+Mar_BR;Rossi Advogados;Serviços;;;;;;;;;;;;;;;;;;4;4;;4;;4;2;4;4
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Serviços;;;;;;;;;;;;;;;;;;2135;2205;2232;2263;1818;2000;1345;2254;2181
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Serviços;;;;;;;;;;;;;;;;;;211;247;249;247;199;218;147;246;264
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Serviços;;;;;;;;;;;;;;;;;;;;;;;;122;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Serviços;;;;;;;;;;;;;;;;;;;;;;;101;67;116;112
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Serviços;;;;;;;;;;;;;;;;;;;;;;;;;;284
+DZM;DZM - Imóveis Guilhermina;Despesas Financeiras;;;;;;;;;;;;;;;;;;3;4;;;;;;;
+DZM;DZM - Mar Brasil;Despesas Financeiras;;;;;;;;;;;;;;;;;;3;15;;;;;;;
+DZM;DZM - Pessoal;Despesas Financeiras;;;;;;;;;;;;;;;;;;;6;;;;;;;
+DZM;DZM - Rancho da Praia;Despesas Financeiras;;;;;;;;;;;;;;;;;;3;114;54;29;;;1;;
+DZM;DZM - RATEIO;Despesas Financeiras;;;;;;;;;;;;;;;;;;;;239;239;265;271;274;281;266
+DZM;DZM - Ribeirópolis - Galpão 0643;Despesas Financeiras;;;;;;;;;;;;;;;;;;3;;;;;;;;
+DZM;DZM - Terceirização;Despesas Financeiras;;;;;;;;;;;;;;;;;;194;108;;;;;;;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;1931;6;3331;1420;10
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Despesas Financeiras;;;;;;;;;;;;;;;;;;;4;1;;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas Financeiras;;;;;;;;;;;;;;;;;;539;442;572;561;438;385;2;14;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas Financeiras;;;;;;;;;;;;;;;;;;936;648;957;40;41;1293;284;22;54
+Mar_BR;Eventuais B2G;Despesas Financeiras;;;;;;;;;;;;;;;;;;441;;;534;;;;;
+Mar_BR;Mar Brasil - Estoque;Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;54;;
+Mar_BR;Mar Brasil - Rateio;Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;54;;
+Mar_BR;Rede Alpha;Despesas Financeiras;;;;;;;;;;;;;;;;;;37;38;43;49;2;45;28;78;57
+Mar_BR;Rossi Advogados;Despesas Financeiras;;;;;;;;;;;;;;;;;;13;11;17;15;1;13;10;97;23
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas Financeiras;;;;;;;;;;;;;;;;;;7732;6575;8346;8033;5470;6004;3901;11249;6726
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas Financeiras;;;;;;;;;;;;;;;;;;771;732;918;860;583;694;442;1418;821
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;170;362;36;10
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;231;307;201;571;356
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Despesas Financeiras;;;;;;;;;;;;;;;;;;;;;;;;;1869;829
+Mar_BR;Ybox;Despesas Financeiras;;;;;;;;;;;;;;;;;;;1;14;;;;;;
+DZM;DZM - Locação 647;Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;;;15350
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Outros Custos;;;;;;;;;;;;;;;;;;;;;;5304;120;3449;1601;100
+Mar_BR;Bertioga SEDUC 378/2024 54/2024;Outros Custos;;;;;;;;;;;;;;;;;;;;410;111;;;;;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Outros Custos;;;;;;;;;;;;;;;;;;439;1086;554;682;1119;512;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Outros Custos;;;;;;;;;;;;;;;;;;780;1307;926;267;22;219;291;;4033
+Mar_BR;Casa Tupi 771 - Anexo;Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;;484;36
+Mar_BR;D.Z.M;Outros Custos;;;;;;;;;;;;;;;;;;;619;;118;;;;;
+Mar_BR;Eventuais B2G;Outros Custos;;;;;;;;;;;;;;;;;;376;;;519;;;;;
+Mar_BR;Locação Oftalmológico 14/2021 033/2021;Outros Custos;;;;;;;;;;;;;;;;;;565;565;;565;;;;;
+Mar_BR;Mar Brasil - Estoque;Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;;;150
+Mar_BR;Rede Alpha;Outros Custos;;;;;;;;;;;;;;;;;;32;69;43;46;37;34;28;85;79
+Mar_BR;Rossi Advogados;Outros Custos;;;;;;;;;;;;;;;;;;11;24;15;14;14;12;7;22;21
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Outros Custos;;;;;;;;;;;;;;;;;;6429;13245;8080;11093;17767;6385;4470;12257;11542
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Outros Custos;;;;;;;;;;;;;;;;;;635;1457;939;1128;2606;1024;682;1374;1358
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Outros Custos;;;;;;;;;;;;;;;;;;;;;;119;;371;39;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Outros Custos;;;;;;;;;;;;;;;;;;;;;;;337;204;670;584
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Outros Custos;;;;;;;;;;;;;;;;;;;;;;;;;39;424
+DZM;DZM - Mar Brasil - Climatização;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;1290;;
+DZM;DZM - RATEIO;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;20000;;;
+DZM;DZM - Terceirização;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;1160;496;500;;;
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;318;;2285;178;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;106;125;129;126;66;111;48;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;189;182;215;;;374;356;;5
+Mar_BR;Eventuais B2G;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;91;;;128;;;;;
+Mar_BR;Rede Alpha;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;8;10;10;11;;9;22;10;5
+Mar_BR;Rossi Advogados;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;3;3;3;3;;3;6;3;1
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;1557;1815;2177;1845;849;1730;3389;1383;722
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;154;203;204;201;93;188;369;151;87
+Mar_BR;São Paulo CREF4 PSP 2325/2025 93/2025;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;247;;
+Mar_BR;São Paulo CRSN PSP 6018/2025;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;89;175;71;37
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Despesas de Vendas e Marketing;;;;;;;;;;;;;;;;;;;;;;;;;;94
+Mar_BR;Bertioga SEDUC 3151/2025 135/2025;Outros Tributos;;;;;;;;;;;;;;;;;;;;;;;;;228;
+Mar_BR;Bertioga SESAP 1390/2024 71/2024;Outros Tributos;;;;;;;;;;;;;;;;;;;;14;;;;;;
+Mar_BR;Capina Elétrica / MAM / Crestani / Zasso;Outros Tributos;;;;;;;;;;;;;;;;;;;;23;;;;;;11
+Mar_BR;Rede Alpha;Outros Tributos;;;;;;;;;;;;;;;;;;;;1;;;;;12;12
+Mar_BR;Rossi Advogados;Outros Tributos;;;;;;;;;;;;;;;;;;;;0;;;;;3;3
+Mar_BR;Santos STS SEDUC 36693/2022 12/2024;Outros Tributos;;;;;;;;;;;;;;;;;;;;200;;;;;1771;1744
+Mar_BR;São Paulo CMSP CSP 274/2024 03/2025;Outros Tributos;;;;;;;;;;;;;;;;;;;;22;;;;;193;211
+Mar_BR;São Paulo CRSN PSP 6018/2025;Outros Tributos;;;;;;;;;;;;;;;;;;;;;;;;;91;90
+Mar_BR;São Paulo SmartSampa SMSU PSP 6029/2025 055/2025;Outros Tributos;;;;;;;;;;;;;;;;;;;;;;;;;;227

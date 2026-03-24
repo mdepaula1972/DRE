@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <script src="auth-check.js?v=28.0"></script>
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js?v=28.0"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Análise Setorial - Mar Brasil | Gestão Financeira</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -48,7 +50,10 @@
                 <label for="csvFile" class="form-label text-white mb-2"><i class="bi bi-cloud-upload me-2"></i>Carregar
                     Análise Setorial</label>
                 <input class="form-control form-control-sm" type="file" id="csvFile" accept=".csv">
-                <div id="fileStatus" class="form-text text-white-50 mt-2">Nenhum arquivo carregado</div>
+                <button class="btn btn-outline-light btn-sm w-100 mt-2" onclick="loadFromSupabase()">
+                    <i class="bi bi-database-fill-down me-2"></i>Sincronizar Supabase
+                </button>
+                <div id="fileStatus" class="form-text text-white-50 mt-2">Aguardando dados...</div>
             </div>
             <hr class="border-secondary">
 
@@ -111,6 +116,11 @@
                 <button class="btn btn-outline-danger" id="btnExportPDF" onclick="exportToPDF()">
                     <i class="bi bi-file-earmark-pdf me-1"></i>
                     <span class="d-none d-md-inline">Exportar PDF</span>
+                </button>
+                <button class="btn btn-warning fw-bold" id="btnDataAudit" onclick="runDataAudit()"
+                    title="Auditoria de Dados Omie">
+                    <i class="bi bi-shield-exclamation me-1"></i>
+                    <span class="d-none d-md-inline">Audit</span>
                 </button>
                 <button class="btn btn-primary d-md-none" id="toggleSidebar">
                     <i class="bi bi-list"></i>
@@ -273,6 +283,70 @@
                                 <!-- Content populated by JS -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Auditoria de Dados (Data Health) -->
+    <div class="modal fade" id="auditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 bg-warning bg-opacity-10">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-shield-exclamation me-2"></i>Saúde dos
+                        Dados (Auditoria Omie)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-4">Abaixo estão listados os lançamentos sincronizados do Omie que
+                        possuem inconsistências cadastrais. <strong>Lançamentos sem Conta DRE ou sem
+                            Projeto/Departamento impactam a precisão do seu painel.</strong></p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light p-3">
+                                <h6 class="text-muted small text-uppercase fw-bold"><i
+                                        class="bi bi-x-circle-fill text-danger me-2"></i>Sem Conta DRE (Mapeamento)</h6>
+                                <h4 class="mb-0" id="auditCountNoDre">0</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light p-3">
+                                <h6 class="text-muted small text-uppercase fw-bold"><i
+                                        class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Sem
+                                    Projeto/Departamento</h6>
+                                <h4 class="mb-0" id="auditCountNoProj">0</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive" style="max-height: 500px;">
+                        <table class="table table-sm table-hover align-middle" id="auditTable">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>ID Omie</th>
+                                    <th>Fornecedor/Cliente</th>
+                                    <th>Valor</th>
+                                    <th>Problema</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Content populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-info text-white fw-bold" onclick="exportAuditCSV()">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Exportar Audit
+                        </button>
+                        <button type="button" class="btn btn-dark fw-bold" onclick="exportAllSupabaseCSV()">
+                            <i class="bi bi-download me-2"></i>Dados Brutos
+                        </button>
                     </div>
                 </div>
             </div>

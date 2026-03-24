@@ -1,4 +1,4 @@
-// PeopleBoard JS - CSI MAR BRASIL
+// PeopleBoard JS - CSI MAR BRASIL (v28.10)
 const SUPABASE_URL = "https://ngtjhwswbbivqajtpjvg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndGpod3N3YmJpdnFhanRwanZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTE4MjM2MCwiZXhwIjoyMDg0NzU4MzYwfQ.2TPnOfnAzeWG23Y-VuDKxxzQ9QdbHwrnHdVBhS9hU28";
 
@@ -66,7 +66,7 @@ window.getPageContext = function () {
             empresa: currentEmp.company,
             status: currentEmp.status,
             admissão: formatDate(currentEmp.start_date),
-            consignável: isPrivacyActive ? "OCULTO" : formatCurrency((currentEmp.remuneration || 0) - calculateDebt(currentEmp))
+            consignável: isPrivacyActive ? "OCULTO" : formatCurrency((currentEmp.remuneration || 0) - calculateTaken(currentEmp))
         } : null,
         employeesSummary: allEmployees.map(e => ({
             n: e.full_name,
@@ -130,25 +130,26 @@ async function init() {
 }
 
 async function fetchEmployees() {
-    const { data: employees, error: eError } = await db
-        .from('employees')
-        .select('*')
-        .order('full_name', { ascending: true });
+    const [empRes, loansRes] = await Promise.all([
+        db.from('employees').select('*').order('full_name', { ascending: true }),
+        db.from('employee_loans').select('*').order('created_at')
+    ]);
 
-    if (eError) { console.error('Error fetching employees:', eError); return; }
+    if (empRes.error) { console.error('Error fetching employees:', empRes.error); return; }
+    if (loansRes.error) { console.warn('employee_loans not available (table may not exist yet):', loansRes.error?.message); }
 
-    console.log(`[DEBUG] Colaboradores carregados do Banco: ${employees.length}`);
-    console.table(employees.map(e => ({ id: e.id, nome: e.full_name, status: e.status })));
+    const employees = empRes.data || [];
+    const allLoansData = loansRes.data || [];
 
-    const { data: history, error: hError } = await db
-        .from('employee_history')
-        .select('employee_id');
+    console.log(`[DEBUG] Colaboradores: ${employees.length}, Empréstimos: ${allLoansData.length}`);
 
+    const { data: history, error: hError } = await db.from('employee_history').select('employee_id');
     const idsWithAdditive = new Set((history || []).map(h => h.employee_id));
 
     allEmployees = employees.map(emp => ({
         ...emp,
-        has_additive: idsWithAdditive.has(emp.id)
+        has_additive: idsWithAdditive.has(emp.id),
+        _loans: allLoansData.filter(l => l.employee_id === emp.id)
     }));
 }
 
@@ -384,8 +385,8 @@ function renderList() {
                 <div class="small text-muted">${emp.job_role || '---'}</div>
             </td>
             <td class="fw-bold font-monospace ${isPrivacyActive ? 'privacy-text' : ''}">${formatCurrency(emp.remuneration)}</td>
-            <td class="text-info font-monospace small ${isPrivacyActive ? 'privacy-text' : ''}">${formatCurrency((emp.remuneration || 0) - calculateDebt(emp))}</td>
-            <td class="text-warning font-monospace small ${isPrivacyActive ? 'privacy-text' : ''}">${formatCurrency(calculateDebt(emp))}</td>
+            <td class="text-info font-monospace small ${isPrivacyActive ? 'privacy-text' : ''}">${formatCurrency((emp.remuneration || 0) - calculateTaken(emp))}</td>
+            <td class="text-warning font-monospace small ${isPrivacyActive ? 'privacy-text' : ''}">${formatCurrency(calculateTaken(emp))}</td>
             <td><span class="badge ${getStatusBadgeClass(emp.status)}">${(emp.status || 'Ativo').toUpperCase()}</span></td>
             <td class="text-center">${emp.has_additive ? '<span class="badge bg-info text-white">A</span>' : '---'}</td>
             <td class="text-center">
@@ -598,60 +599,7 @@ window.saveDocsLinks = async function () {
     }
 };
 
-// Validação de Empréstimos
-function validateLoanRequest(payload, employeeId) {
-    const warnings = [];
 
-    // Buscar funcionário existente se for edição
-    const existingEmployee = employeeId ? allEmployees.find(e => e.id === employeeId) : null;
-
-    // 1. Validar tempo mínimo de empresa (6 meses)
-    if (payload.start_date) {
-        const startDate = new Date(payload.start_date);
-        const today = new Date();
-        const monthsWorked = (today.getFullYear() - startDate.getFullYear()) * 12 + (today.getMonth() - startDate.getMonth());
-
-        if (monthsWorked < 6 && payload.loan_amount > 0) {
-            warnings.push({
-                type: 'TEMPO_MINIMO',
-                message: `⚠️ ALERTA: O colaborador possui apenas ${monthsWorked} meses de empresa. O mínimo recomendado é 6 meses para concessão de empréstimo.`
-            });
-        }
-    }
-
-    // 2. Validar margem consignável (Total do empréstimo não pode exceder 1 salário)
-    const remuneration = payload.remuneration || 0;
-    const maxLoanAllowed = remuneration; // Limite: 1 salário
-
-    // Calcular total de empréstimos solicitados
-    let totalLoanAmount = parseFloat(payload.loan_amount) || 0;
-
-    // Adicionar empréstimos diversos se houver
-    if (payload.loans_data && Array.isArray(payload.loans_data)) {
-        payload.loans_data.forEach(ln => {
-            totalLoanAmount += parseFloat(ln.amount) || 0;
-        });
-    }
-
-    // Validar se o valor total do empréstimo excede 1 salário
-    if (totalLoanAmount > maxLoanAllowed) {
-        const exceeded = totalLoanAmount - maxLoanAllowed;
-        const percentExceeded = ((exceeded / maxLoanAllowed) * 100).toFixed(1);
-
-        warnings.push({
-            type: 'MARGEM_EXCEDIDA',
-            message: `⚠️ ALERTA DE LIMITE DE EMPRÉSTIMO:\n\n` +
-                `Remuneração Mensal: R$ ${remuneration.toFixed(2)}\n` +
-                `Limite Máximo Permitido: R$ ${maxLoanAllowed.toFixed(2)} (1 salário)\n` +
-                `Valor Total Solicitado: R$ ${totalLoanAmount.toFixed(2)}\n` +
-                `Excedente: R$ ${exceeded.toFixed(2)}\n\n` +
-                `O empréstimo excede em ${percentExceeded}% o limite permitido!\n` +
-                `REGRA: O valor total do empréstimo não pode ultrapassar 1 salário.`
-        });
-    }
-
-    return { warnings };
-}
 
 // --- CURD & UTIL ---
 window.saveEmployee = async function () {
@@ -863,9 +811,15 @@ async function openProfile(id) {
         scrambleText('profileEmergencyRelation', emp.emergency_contact_relation || '---');
 
         const debt = calculateDebt(emp);
+        const taken = calculateTaken(emp);
         scrambleText('profileConsignable', isPrivacyActive ? 'R$ •••' : formatCurrency((emp.remuneration || 0) - debt));
-        scrambleText('profileDebtBalance', isPrivacyActive ? 'R$ •••' : formatCurrency(debt));
-    }, 200);
+
+        let debtHtml = isPrivacyActive ? 'R$ •••' : formatCurrency(debt);
+        if (taken > 0 && debt <= 0) {
+            debtHtml += ' <span class="badge bg-success border border-success p-1 px-2 rounded ms-2" style="font-size: 0.6rem; vertical-align: middle;">LIQUIDADO</span>';
+        }
+        scrambleText('profileDebtBalance', debtHtml);
+    }, 50);
 
     document.getElementById('profilePhoto').src = emp.photo_url || 'https://via.placeholder.com/350?text=NO+IMAGE';
     document.getElementById('profileCreated').textContent = "CRIADO: " + formatDate(emp.created_at);
@@ -993,44 +947,68 @@ window.deleteHistoryItem = async function (id) {
 
 window.closeProfile = () => document.getElementById('profileOverlay').style.display = 'none';
 
+function getLoansData(emp) {
+    // New architecture: use _loans from employee_loans table
+    if (emp._loans && Array.isArray(emp._loans)) return emp._loans;
+    // Legacy fallback: read from loans_data JSON field
+    if (!emp.loans_data) return [];
+    if (typeof emp.loans_data === 'string') {
+        try { return JSON.parse(emp.loans_data) || []; } catch (e) { return []; }
+    }
+    return Array.isArray(emp.loans_data) ? emp.loans_data : [];
+}
+
 function calculateDebt(emp) {
     let totalPaid = 0;
+    const now = new Date();
 
-    // Helper para cálculo indivual
     const calcPaidForOne = (amount, inst, startCycle) => {
         if (!amount || !inst || !startCycle) return 0;
-        const start = new Date(startCycle + '-01');
-        const now = new Date();
+        const [y, m] = startCycle.split('-').map(Number);
+        const start = new Date(y, m - 1, 1);
         let elapsed = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
         if (now.getDate() < 10) elapsed--;
         elapsed = Math.max(0, Math.min(elapsed, inst));
         return elapsed * (amount / inst);
     };
 
-    // Principal
-    totalPaid += calcPaidForOne(emp.loan_amount, emp.loan_installments, emp.loan_start_cycle);
+    const loans = getLoansData(emp);
+    let totalAmount = 0;
 
-    // Diversos
-    if (emp.loans_data && Array.isArray(emp.loans_data)) {
-        emp.loans_data.forEach(ln => {
-            totalPaid += calcPaidForOne(ln.amount, ln.installments, ln.start_cycle);
-        });
+    loans.forEach(ln => {
+        const amount = parseFloat(ln.amount) || 0;
+        const inst = parseInt(ln.installments) || 0;
+        const sc = ln.start_cycle;
+        totalPaid += calcPaidForOne(amount, inst, sc);
+        totalAmount += amount;
+    });
+
+    // Legacy fallback for employees not yet with _loans
+    if (!emp._loans || emp._loans.length === 0) {
+        const mainAmt = parseFloat(emp.loan_amount) || 0;
+        const mainInst = parseInt(emp.loan_installments) || 0;
+        if (mainAmt > 0 && mainInst > 0 && emp.loan_start_cycle) {
+            totalPaid += calcPaidForOne(mainAmt, mainInst, emp.loan_start_cycle);
+            totalAmount += mainAmt;
+        }
     }
 
-    const totalAmount = (emp.loan_amount || 0) + (emp.loans_data ? emp.loans_data.reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0) : 0);
     return Math.max(0, totalAmount - totalPaid);
 }
-function calculateMargin(emp) {
-    const base = (emp.remuneration || 0) * 0.3; // 30% de margem padrão
-    const debt = calculateDebt(emp);
-    const installment = emp.loan_amount ? (emp.loan_amount / emp.loan_installments) : 0;
-    const margin = base - installment;
 
-    if (margin <= 0) {
-        console.warn(`[FINANCEIRO] Margem zerada ou negativa para ${emp.full_name}: ${margin}`);
+function calculateTaken(emp) {
+    const loans = getLoansData(emp);
+    let taken = loans.reduce((a, ln) => a + (parseFloat(ln.amount) || 0), 0);
+    // Legacy fallback
+    if (taken === 0 && (!emp._loans || emp._loans.length === 0)) {
+        taken = parseFloat(emp.loan_amount || 0);
     }
+    return taken;
+}
 
-    return Math.max(0, margin);
+function calculateMargin(emp) {
+    const taken = calculateTaken(emp);
+    return Math.max(0, (emp.remuneration || 0) - taken);
 }
 
 function formatCurrency(v) { return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -1038,13 +1016,7 @@ function formatDate(d) { if (!d) return '---'; const [y, m, day] = d.split('T')[
 function scrambleText(id, val) {
     const el = document.getElementById(id);
     if (!el) return;
-    const chars = "!<>-_\\/[]{}—=+*^?#________";
-    let iter = 0;
-    const interval = setInterval(() => {
-        el.innerText = val.split("").map((c, i) => i < iter ? val[i] : chars[Math.floor(Math.random() * chars.length)]).join("");
-        if (iter >= val.length) clearInterval(interval);
-        iter += 1 / 8;
-    }, 40);
+    el.innerHTML = val;
 }
 
 // --- UTILITÁRIOS DE FORMULÁRIO E MÁSCARAS ---
@@ -1251,19 +1223,13 @@ window.generateDebtTermPDF = async function () {
     // Helper para formatar moeda
     const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // Carregar Timbrado
-    const loadImg = (url) => new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = url;
-    });
-
+    // Carregar Timbrado (Base64)
     try {
-        const timbrado = await loadImg('./Timbrado Mar Brasil.png');
+        const timbrado = window.TIMBRADO_B64;
+        if (!timbrado) throw new Error("Base64 do timbrado não carregado.");
 
         const addPageWithTimbrado = () => {
-            doc.addImage(timbrado, 'PNG', 0, 0, 210, 297);
+            doc.addImage(timbrado, 'JPEG', 0, 0, 210, 297);
         };
 
         addPageWithTimbrado();
@@ -1439,7 +1405,7 @@ CLÁUSULA QUINTA – DAS DISPOSIÇÕES GERAIS
 
     } catch (e) {
         console.error("Erro ao gerar PDF:", e);
-        alert("Erro ao carregar o papel timbrado. Verifique se o arquivo 'Timbrado Mar Brasil.png' está na pasta raiz.");
+        alert("Erro ao carregar o papel timbrado. Verifique se o arquivo 'timbrado_mar_brasil.png' está na pasta raiz.");
     }
 };
 
