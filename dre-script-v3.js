@@ -2,7 +2,7 @@
 
 // Configuration
 const CONFIG = {
-    VERSION: "27.0",
+    VERSION: "27.1",
     LAST_UPDATE: "06/01/2026",
     COLORS: {
         primary: '#F2911B',
@@ -777,9 +777,9 @@ function calculateDRE() {
         getVal("Outros Tributos") + getVal("Despesas Eventuais") + getVal("Despesas Variáveis") + getVal("Intermediação de Negócios") +
         (getCatTotal("Distribuição de Dividendos") + getCatTotal("Dividendos"));
 
-    // Nova regra de cálculo de Investimentos
-    // Soma direta das categorias brutas para evitar lógica de dedução da tabela
-    const totalInvestimentos = getCatTotal("Consórcios - a contemplar") + getCatTotal("Serviços") + getCatTotal("Ativos");
+    // Cálculo de Investimentos: usa Consórcios + Serviços ajustado (Serviços - Consórcios) + Ativos
+    // getVal("Serviços") já reflete a fórmula servicos_menos_consorcios da ESTRUTURA_DRE
+    const totalInvestimentos = getCatTotal("Consórcios - a contemplar") + getVal("Serviços") + getCatTotal("Ativos");
 
     const totalSaidas = totalImpostos + totalCustos + totalDespesas + totalInvestimentos;
 
@@ -850,8 +850,8 @@ function calculateDRE() {
         getPrevVal("Despesas Eventuais") + getPrevVal("Despesas Variáveis") + getPrevVal("Intermediação de Negócios") +
         (getPrevCatTotal("Distribuição de Dividendos") + getPrevCatTotal("Dividendos"));
 
-    // Investments (Direct Sum as per current logic)
-    const prev_totalInvestimentos = getPrevCatTotal("Consórcios - a contemplar") + getPrevCatTotal("Serviços") + getPrevCatTotal("Ativos");
+    // Investimentos: usa Consórcios + Serviços ajustado + Ativos (consistente com totalInvestimentos)
+    const prev_totalInvestimentos = getPrevCatTotal("Consórcios - a contemplar") + getPrevVal("Serviços") + getPrevCatTotal("Ativos");
     const prev_totalSaidas = prev_totalImpostos + prev_totalCustos + prev_totalDespesas + prev_totalInvestimentos;
     const prev_resultado = prev_totalEntradas + getPrevVal("Ativos") + prev_outrasEntradas - prev_totalSaidas;
     const prev_fcl = prev_resultado - getPrevVal("Ativos");
@@ -1062,7 +1062,7 @@ function updateCards() {
             }
         },
 
-        { key: 'total_saidas', title: 'Total Saídas', icon: 'bi-graph-down-arrow', color: 'danger', bgColor: 'bg-red-soft', percentKey: 'perc_total_saidas', percentRefIcon: 'bi-graph-up-arrow' },
+        { key: 'total_saidas', title: 'Total Saídas', icon: 'bi-graph-down-arrow', color: 'danger', bgColor: 'bg-red-soft', percentKey: 'perc_total_saidas', percentRefIcon: 'bi-graph-up-arrow', isClickable: true },
         { key: 'resultado', title: 'Resultado', icon: 'bi-bullseye', color: 'highlight', bgColor: 'bg-yellow-soft', percentKey: 'perc_resultado', percentRefIcon: 'bi-graph-up-arrow', isClickable: true },
         { key: 'fcl', title: 'Fluxo de Caixa Livre - FCL', icon: 'bi-wallet2', color: 'success', bgColor: 'bg-green-soft', percentKey: 'perc_fcl_receita', percentRefIcon: 'bi-graph-up-arrow', isClickable: true }
     ];
@@ -1145,10 +1145,10 @@ function renderCards(containerId, cards, metrics, colSize) {
         }
 
         // Definir comportamento de clique
-        const clickableClass = card.key === 'total_equipamentos' ? 'card-clickable' : '';
+        const clickableClass = (card.key === 'total_equipamentos' || card.isClickable) ? 'card-clickable' : '';
         const clickHandler = card.key === 'total_equipamentos'
             ? 'onclick="openPorMaquinaModal()"'
-            : `onclick="showCardDetails('${card.key}', '${card.title}')"`;
+            : (card.isClickable ? `onclick="showCardDetails('${card.key}', '${card.title}')"` : '');
 
         // Declarar html uma única vez
         let html;
@@ -1770,7 +1770,7 @@ function showCardDetails(key, title) {
         'total_impostos': ['Impostos', 'Provisão - IRPJ e CSSL Trimestral'],
         'total_custos': ['Credenciado Operacional', 'Adiantamento - Credenciado Operacional', 'Terceirização de Mão de Obra', 'Despesas com Pessoal', 'Custo dos Serviços Prestados', 'Preventiva - B2G', 'Manutenção Preventiva', 'Corretiva - B2G', 'Manutenção Corretiva', 'Outros Custos'],
         'total_despesas': ['Credenciado Administrativo', 'Adiantamento - Credenciado Administrativo', 'Credenciado TI', 'Adiantamento - Credenciado TI', 'Despesas Administrativas', 'Despesas de Vendas e Marketing', 'Despesas Financeiras', 'Outros Tributos', 'Jurídico', 'Despesas Variáveis', 'Intermediação de Negócios'],
-        'total_investimentos': ['Consórcios - a contemplar', 'Serviços', 'Ativos'],
+        'total_investimentos': null,
         'mutuo_entradas': ['Mútuo - Entradas'],
         'mutuo_saidas': ['Mútuo - Saídas'],
         'dividendos': ['Distribuição de Dividendos', 'Dividendos'],
@@ -1824,35 +1824,52 @@ function showCardDetails(key, title) {
         });
     };
 
-    if (key === 'total_saidas') {
-        const groups = [
-            { label: 'Custos Operacionais', mapKey: 'total_custos' },
-            { label: 'Despesas Rateadas', mapKey: 'total_despesas' },
-            { label: 'Impostos', mapKey: 'total_impostos' },
-            { label: 'Investimentos', mapKey: 'total_investimentos' }
-        ];
-        groups.forEach((g, i) => {
-            addDataset(g.label, getValuesSeries(metricMap[g.mapKey]), i);
+    // Helper: série mensal de Investimentos com Serviços ajustado (Serviços - Consórcios, mínimo 0)
+    const getInvestSeries = () => state.validColumns.map(col => {
+        let cons = 0, svc = 0, atv = 0;
+        state.filteredData.forEach(row => {
+            const v = parseFloat(row[col]?.toString().replace(',', '.') || 0);
+            if (row.Categoria === 'Consórcios - a contemplar') cons += v;
+            else if (row.Categoria === 'Serviços') svc += v;
+            else if (row.Categoria === 'Ativos') atv += v;
         });
+        return cons + Math.max(0, svc - cons) + atv;
+    });
+
+    if (key === 'total_saidas') {
+        const targetCats = [
+            ...(metricMap['total_custos'] || []),
+            ...(metricMap['total_despesas'] || []),
+            ...(metricMap['total_impostos'] || [])
+        ];
+        
+        targetCats.forEach((cat, i) => {
+            const series = getValuesSeries([cat]);
+            if (series.some(v => v !== 0)) addDataset(cat, series, i);
+        });
+        
+        const seriesCons = getValuesSeries(['Consórcios - a contemplar']);
+        const seriesSvcRaw = getValuesSeries(['Serviços']);
+        const seriesAtv = getValuesSeries(['Ativos']);
+        const seriesSvcAdj = seriesSvcRaw.map((v, i) => Math.max(0, v - seriesCons[i]));
+        
+        const baseColorIdx = targetCats.length;
+        if (seriesCons.some(v => v !== 0)) addDataset('Consórcios - a contemplar', seriesCons, baseColorIdx);
+        if (seriesSvcAdj.some(v => v !== 0)) addDataset('Serviços', seriesSvcAdj, baseColorIdx + 1);
+        if (seriesAtv.some(v => v !== 0)) addDataset('Ativos', seriesAtv, baseColorIdx + 2);
 
     } else if (key === 'resultado') {
-        // Para Resultado, vamos mostrar Entradas vs Saídas Empilhadas (Neto é difícil de visualizar empilhado)
-        // Ou melhor: Breakdown dos componentes principais
-        // Atenção: Misturar positivo e negativo em stacked bar funciona (sobe e desce do eixo 0)
-
-        addDataset('Total Entradas Ops.', getValuesSeries(metricMap['total_entradas']), 2); // Verde
+        // Fix double counting and provide breakdown
+        addDataset('Total Entradas Ops.', getValuesSeries(['Receita Bruta de Vendas', 'Receitas Indiretas']), 2); // Verde
         addDataset('Outras Entradas', getValuesSeries(metricMap['outras_entradas']), 5);    // Amarelo
         addDataset('Ativos (Ajuste)', getValuesSeries(['Ativos']), 6);                      // Teal
-
-        // Saídas (Negativas para o gráfico ficar lógico em relação ao saldo? Ou positivas para comparação de volume?)
-        // O usuário quer ver "o que compõe". Mostrar saídas como negativo no gráfico de Resultado faz sentido matemática visualmente.
 
         const invert = (arr) => arr.map(v => -Math.abs(v)); // Força visualização negativa
 
         addDataset('Custos Operacionais', invert(getValuesSeries(metricMap['total_custos'])), 9); // Laranja 
         addDataset('Despesas Rateadas', invert(getValuesSeries(metricMap['total_despesas'])), 1); // Dark
         addDataset('Impostos', invert(getValuesSeries(metricMap['total_impostos'])), 16);         // Red
-        addDataset('Investimentos', invert(getValuesSeries(metricMap['total_investimentos'])), 4); // Purple
+        addDataset('Investimentos', invert(getInvestSeries()), 4); // Purple
 
     } else if (key === 'fcl') {
         // FCL Composição: Resultado Liquido vs Ded. Ativos
@@ -1868,12 +1885,46 @@ function showCardDetails(key, title) {
         const custos = getValuesSeries(metricMap['total_custos']);
         const despesas = getValuesSeries(metricMap['total_despesas']);
         const impostos = getValuesSeries(metricMap['total_impostos']);
-        const invest = getValuesSeries(metricMap['total_investimentos']);
+        const invest = getInvestSeries();
 
         const resultadoSeries = entradas.map((v, i) => v + outras[i] + ativos[i] - (custos[i] + despesas[i] + impostos[i] + invest[i]));
 
         addDataset('Resultado Líquido', resultadoSeries, 2);
         addDataset('(-) Ded. Ativos', ativos.map(v => -v), 9); // Negativo pois subtrai
+
+    } else if (key === 'total_investimentos') {
+        // Cálculo especial: Serviços é bruto e já inclui Consórcios embutidos.
+        // O valor correto de Serviços para investimentos é: max(0, Serviços - Consórcios)
+        const seriesConsorcios = state.validColumns.map(col => {
+            let s = 0;
+            state.filteredData.forEach(row => {
+                if (row.Categoria === 'Consórcios - a contemplar')
+                    s += parseFloat(row[col]?.toString().replace(',', '.') || 0);
+            });
+            return s;
+        });
+        const seriesServicosRaw = state.validColumns.map(col => {
+            let s = 0;
+            state.filteredData.forEach(row => {
+                if (row.Categoria === 'Serviços')
+                    s += parseFloat(row[col]?.toString().replace(',', '.') || 0);
+            });
+            return s;
+        });
+        const seriesAtivos = state.validColumns.map(col => {
+            let s = 0;
+            state.filteredData.forEach(row => {
+                if (row.Categoria === 'Ativos')
+                    s += parseFloat(row[col]?.toString().replace(',', '.') || 0);
+            });
+            return s;
+        });
+        // Serviços ajustado = Serviços_bruto - Consórcios (mínimo 0)
+        const seriesServicosAdj = seriesServicosRaw.map((v, i) => Math.max(0, v - seriesConsorcios[i]));
+
+        if (seriesConsorcios.some(v => v !== 0)) addDataset('Consórcios - a contemplar', seriesConsorcios, 0);
+        if (seriesServicosAdj.some(v => v !== 0))  addDataset('Serviços', seriesServicosAdj, 1);
+        if (seriesAtivos.some(v => v !== 0))       addDataset('Ativos', seriesAtivos, 2);
 
     } else if (metricMap[key]) {
         // Caso Padrão: Divide nas categorias individuais listadas no map
@@ -1982,15 +2033,41 @@ function showCardDetails(key, title) {
             .map(([cat, val]) => ({ category: cat, value: val }))
             .sort((a, b) => b.value - a.value);
 
-    } else if (key === 'total_saidas') {
-        // Breakdown for Total Saídas
-        const m = state.metrics;
+    } else if (key === 'total_investimentos') {
+        // Tabela de composição com Serviços ajustado (sem duplicar Consórcios)
+        const consTot = getCatSum('Consórcios - a contemplar');
+        const svcTot  = Math.max(0, getCatSum('Serviços') - consTot);
+        const atiTot  = getCatSum('Ativos');
         contributingCategories = [
-            { category: 'Custos Operacionais', value: m.total_custos },
-            { category: 'Despesas Rateadas', value: m.total_despesas },
-            { category: 'Impostos', value: m.total_impostos },
-            { category: 'Investimentos', value: m.total_investimentos }
-        ].sort((a, b) => b.value - a.value);
+            { category: 'Consórcios - a contemplar', value: consTot },
+            { category: 'Serviços', value: svcTot },
+            { category: 'Ativos', value: atiTot }
+        ].filter(c => c.value > 0).sort((a, b) => b.value - a.value);
+    } else if (key === 'total_saidas') {
+        const targetCats = [
+            ...(metricMap['total_custos'] || []),
+            ...(metricMap['total_despesas'] || []),
+            ...(metricMap['total_impostos'] || [])
+        ];
+        const catTotals = {};
+        state.filteredData.forEach(row => {
+            if (targetCats.includes(row.Categoria)) {
+                if (!catTotals[row.Categoria]) catTotals[row.Categoria] = 0;
+                state.validColumns.forEach(col => catTotals[row.Categoria] += parseFloat(row[col]?.toString().replace(',', '.') || 0));
+            }
+        });
+        
+        contributingCategories = Object.entries(catTotals).map(([cat, val]) => ({ category: cat, value: val }));
+        
+        const consTot = getCatSum('Consórcios - a contemplar');
+        const svcTot  = Math.max(0, getCatSum('Serviços') - consTot);
+        const atiTot  = getCatSum('Ativos');
+        
+        if (consTot > 0) contributingCategories.push({ category: 'Consórcios - a contemplar', value: consTot });
+        if (svcTot > 0) contributingCategories.push({ category: 'Serviços', value: svcTot });
+        if (atiTot > 0) contributingCategories.push({ category: 'Ativos', value: atiTot });
+        
+        contributingCategories.sort((a, b) => b.value - a.value);
     } else if (key === 'resultado') {
         // Detalhamento do Resultado
         const m = state.metrics;
@@ -2026,8 +2103,12 @@ function showCardDetails(key, title) {
             // Vamos manter simples:
             const percent = total !== 0 ? (Math.abs(item.value) / Math.abs(total) * 100).toFixed(1) + '%' : '-';
 
-            const colorClass = item.value < 0 ? 'text-danger' : 'text-success';
-
+            // Para Saídas, todos serão exibidos como despesas (negativos visualmente em cor), 
+            // Para as outras, os itens que aumentam saldo são verde, os que reduzem são vermelho.
+            let colorClass = item.value < 0 ? 'text-danger' : 'text-success';
+            if (key === 'total_saidas') {
+                colorClass = 'text-danger'; // Forçando todo item de saída a ser vermelho para manter a lógica visual
+            }
             const row = `
                 <tr>
                     <td>${item.category}</td>

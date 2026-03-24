@@ -39,6 +39,10 @@
 
     // Verificar autenticação ao carregar
     async function checkAuth() {
+        // AUTH DESATIVADO TEMPORARIAMENTE
+        window.userPermissions = { _isAdmin: true };
+        return true;
+
         try {
             const { data: { session }, error } = await window.authSupabase.auth.getSession();
 

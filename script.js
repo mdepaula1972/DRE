@@ -2,8 +2,8 @@
 
 // Configuration
 const CONFIG = {
-    VERSION: "28.0",
-    LAST_UPDATE: "07/02/2026",
+    VERSION: "28.3",
+    LAST_UPDATE: "23/02/2026",
     COLORS: {
         primary: '#F2911B',
         secondary: '#262223',
@@ -100,46 +100,7 @@ let state = {
 Chart.register(ChartDataLabels);
 
 function initCharts() {
-    const ctxMainElement = document.getElementById('mainChart');
-    const ctxPieElement = document.getElementById('pieChart');
-    const ctxWaterfallElement = document.getElementById('waterfallChart');
-    const ctxTopElement = document.getElementById('topExpensesChart');
-
-    // Initialize Main Chart
-    if (ctxMainElement) {
-        state.charts.main = new Chart(ctxMainElement.getContext('2d'), {
-            type: 'bar',
-            data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    }
-
-    // Initialize Pie Chart
-    if (ctxPieElement) {
-        state.charts.pie = new Chart(ctxPieElement.getContext('2d'), {
-            type: 'doughnut',
-            data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    }
-
-    // Initialize Waterfall Chart
-    if (ctxWaterfallElement) {
-        state.charts.waterfall = new Chart(ctxWaterfallElement.getContext('2d'), {
-            type: 'bar',
-            data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    }
-
-    // Initialize Top Expenses Chart
-    if (ctxTopElement) {
-        state.charts.topExpenses = new Chart(ctxTopElement.getContext('2d'), {
-            type: 'bar', // Horizontal bar usually
-            data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
-        });
-    }
+    console.log("Charts will be initialized on demand by updateCharts().");
 }
 
 // Data Processing
@@ -194,73 +155,288 @@ function handleFileUpload(event) {
  * ou se o usuário desejar um carregamento padrão.
  * ATUALIZADO: Carrega JSON mesclado de duas fontes (até mai/25 e jun/25+)
  */
-function tryAutoLoad() {
-    const isGitHubPages = window.location.hostname.includes('github.io');
+/**
+ * Tenta carregar dados automaticamente.
+ * Prioridade: Supabase (Live) -> dados.csv (Local) -> fallback JSON
+ */
+async function tryAutoLoad() {
+    console.log("Iniciando carregamento automático de dados (Híbrido)...");
+
+    let supabaseData = [];
+    let localData = [];
+
+    // 1. Buscar do Supabase (Prioridade para meses que existem lá)
+    if (window.authSupabase) {
+        supabaseData = await loadFromSupabase();
+    }
+
     const primaryFile = 'dados.csv';
+    console.log(`Tentando arquivo local para histórico (${primaryFile})...`);
 
-    console.log(`Tentando auto-load prioritário (${primaryFile})...`);
-
-    fetch(primaryFile)
-        .then(response => {
-            if (!response.ok) throw new Error("Arquivo dados.csv não encontrado");
-            return response.blob();
-        })
-        .then(blob => {
-            console.log("dados.csv encontrado. Processando...");
+    try {
+        const response = await fetch(primaryFile);
+        if (response.ok) {
+            const blob = await response.blob();
             const file = new File([blob], 'dados.csv', { type: 'text/csv' });
-            const event = { target: { files: [file] } };
-            handleFileUpload(event);
-        })
-        .catch(err => {
-            console.warn("Auto-load de dados.csv falhou:", err.message);
-            console.log("Tentando fallback para dados_dre_merged.json...");
 
-            fetch('dados_dre_merged.json')
-                .then(res => res.json())
-                .then(data => {
-                    console.log("Fallback JSON carregado.");
-                    processJSONData(data);
-                })
-                .catch(err2 => {
-                    console.warn("Todos os auto-loads falharam.");
+            // Usar PapaParse de forma síncrona/promissificada para pegar os dados locais
+            localData = await new Promise((resolve) => {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    encoding: "ISO-8859-1",
+                    complete: (results) => resolve(results.data)
                 });
-        });
+            });
+        }
+    } catch (err) {
+        console.warn("Auto-load de dados.csv falhou:", err.message);
+    }
+
+    // Se não tem nada de nenhum lugar, tentar o fallback JSON antigo
+    if (supabaseData.length === 0 && localData.length === 0) {
+        console.log("Tentando fallback para dados_dre_merged.json...");
+        try {
+            const res = await fetch('dados_dre_merged.json');
+            const data = await res.json();
+            processJSONData(data);
+            return;
+        } catch (e) {
+            console.warn("Todos os auto-loads falharam.");
+            return;
+        }
+    }
+
+    // 2. SMART MERGE: Mesclar dados do CSV com Supabase
+    // O Supabase tem prioridade total sobre os meses que ele contém.
+    const mergedData = smartMergeData(localData, supabaseData);
+
+    // Processar os dados mesclados (já no formato wide/pivotado)
+    processJSONData(mergedData, true);
 }
 
 /**
- * Processa dados JSON (formato normalizado do dual-source)
- * Converte para formato CSV esperado pelo resto do código
+ * Mescla dados locais e do banco, garantindo que meses no banco excluam os locais.
  */
-function processJSONData(jsonData) {
+function smartMergeData(localRows, supabasePivoted) {
+    if (supabasePivoted.length === 0) return localRows;
+    if (localRows.length === 0) return supabasePivoted;
+
+    // Identificar quais meses estão presentes no Supabase
+    const supabaseMonths = new Set();
+    supabasePivoted.forEach(row => {
+        Object.keys(row).forEach(key => {
+            if (key.includes('/')) supabaseMonths.add(key);
+        });
+    });
+
+    console.log("📅 Meses auditados via Supabase (Precedência):", Array.from(supabaseMonths));
+
+    // Limpar os meses auditados das linhas locais
+    const cleanedLocal = localRows.map(row => {
+        const newRow = { ...row };
+        supabaseMonths.forEach(m => {
+            delete newRow[m];
+        });
+        return newRow;
+    });
+
+    // Unir as bases pelo ID (Empresa|Projeto|Categoria)
+    const mergeMap = new Map();
+
+    // Inserir locais limpos
+    cleanedLocal.forEach(row => {
+        // Normalizar chaves para o padrão do app
+        const e = row.Empresa || row.empresa || 'N/A';
+        const p = row.Projeto || row.projeto || 'Sem Projeto';
+        const c = row.Categoria || row.categoria || 'Sem Categoria';
+        const key = `${e}|${p}|${c}`;
+
+        if (!mergeMap.has(key)) {
+            mergeMap.set(key, { Empresa: e, Projeto: p, Categoria: c });
+        }
+
+        const entry = mergeMap.get(key);
+        Object.keys(row).forEach(k => {
+            if (k.includes('/') && !supabaseMonths.has(k)) {
+                entry[k] = row[k];
+            }
+        });
+    });
+
+    // Inserir Supabase (Sobrescrevendo ou adicionando colunas)
+    supabasePivoted.forEach(row => {
+        const key = `${row.Empresa}|${row.Projeto}|${row.Categoria}`;
+        if (!mergeMap.has(key)) {
+            mergeMap.set(key, { ...row });
+        } else {
+            const entry = mergeMap.get(key);
+            Object.keys(row).forEach(k => {
+                if (k.includes('/')) entry[k] = row[k];
+            });
+        }
+    });
+
+    return Array.from(mergeMap.values());
+}
+
+/**
+ * Busca dados da nova tabela financeiro_detalhado e transforma para o formato DRE
+ */
+async function loadFromSupabase() {
+    try {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.remove('d-none');
+
+        const statusEl = document.getElementById('fileStatus');
+        if (statusEl) statusEl.textContent = "Conectando ao Supabase...";
+
+        const { data, error } = await window.authSupabase
+            .from('financeiro_detalhado')
+            .select('*')
+            .order('data_registro', { ascending: true });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            console.warn("Nenhum dado encontrado no Supabase.");
+            return [];
+        }
+
+        console.log(`✅ ${data.length} registros recuperados do Supabase. Iniciando pivot...`);
+        state.rawSupabaseRows = data; // SAVE FOR AUDIT
+        return pivotSupabaseToWide(data);
+
+    } catch (err) {
+        console.error("Erro ao carregar do Supabase:", err);
+        return [];
+    } finally {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.add('d-none');
+    }
+}
+
+/**
+ * Transforma linhas do banco em formato de colunas mensais
+ */
+function pivotSupabaseToWide(dbRows) {
+    const result = {};
+    const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+    dbRows.forEach(row => {
+        const empresa = row.empresa || 'N/A';
+        const tipo = (row.tipo || 'P').toUpperCase(); // P = Pagar, R = Receber
+
+        // REGRAS ESTRITAS DE MAPEAMENTO OMIE -> APP (v2)
+
+        // 1. Projeto app = departamento Omie
+        const projeto = row.departamento || 'Sem Projeto';
+
+        // 2. Extração de nomes originais
+        const omieCat = (row.categoria || '').trim();
+        const omieCatLower = omieCat.toLowerCase();
+        const contaDre = (row.conta_dre || '').trim();
+
+        // 3. FILTROS DE EXCLUSÃO (Ignorar Lançamento)
+        // a) Sem Conta DRE (se categoria Omie existir)
+        if (omieCat && !contaDre) return;
+
+        // b) Mútuos, Dividendos e Intermediação
+        if (omieCatLower.includes('mútuo') || omieCatLower.includes('mutuo') ||
+            omieCatLower.includes('dividendo') ||
+            omieCatLower.includes('intermediação') || omieCatLower.includes('intermediacao')) {
+            return;
+        }
+
+        // c) Terceirização de Serviços (Receitas não entram)
+        if (omieCatLower.includes('terceirização de serviços') && tipo === 'R') {
+            return;
+        }
+
+        // 4. MAPEAMENTO DE CATEGORIA (Exceções Estritas)
+        let categoria = contaDre || 'Sem Categoria';
+
+        // Regras onde a Categoria Omie SOBREPÕE a Conta DRE
+        const isPreventivaB2G = omieCatLower.includes('preventiva b2g'); // Diferentemente de B2B
+        const isCorretivaB2G = omieCatLower.includes('corretiva b2g');
+        const isCredenciado = omieCatLower.includes('credenciado') || omieCatLower.includes('adiantamento credenciado');
+        const isConsorcioAContemplar = omieCatLower.includes('consórcios - a contemplar') || omieCatLower.includes('consorcios - a contemplar');
+        const isTerceirizacaoServicos = omieCatLower.includes('terceirização de serviços') || omieCatLower.includes('terceirizacao de servicos');
+
+        if (isPreventivaB2G || isCorretivaB2G || isCredenciado || isConsorcioAContemplar || isTerceirizacaoServicos) {
+            categoria = omieCat;
+        }
+
+        const valor = parseFloat(row.valor || 0);
+
+        if (!row.data_registro) return;
+
+        // Formato data_registro: YYYY-MM-DD
+        const [year, month, day] = row.data_registro.split('-');
+        const date = new Date(year, month - 1, day);
+        const mesNome = meses[date.getMonth()];
+        const anoShort = year.toString().slice(-2);
+        const periodo = `${mesNome}/${anoShort}`;
+
+        const key = `${empresa}|${projeto}|${categoria}`;
+
+        if (!result[key]) {
+            result[key] = {
+                Empresa: empresa,
+                Projeto: projeto,
+                Categoria: categoria
+            };
+        }
+
+        if (!result[key][periodo]) result[key][periodo] = 0;
+        result[key][periodo] += valor;
+    });
+
+    return Object.values(result).map(row => {
+        // Garantir que todos os campos de metadados existam para evitar quebras
+        return {
+            Empresa: row.Empresa,
+            Projeto: row.Projeto,
+            Categoria: row.Categoria,
+            ...row
+        };
+    });
+}
+
+/**
+ * Processa dados JSON (formato normalizado do dual-source ou já pivotado)
+ */
+function processJSONData(jsonData, isAlreadyWide = false) {
     try {
         console.log("Processando JSON data...");
+        let data = [];
 
-        // Converter JSON normalizado para formato CSV wide
-        // JSON: [{empresa, projeto, categoria, competencia, valor}, ...]
-        // CSV esperado: {Empresa, Projeto, Categoria, "jan/24": valor, "fev/24": valor, ...}
+        if (isAlreadyWide) {
+            data = jsonData;
+        } else {
+            // Converter JSON normalizado (long) para formato CSV wide
+            const csvFormat = {};
+            jsonData.forEach(item => {
+                const key = `${item.empresa}|${item.projeto}|${item.categoria}`;
+                if (!csvFormat[key]) {
+                    csvFormat[key] = {
+                        Empresa: item.empresa,
+                        Projeto: item.projeto,
+                        Categoria: item.categoria
+                    };
+                }
+                const periodFormatted = formatCompetenciaToCSV(item.competencia);
+                csvFormat[key][periodFormatted] = item.valor;
+            });
+            data = Object.values(csvFormat);
+        }
 
-        const csvFormat = {};
         const allPeriods = new Set();
-
-        jsonData.forEach(item => {
-            const key = `${item.empresa}|${item.projeto}|${item.categoria}`;
-
-            if (!csvFormat[key]) {
-                csvFormat[key] = {
-                    Empresa: item.empresa,
-                    Projeto: item.projeto,
-                    Categoria: item.categoria
-                };
-            }
-
-            // Converter "2024-01" para "jan/24"
-            const periodFormatted = formatCompetenciaToCSV(item.competencia);
-            allPeriods.add(periodFormatted);
-            csvFormat[key][periodFormatted] = item.valor;
+        data.forEach(row => {
+            Object.keys(row).forEach(k => {
+                if (k.includes('/')) allPeriods.add(k);
+            });
         });
-
-        // Converter para Array
-        const data = Object.values(csvFormat);
 
         // Listar todos os períodos encontrados (SORTED)
         const periodosArray = Array.from(allPeriods).sort((a, b) => {
@@ -926,11 +1102,11 @@ function calculateDRE() {
         const proj = row.Projeto || 'Sem Projeto';
         allProjects.add(proj);
 
-        if (!catTotals[cat]) {
-            catTotals[cat] = 0;
-            prevCatTotals[cat] = 0;
-            catMonthly[cat] = {};
-            cols.forEach(c => catMonthly[cat][c] = 0);
+        if (!catTotals[catLower]) {
+            catTotals[catLower] = 0;
+            prevCatTotals[catLower] = 0;
+            catMonthly[catLower] = {};
+            cols.forEach(c => catMonthly[catLower][c] = 0);
         }
 
         if (!projCatTotals[proj]) projCatTotals[proj] = {};
@@ -944,8 +1120,8 @@ function calculateDRE() {
         // Current Sum
         cols.forEach(col => {
             const val = parseFloat(row[col]?.toString().replace(',', '.') || 0);
-            catTotals[cat] += val;
-            catMonthly[cat][col] += val;
+            catTotals[catLower] += val;
+            catMonthly[catLower][col] += val;
 
             projCatTotals[proj][catLower] += val;
             projCatMonthly[proj][catLower][col] += val;
@@ -954,7 +1130,7 @@ function calculateDRE() {
         // Previous Sum
         prevCols.forEach(col => {
             const val = parseFloat(row[col]?.toString().replace(',', '.') || 0);
-            prevCatTotals[cat] += val;
+            prevCatTotals[catLower] += val;
         });
     });
 
@@ -987,11 +1163,11 @@ function calculateDRE() {
     // DEBUG: Log unique categories and specific totals
     console.log("=== DEBUG: Categorias Encontradas ===");
     console.log("Todas as categorias:", Object.keys(catTotals).sort());
-    console.log("\n--- Buscando Preventiva e Corretiva ---");
-    console.log("Total para 'Corretiva - B2G':", catTotals["Corretiva - B2G"]);
-    console.log("Total para 'Preventiva - B2G':", catTotals["Preventiva - B2G"]);
-    console.log("Total para 'Manutenção Corretiva':", catTotals["Manutenção Corretiva"]);
-    console.log("Total para 'Manutenção Preventiva':", catTotals["Manutenção Preventiva"]);
+    console.log("\n--- Buscando Preventiva e Corretiva (Normalizado) ---");
+    console.log("Total para 'Corretiva - B2G':", getCatTotal("Corretiva - B2G"));
+    console.log("Total para 'Preventiva - B2G':", getCatTotal("Preventiva - B2G"));
+    console.log("Total para 'Manutenção Corretiva':", getCatTotal("Manutenção Corretiva"));
+    console.log("Total para 'Manutenção Preventiva':", getCatTotal("Manutenção Preventiva"));
     console.log("=====================================\n");
 
     // --- DRE Structure Calculation ---
@@ -1068,8 +1244,9 @@ function calculateDRE() {
         (getCatTotal("Distribuição de Dividendos") + getCatTotal("Dividendos"));
 
     // Nova regra de cálculo de Investimentos
-    // Soma direta das categorias brutas para evitar lógica de dedução da tabela
-    const totalInvestimentos = getCatTotal("Consórcios - a contemplar") + getCatTotal("Serviços") + getCatTotal("Ativos");
+    // Soma Consórcios, Serviços líquido de Consórcios, e Ativos
+    const servicosTotalAjustado = Math.max(0, getCatTotal("Serviços") - getCatTotal("Consórcios - a contemplar"));
+    const totalInvestimentos = getCatTotal("Consórcios - a contemplar") + servicosTotalAjustado + getCatTotal("Ativos");
 
     const totalSaidas = totalImpostos + totalCustos + totalDespesas + totalInvestimentos;
 
@@ -1140,8 +1317,10 @@ function calculateDRE() {
         getPrevVal("Despesas Eventuais") + getPrevVal("Despesas Variáveis") + getPrevVal("Intermediação de Negócios") +
         (getPrevCatTotal("Distribuição de Dividendos") + getPrevCatTotal("Dividendos"));
 
-    // Investments (Direct Sum as per current logic)
-    const prev_totalInvestimentos = getPrevCatTotal("Consórcios - a contemplar") + getPrevCatTotal("Serviços") + getPrevCatTotal("Ativos");
+    // Investments (Soma com valor líquido de Serviços)
+    const prev_servicosTotalAjustado = Math.max(0, getPrevCatTotal("Serviços") - getPrevCatTotal("Consórcios - a contemplar"));
+    const prev_totalInvestimentos = getPrevCatTotal("Consórcios - a contemplar") + prev_servicosTotalAjustado + getPrevCatTotal("Ativos");
+    
     const prev_totalSaidas = prev_totalImpostos + prev_totalCustos + prev_totalDespesas + prev_totalInvestimentos;
     const prev_resultado = prev_totalEntradas + getPrevVal("Ativos") + prev_outrasEntradas - prev_totalSaidas;
     const prev_fcl = prev_resultado - getPrevVal("Ativos");
@@ -1501,7 +1680,7 @@ function updateCards() {
             }
         },
 
-        { key: 'total_saidas', title: 'Total Saídas', icon: 'bi-graph-down-arrow', color: 'danger', bgColor: 'bg-red-soft', percentKey: 'perc_total_saidas', percentRefIcon: 'bi-graph-up-arrow' },
+        { key: 'total_saidas', title: 'Total Saídas', icon: 'bi-graph-down-arrow', color: 'danger', bgColor: 'bg-red-soft', percentKey: 'perc_total_saidas', percentRefIcon: 'bi-graph-up-arrow', isClickable: true },
         { key: 'resultado', title: 'Resultado', icon: 'bi-bullseye', color: 'highlight', bgColor: 'bg-yellow-soft', percentKey: 'perc_resultado', percentRefIcon: 'bi-graph-up-arrow', isClickable: true },
         { key: 'fcl', title: 'Fluxo de Caixa Livre - FCL', icon: 'bi-wallet2', color: 'success', bgColor: 'bg-green-soft', percentKey: 'perc_fcl_receita', percentRefIcon: 'bi-graph-up-arrow', isClickable: true }
     ];
@@ -1585,10 +1764,10 @@ function renderCards(containerId, cards, metrics, colSize) {
         }
 
         // Definir comportamento de clique
-        const clickableClass = card.key === 'total_equipamentos' ? 'card-clickable' : '';
+        const clickableClass = (card.key === 'total_equipamentos' || card.isClickable) ? 'card-clickable' : '';
         const clickHandler = card.key === 'total_equipamentos'
             ? 'onclick="openPorMaquinaModal()"'
-            : `onclick="showCardDetails('${card.key}', '${card.title}')"`;
+            : (card.isClickable ? `onclick="showCardDetails('${card.key}', '${card.title}')"` : '');
 
         // Declarar html uma única vez
         let html;
@@ -1648,9 +1827,20 @@ function updateCharts() {
     const waterfallChartEl = document.getElementById('waterfallChart');
     const topExpensesChartEl = document.getElementById('topExpensesChart');
 
-    if (!mainChartEl && !pieChartEl && !waterfallChartEl && !topExpensesChartEl) {
-        return; // No charts on this page
-    }
+    // DESTROY EXISTING CHARTS SAFELY
+    const destroyChart = (elId, stateKey) => {
+        const existing = Chart.getChart(elId);
+        if (existing) existing.destroy();
+        if (state.charts[stateKey]) {
+            state.charts[stateKey].destroy();
+            state.charts[stateKey] = null;
+        }
+    };
+
+    if (mainChartEl) destroyChart('mainChart', 'main');
+    if (pieChartEl) destroyChart('pieChart', 'pie');
+    if (waterfallChartEl) destroyChart('waterfallChart', 'waterfall');
+    if (topExpensesChartEl) destroyChart('topExpensesChart', 'topExpenses');
 
     // Only get context if element exists
     const ctxMain = mainChartEl ? mainChartEl.getContext('2d') : null;
@@ -2213,16 +2403,28 @@ function showCardDetails(key, title) {
     let contributingCategories = [];
 
     // We need to look at CONFIG.ESTRUTURA_DRE to find which categories map to this metric
-    // Or if it's a direct aggregate like 'total_custos', we find the lines that sum up to it.
+        // Helper to get invest series (avoiding double count of 'Consorcios' in 'Servicos')
+    const getInvestSeries = () => {
+        return state.validColumns.map(col => {
+            let consTot = 0, svcTot = 0, atvTot = 0;
+            state.filteredData.forEach(row => {
+                const val = parseFloat(row[col]?.toString().replace(',', '.') || 0);
+                if (row.Categoria === 'Consórcios - a contemplar') consTot += val;
+                if (row.Categoria === 'Serviços') svcTot += val;
+                if (row.Categoria === 'Ativos') atvTot += val;
+            });
+            const svcAjustado = Math.max(0, svcTot - consTot);
+            return consTot + svcAjustado + atvTot;
+        });
+    };
 
-    // Map metric keys to DRE Line Titles or Categories
     const metricMap = {
         'total_entradas': ['Receita Bruta de Vendas', 'Receitas Indiretas', 'Outras Receitas', 'Receitas Financeiras', 'Honorários', 'Juros e devoluções', 'Recuperação de Despesas Variáveis'],
         'outras_entradas': ['Outras Receitas', 'Receitas Financeiras', 'Honorários', 'Juros e devoluções'],
         'total_impostos': ['Impostos', 'Provisão - IRPJ e CSSL Trimestral'],
         'total_custos': ['Credenciado Operacional', 'Adiantamento - Credenciado Operacional', 'Terceirização de Mão de Obra', 'Despesas com Pessoal', 'Custo dos Serviços Prestados', 'Preventiva - B2G', 'Manutenção Preventiva', 'Corretiva - B2G', 'Manutenção Corretiva', 'Outros Custos'],
         'total_despesas': ['Credenciado Administrativo', 'Adiantamento - Credenciado Administrativo', 'Credenciado TI', 'Adiantamento - Credenciado TI', 'Despesas Administrativas', 'Despesas de Vendas e Marketing', 'Despesas Financeiras', 'Outros Tributos', 'Jurídico', 'Despesas Variáveis', 'Intermediação de Negócios'],
-        'total_investimentos': ['Consórcios - a contemplar', 'Serviços', 'Ativos'],
+        'total_investimentos': null, // Custom handling below
         'mutuo_entradas': ['Mútuo - Entradas'],
         'mutuo_saidas': ['Mútuo - Saídas'],
         'dividendos': ['Distribuição de Dividendos', 'Dividendos'],
@@ -2277,34 +2479,51 @@ function showCardDetails(key, title) {
     };
 
     if (key === 'total_saidas') {
-        const groups = [
-            { label: 'Custos Operacionais', mapKey: 'total_custos' },
-            { label: 'Despesas Rateadas', mapKey: 'total_despesas' },
-            { label: 'Impostos', mapKey: 'total_impostos' },
-            { label: 'Investimentos', mapKey: 'total_investimentos' }
+        const targetCats = [
+            ...(metricMap['total_custos'] || []),
+            ...(metricMap['total_despesas'] || []),
+            ...(metricMap['total_impostos'] || [])
         ];
-        groups.forEach((g, i) => {
-            addDataset(g.label, getValuesSeries(metricMap[g.mapKey]), i);
+        
+        targetCats.forEach((cat, i) => {
+            const series = getValuesSeries([cat]);
+            if (series.some(v => v !== 0)) addDataset(cat, series, i);
         });
+        
+        const seriesCons = getValuesSeries(['Consórcios - a contemplar']);
+        const seriesSvcRaw = getValuesSeries(['Serviços']);
+        const seriesAtv = getValuesSeries(['Ativos']);
+        const seriesSvcAdj = seriesSvcRaw.map((v, i) => Math.max(0, v - seriesCons[i]));
+        
+        const baseColorIdx = targetCats.length;
+        if (seriesCons.some(v => v !== 0)) addDataset('Consórcios - a contemplar', seriesCons, baseColorIdx);
+        if (seriesSvcAdj.some(v => v !== 0)) addDataset('Serviços', seriesSvcAdj, baseColorIdx + 1);
+        if (seriesAtv.some(v => v !== 0)) addDataset('Ativos', seriesAtv, baseColorIdx + 2);
 
     } else if (key === 'resultado') {
-        // Para Resultado, vamos mostrar Entradas vs Saídas Empilhadas (Neto é difícil de visualizar empilhado)
-        // Ou melhor: Breakdown dos componentes principais
-        // Atenção: Misturar positivo e negativo em stacked bar funciona (sobe e desce do eixo 0)
-
-        addDataset('Total Entradas Ops.', getValuesSeries(metricMap['total_entradas']), 2); // Verde
+        // Fix double counting and provide breakdown
+        addDataset('Total Entradas Ops.', getValuesSeries(['Receita Bruta de Vendas', 'Receitas Indiretas']), 2); // Verde
         addDataset('Outras Entradas', getValuesSeries(metricMap['outras_entradas']), 5);    // Amarelo
         addDataset('Ativos (Ajuste)', getValuesSeries(['Ativos']), 6);                      // Teal
-
-        // Saídas (Negativas para o gráfico ficar lógico em relação ao saldo? Ou positivas para comparação de volume?)
-        // O usuário quer ver "o que compõe". Mostrar saídas como negativo no gráfico de Resultado faz sentido matemática visualmente.
 
         const invert = (arr) => arr.map(v => -Math.abs(v)); // Força visualização negativa
 
         addDataset('Custos Operacionais', invert(getValuesSeries(metricMap['total_custos'])), 9); // Laranja 
         addDataset('Despesas Rateadas', invert(getValuesSeries(metricMap['total_despesas'])), 1); // Dark
         addDataset('Impostos', invert(getValuesSeries(metricMap['total_impostos'])), 16);         // Red
-        addDataset('Investimentos', invert(getValuesSeries(metricMap['total_investimentos'])), 4); // Purple
+        
+        // Use custom logic for Investimentos instead of crashing on metricMap['total_investimentos'] (which is null)
+        const getInvestSeries = () => state.validColumns.map(col => {
+            let cons = 0, svc = 0, atv = 0;
+            state.filteredData.forEach(row => {
+                const v = parseFloat(row[col]?.toString().replace(',', '.') || 0);
+                if (row.Categoria === 'Consórcios - a contemplar') cons += v;
+                else if (row.Categoria === 'Serviços') svc += v;
+                else if (row.Categoria === 'Ativos') atv += v;
+            });
+            return cons + Math.max(0, svc - cons) + atv;
+        });
+        addDataset('Investimentos', invert(getInvestSeries()), 4); // Purple
 
     } else if (key === 'fcl') {
         // FCL Composição: Resultado Liquido vs Ded. Ativos
@@ -2320,12 +2539,30 @@ function showCardDetails(key, title) {
         const custos = getValuesSeries(metricMap['total_custos']);
         const despesas = getValuesSeries(metricMap['total_despesas']);
         const impostos = getValuesSeries(metricMap['total_impostos']);
-        const invest = getValuesSeries(metricMap['total_investimentos']);
+        const invest = getInvestSeries();
 
         const resultadoSeries = entradas.map((v, i) => v + outras[i] + ativos[i] - (custos[i] + despesas[i] + impostos[i] + invest[i]));
 
         addDataset('Resultado Líquido', resultadoSeries, 2);
         addDataset('(-) Ded. Ativos', ativos.map(v => -v), 9); // Negativo pois subtrai
+
+    } else if (key === 'total_investimentos') {
+        // Special mapping for investments 
+        addDataset('Consórcios - a contemplar', getValuesSeries(['Consórcios - a contemplar']), 0);
+        
+        // Calculando a série de Serviços Ajustada usando `Math.max(0, s - c)`
+        const servicosAjustados = state.validColumns.map(col => {
+            let s = 0, c = 0;
+            state.filteredData.forEach(row => {
+                const val = parseFloat(row[col]?.toString().replace(',', '.') || 0);
+                if (row.Categoria === 'Serviços') s += val;
+                if (row.Categoria === 'Consórcios - a contemplar') c += val;
+            });
+            return Math.max(0, s - c);
+        });
+        
+        addDataset('Serviços (Líquido)', servicosAjustados, 1);
+        addDataset('Ativos', getValuesSeries(['Ativos']), 2);
 
     } else if (metricMap[key]) {
         // Caso Padrão: Divide nas categorias individuais listadas no map
@@ -2434,15 +2671,43 @@ function showCardDetails(key, title) {
             .map(([cat, val]) => ({ category: cat, value: val }))
             .sort((a, b) => b.value - a.value);
 
-    } else if (key === 'total_saidas') {
-        // Breakdown for Total Saídas
-        const m = state.metrics;
+    } else if (key === 'total_investimentos') {
+        const consTot = getCatSum('Consórcios - a contemplar');
+        const svcTotRaw = getCatSum('Serviços');
+        const atvTot = getCatSum('Ativos');
+        const svcAjustado = Math.max(0, svcTotRaw - consTot);
+        
         contributingCategories = [
-            { category: 'Custos Operacionais', value: m.total_custos },
-            { category: 'Despesas Rateadas', value: m.total_despesas },
-            { category: 'Impostos', value: m.total_impostos },
-            { category: 'Investimentos', value: m.total_investimentos }
+            { category: 'Consórcios - a contemplar', value: consTot },
+            { category: 'Serviços (Líquido)', value: svcAjustado },
+            { category: 'Ativos', value: atvTot }
         ].sort((a, b) => b.value - a.value);
+
+    } else if (key === 'total_saidas') {
+        const targetCats = [
+            ...(metricMap['total_custos'] || []),
+            ...(metricMap['total_despesas'] || []),
+            ...(metricMap['total_impostos'] || [])
+        ];
+        const catTotals = {};
+        state.filteredData.forEach(row => {
+            if (targetCats.includes(row.Categoria)) {
+                if (!catTotals[row.Categoria]) catTotals[row.Categoria] = 0;
+                state.validColumns.forEach(col => catTotals[row.Categoria] += parseFloat(row[col]?.toString().replace(',', '.') || 0));
+            }
+        });
+        
+        contributingCategories = Object.entries(catTotals).map(([cat, val]) => ({ category: cat, value: val }));
+        
+        const consTot = getCatSum('Consórcios - a contemplar');
+        const svcTot  = Math.max(0, getCatSum('Serviços') - consTot);
+        const atiTot  = getCatSum('Ativos');
+        
+        if (consTot > 0) contributingCategories.push({ category: 'Consórcios - a contemplar', value: consTot });
+        if (svcTot > 0) contributingCategories.push({ category: 'Serviços', value: svcTot });
+        if (atiTot > 0) contributingCategories.push({ category: 'Ativos', value: atiTot });
+        
+        contributingCategories.sort((a, b) => b.value - a.value);
     } else if (key === 'resultado') {
         // Detalhamento do Resultado
         const m = state.metrics;
@@ -2478,7 +2743,10 @@ function showCardDetails(key, title) {
             // Vamos manter simples:
             const percent = total !== 0 ? (Math.abs(item.value) / Math.abs(total) * 100).toFixed(1) + '%' : '-';
 
-            const colorClass = item.value < 0 ? 'text-danger' : 'text-success';
+            let colorClass = item.value < 0 ? 'text-danger' : 'text-success';
+            if (key === 'total_saidas') {
+                colorClass = 'text-danger'; // Forçando todo item de saída a ser vermelho para manter a lógica visual
+            }
 
             const row = `
                 <tr>
@@ -3289,3 +3557,153 @@ function loadStateFromStorage() {
         }
     }
 }
+
+// ========================================
+// DATA AUDIT TOOL (Health Check)
+// ========================================
+function runDataAudit() {
+    if (!state.rawSupabaseRows || state.rawSupabaseRows.length === 0) {
+        alert("Carregue os dados do Supabase primeiro (Sincronizar Supabase) para realizar a auditoria.");
+        return;
+    }
+
+    const tbody = document.querySelector('#auditTable tbody');
+    const countNoDreEl = document.getElementById('auditCountNoDre');
+    const countNoProjEl = document.getElementById('auditCountNoProj');
+
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    let countNoDre = 0;
+    let countNoProj = 0;
+    const issues = [];
+
+    state.rawSupabaseRows.forEach(row => {
+        const omieCat = (row.categoria || '').trim();
+        const contaDre = (row.conta_dre || '').trim();
+        const departamento = (row.departamento || '').trim();
+        const projetoRaiz = (row.projeto_raiz || '').trim();
+
+        let rowIssue = '';
+
+        // Critério 1: Categoria sem Conta DRE (Lançamentos com categorias que não têm vínculos com Conta DRE no Omie)
+        if (omieCat && !contaDre) {
+            countNoDre++;
+            rowIssue = '<span class="badge bg-danger">Sem Conta DRE</span>';
+        }
+
+        // Critério 2: Sem Departamento ou Projeto
+        if (!departamento || !projetoRaiz || departamento === 'N/A' || departamento.toLowerCase().includes('sem rateio')) {
+            countNoProj++;
+            rowIssue += (rowIssue ? ' ' : '') + '<span class="badge bg-warning text-dark">Sem Projeto/Dep</span>';
+        }
+
+        if (rowIssue) {
+            issues.push({
+                data: row.data_registro,
+                id: row.omie_id,
+                cliente: row.fornecedor_cliente || 'N/A',
+                valor: row.valor || 0,
+                issue: rowIssue
+            });
+        }
+    });
+
+    // Populate Table
+    if (issues.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-success py-4"><i class="bi bi-patch-check-fill me-2"></i>Nenhuma inconsistência detectada nos dados sincronizados!</td></tr>';
+    } else {
+        issues.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="small">${item.data}</td>
+                <td class="small text-muted">${item.id}</td>
+                <td>${item.cliente}</td>
+                <td class="fw-bold text-end">${item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                <td>${item.issue}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Update Counters
+    if (countNoDreEl) countNoDreEl.textContent = countNoDre;
+    if (countNoProjEl) countNoProjEl.textContent = countNoProj;
+
+    // Show Modal
+    const modalEl = document.getElementById('auditModal');
+    if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+}
+
+// Exportadores de CSV para Auditoria
+function exportAuditCSV() {
+    if (!state.rawSupabaseRows) return;
+
+    const issues = [];
+    state.rawSupabaseRows.forEach(row => {
+        const omieCat = (row.categoria || '').trim();
+        const contaDre = (row.conta_dre || '').trim();
+        const departamento = (row.departamento || '').trim();
+        const projetoRaiz = (row.projeto_raiz || '').trim();
+
+        let problem = '';
+        if (omieCat && !contaDre) problem = 'Sem Conta DRE';
+        if (!departamento || !projetoRaiz || departamento === 'N/A' || departamento.toLowerCase().includes('sem rateio')) {
+            problem += (problem ? ' | ' : '') + 'Sem Projeto/Dep';
+        }
+
+        if (problem) {
+            issues.push({ ...row, problema_auditoria: problem });
+        }
+    });
+
+    if (issues.length === 0) {
+        alert("Nenhuma inconsistência para exportar.");
+        return;
+    }
+
+    _downloadCSV(issues, "auditoria_inconsistencias.csv");
+}
+
+function exportAllSupabaseCSV() {
+    if (!state.rawSupabaseRows || state.rawSupabaseRows.length === 0) {
+        alert("Nenhum dado carregado para exportar.");
+        return;
+    }
+    _downloadCSV(state.rawSupabaseRows, "dados_brutos_supabase.csv");
+}
+
+function _downloadCSV(data, filename) {
+    const headers = Object.keys(data[0]);
+    const csvRows = [headers.join(',')];
+
+    for (const row of data) {
+        const values = headers.map(header => {
+            let val = row[header] === null || row[header] === undefined ? '' : row[header];
+            const escaped = ('' + val).replace(/"/g, '""');
+            return `"${escaped}"`;
+        });
+        csvRows.push(values.join(','));
+    }
+
+    const csvString = '\uFEFF' + csvRows.join('\n'); // Add BOM for Excel
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// Global exposure
+window.exportAuditCSV = exportAuditCSV;
+window.exportAllSupabaseCSV = exportAllSupabaseCSV;
+window.runDataAudit = runDataAudit;
