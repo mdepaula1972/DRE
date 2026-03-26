@@ -332,19 +332,21 @@ function renderDetailedTable(filtered) {
             })();
             detailHTML += `
                 <div class="col-auto">
-                    <div class="border border-secondary rounded p-2 bg-white" style="min-width:200px;">
+                    <div class="border border-secondary rounded p-2 bg-white ${lnDebt <= 0 ? 'border-success' : ''}" style="min-width:200px;">
                         <div class="d-flex justify-content-between align-items-start mb-1">
                             <div class="small text-muted fw-bold"><i class="bi bi-cash me-1"></i>OP. #${i + 1}</div>
-                            <button class="btn btn-xs btn-outline-danger p-0 px-1" onclick="deleteLoan('${ln.id}','${emp.full_name.replace(/'/g, "\\'")}')">
-                                <i class="bi bi-trash" style="font-size:0.65rem;"></i>
-                            </button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="badge ${lnDebt <= 0 ? 'bg-success' : 'bg-primary'}" style="font-size: 0.6rem;">${lnDebt <= 0 ? 'LIQUIDADO' : 'ATIVO'}</span>
+                                <button class="btn btn-xs btn-outline-danger p-0 px-1" onclick="deleteLoan('${ln.id}','${emp.full_name.replace(/'/g, "\\'")}')">
+                                    <i class="bi bi-trash" style="font-size:0.65rem;"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="small">Valor: <span class="fw-bold text-dark">${formatCurrency(ln.amount)}</span></div>
                         <div class="small">Parcelas: <span class="text-dark">${ln.installments}x = ${formatCurrency(parseFloat(ln.amount) / ln.installments)}/mês</span></div>
                         <div class="small">Início: <span class="text-dark">${ln.start_cycle || '---'}</span></div>
                         <div class="small d-flex align-items-center mt-1">
                             Saldo: <span class="fw-bold ms-1 ${lnDebt <= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(lnDebt)}</span>
-                            ${lnDebt <= 0 ? '<span class="badge bg-success ms-2" style="font-size: 0.6rem;">LIQUIDADO</span>' : ''}
                         </div>
                         ${ln.notes ? `<div class="small text-muted mt-1">${ln.notes}</div>` : ''}
                     </div>
