@@ -122,26 +122,31 @@ function formatDate(d) {
 
 function calculateDebt(emp) {
     const now = new Date();
-    let totalPaid = 0;
-    let totalAmount = 0;
+    let totalDebt = 0;
 
     emp._loans.forEach(ln => {
         const amount = parseFloat(ln.amount) || 0;
         const inst = parseInt(ln.installments) || 0;
-        const startCycle = ln.start_cycle;
-        if (!amount || !inst || !startCycle) return;
+        const sc = ln.start_cycle;
+        if (!amount || !inst || !sc) return;
 
-        const [y, m] = startCycle.split('-').map(Number);
-        const start = new Date(y, m - 1, 1);
-        let elapsed = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-        if (now.getDate() < 10) elapsed--;
-        elapsed = Math.max(0, Math.min(elapsed, inst));
+        function getElapsed(cycle) {
+            const n = new Date();
+            const [y, m] = cycle.split('-').map(Number);
+            let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
+            if (n.getDate() < 10) e--;
+            return Math.max(0, e);
+        }
 
-        totalPaid += elapsed * (amount / inst);
-        totalAmount += amount;
+        const paid_inst = parseInt(ln.paid_installments) || 0;
+        const paid_extra = parseFloat(ln.amount_paid_extra) || 0;
+        const elapsed = getElapsed(sc);
+
+        const totalPaidInstances = Math.max(0, Math.min(elapsed + paid_inst, inst));
+        const debt = Math.max(0, amount - (totalPaidInstances * (amount / inst)) - paid_extra);
+        totalDebt += debt;
     });
-
-    return Math.max(0, totalAmount - totalPaid);
+    return totalDebt;
 }
 
 function calculateTaken(emp) {
@@ -323,12 +328,21 @@ function renderDetailedTable(filtered) {
                 const inst = parseInt(ln.installments) || 0;
                 const sc = ln.start_cycle;
                 if (!amount || !inst || !sc) return amount;
-                const n = new Date();
-                const [y, m] = sc.split('-').map(Number);
-                let elapsed = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
-                if (n.getDate() < 10) elapsed--;
-                elapsed = Math.max(0, Math.min(elapsed, inst));
-                return Math.max(0, amount - elapsed * (amount / inst));
+                
+                function getElapsed(cycle) {
+                    const n = new Date();
+                    const [y, m] = cycle.split('-').map(Number);
+                    let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
+                    if (n.getDate() < 10) e--;
+                    return Math.max(0, e);
+                }
+
+                const paid_inst = parseInt(ln.paid_installments) || 0;
+                const paid_extra = parseFloat(ln.amount_paid_extra) || 0;
+                const elapsed = getElapsed(sc);
+                
+                const totalPaidInstances = Math.max(0, Math.min(elapsed + paid_inst, inst));
+                return Math.max(0, amount - (totalPaidInstances * (amount / inst)) - paid_extra);
             })();
             detailHTML += `
                 <div class="col-auto">
@@ -349,6 +363,17 @@ function renderDetailedTable(filtered) {
                             Saldo: <span class="fw-bold ms-1 ${lnDebt <= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(lnDebt)}</span>
                         </div>
                         ${ln.notes ? `<div class="small text-muted mt-1">${ln.notes}</div>` : ''}
+                        <div class="mt-2 d-flex gap-1">
+                            ${lnDebt > 0 ? `
+                                <button class="btn btn-xs btn-success flex-fill" onclick="liquidateLoan('${ln.id}', '${emp.full_name.replace(/'/g, "\\'")}', ${lnDebt})" title="Liquidar empréstimo">
+                                    💰 Liquidar
+                                </button>
+                            ` : `
+                                <button class="btn btn-xs btn-outline-secondary flex-fill" disabled title="Empréstimo já liquidado">
+                                    ✅ Liquidado
+                                </button>
+                            `}
+                        </div>
                     </div>
                 </div>`;
         });
@@ -500,6 +525,64 @@ window.deleteLoan = async function (loanId, empName) {
     }
     await fetchData();
     renderDashboard();
+};
+
+// ─── LOAN LIQUIDATION ─────────────────────────────────────────────────────────────
+window.liquidateLoan = async function(loanId, empName, currentBalance) {
+    if (!confirm(`Deseja liquidar totalmente este empréstimo de ${empName}?\n\nValor a pagar: ${formatCurrency(currentBalance)}\n\nEsta ação é irreversível!`)) return;
+    
+    try {
+        const btn = document.querySelector(`[onclick*="liquidateLoan('${loanId}'"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>PROCESSANDO...';
+        }
+
+        // Buscar dados atuais do empréstimo
+        const { data: loan, error: fetchErr } = await db.from('employee_loans')
+            .select('*')
+            .eq('id', loanId)
+            .single();
+        
+        if (fetchErr) throw fetchErr;
+        if (!loan) throw new Error('Empréstimo não encontrado');
+
+        // Calcular valor total já pago + pagamento extra para liquidar
+        const installmentValue = parseFloat(loan.amount) / loan.installments;
+        const paidValue = (loan.paid_installments || 0) * installmentValue;
+        const extraPayment = currentBalance; // Saldo restante para liquidar
+        
+        // Atualizar empréstimo
+        const { error: updateErr } = await db.from('employee_loans')
+            .update({
+                amount_paid_extra: (parseFloat(loan.amount_paid_extra) || 0) + extraPayment,
+                notes: (loan.notes || '') + `\n[LIQUIDADO em ${new Date().toLocaleDateString('pt-BR')}]`
+            })
+            .eq('id', loanId);
+        
+        if (updateErr) throw updateErr;
+
+        // Registrar no histórico
+        await db.from('employee_history').insert({
+            employee_id: loan.employee_id,
+            change_date: new Date().toISOString().split('T')[0],
+            event_type: 'Liquidação Empréstimo',
+            observations: `[${empName}] [LID:${loanId}] Empréstimo liquidado totalmente. Valor pago: ${formatCurrency(extraPayment)}`
+        });
+
+        alert('✅ Empréstimo liquidado com sucesso!');
+        await fetchData();
+        renderDashboard();
+        
+    } catch (err) {
+        alert('❌ Erro ao liquidar empréstimo: ' + err.message);
+        // Restaurar botão
+        const btn = document.querySelector(`[onclick*="liquidateLoan('${loanId}'"]`);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '💰 Liquidar';
+        }
+    }
 };
 
 // ─── PDF TERMO ────────────────────────────────────────────────────────────────
