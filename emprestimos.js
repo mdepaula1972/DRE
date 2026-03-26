@@ -37,7 +37,7 @@ async function init() {
 async function fetchData() {
     // Busca employees normalmente (tabela não afetada pelo auth bug)
     const empRes = await db.from('employees')
-        .select('id,full_name,job_role,company,employment_type,remuneration,status,loan_amount,loan_installments,loan_start_cycle,loans_data')
+        .select('id,full_name,job_role,company,employment_type,remuneration,status,loan_amount,loan_installments,loan_start_cycle,loans_data,document_id,street,number,neighborhood,city,state,responsible_rg,responsible_cpf,responsible_name,pj_type,corporate_name,start_date')
         .order('full_name');
 
     // Fazemos um fetch() nativo p/ employee_loans para contornar o supabase-js 
@@ -45,7 +45,7 @@ async function fetchData() {
     let loansFromTable = null;
     let fallbackMsg = '';
     try {
-        const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/employee_loans?select=*`, {
+        const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/employee_loans?select=*,paid_installments,amount_paid_extra`, {
             headers: {
                 'apikey': SUPABASE_KEY,
                 'Authorization': `Bearer ${SUPABASE_KEY}`
@@ -121,27 +121,30 @@ function formatDate(d) {
 }
 
 function calculateDebt(emp) {
-    const now = new Date();
-    let totalPaid = 0;
-    let totalAmount = 0;
-
+    let totalDebt = 0;
     emp._loans.forEach(ln => {
         const amount = parseFloat(ln.amount) || 0;
         const inst = parseInt(ln.installments) || 0;
-        const startCycle = ln.start_cycle;
-        if (!amount || !inst || !startCycle) return;
+        const sc = ln.start_cycle;
+        if (!amount || !inst || !sc) return;
 
-        const [y, m] = startCycle.split('-').map(Number);
-        const start = new Date(y, m - 1, 1);
-        let elapsed = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-        if (now.getDate() < 10) elapsed--;
-        elapsed = Math.max(0, Math.min(elapsed, inst));
+        function getElapsed(cycle) {
+            const n = new Date();
+            const [y, m] = cycle.split('-').map(Number);
+            let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
+            if (n.getDate() < 10) e--;
+            return Math.max(0, e);
+        }
 
-        totalPaid += elapsed * (amount / inst);
-        totalAmount += amount;
+        const paid_inst = parseInt(ln.paid_installments) || 0;
+        const paid_extra = parseFloat(ln.amount_paid_extra) || 0;
+        const elapsed = getElapsed(sc);
+
+        const totalPaidInstances = Math.max(0, Math.min(elapsed + paid_inst, inst));
+        const debt = Math.max(0, amount - (totalPaidInstances * (amount / inst)) - paid_extra);
+        totalDebt += debt;
     });
-
-    return Math.max(0, totalAmount - totalPaid);
+    return totalDebt;
 }
 
 function calculateTaken(emp) {
@@ -151,6 +154,11 @@ function calculateTaken(emp) {
 function getInstallmentForMonth(emp, monthStr) {
     const [ty, tm] = monthStr.split('-').map(Number);
     const targetAbs = ty * 12 + tm;
+    
+    // Mês atual para calcular antecipações
+    const now = new Date();
+    const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
+
     let total = 0;
 
     emp._loans.forEach(ln => {
@@ -164,6 +172,23 @@ function getInstallmentForMonth(emp, monthStr) {
         const endAbs = startAbs + inst - 1;
 
         if (targetAbs >= startAbs && targetAbs <= endAbs) {
+            const paid_inst = parseInt(ln.paid_installments) || 0;
+            
+            // LÓGICA AUTOMÁTICA RESTAURADA:
+            const elapsed = (() => {
+                const n = new Date();
+                const [y, m] = sc.split('-').map(Number);
+                let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
+                if (n.getDate() < 10) e--;
+                return Math.max(0, e);
+            })();
+
+            const monthsIntoLoan = targetAbs - startAbs;
+            
+            // Se o mês alvo já passou (com base em elapsed) OU já foi antecipado
+            if (monthsIntoLoan < (elapsed + paid_inst)) {
+                return;
+            }
             total += amount / inst;
         }
     });
@@ -194,11 +219,12 @@ function updateCounters(filtered) {
     document.getElementById('totalItemsCount').textContent = filtered.length;
 }
 
+
 // ─── PROJECTION TABLE ────────────────────────────────────────────────────────
 function renderProjection(filtered) {
     const now = new Date();
     const months = [];
-    const headers = ['COLABORADOR'];
+    const headers = ['COLABORADOR', 'TOTAL PROJETADO', 'SALDO DEVEDOR'];
 
     for (let i = 0; i < 12; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
@@ -216,21 +242,137 @@ function renderProjection(filtered) {
 
     filtered.forEach(emp => {
         const tr = document.createElement('tr');
-        let html = `<td class="fw-bold border-end bg-light">${emp.full_name}</td>`;
+        const debtTotal = calculateDebt(emp);
+        
+        // Calcular total projetado (soma das parcelas dos 12 meses)
+        let totalProjetado = 0;
+        months.forEach(mStr => {
+            totalProjetado += getInstallmentForMonth(emp, mStr);
+        });
+        
+        let html = `<td class="fw-bold border-end bg-light sticky-col-1" style="min-width:250px;">${emp.full_name}</td>`;
+        html += `<td class="fw-bold text-primary text-center bg-light border-end sticky-col-2" style="min-width:120px;">${formatCurrency(totalProjetado)}</td>`;
+        html += `<td class="fw-bold text-danger text-center bg-light border-end sticky-col-3" style="min-width:120px;">${formatCurrency(debtTotal)}</td>`;
+        
         months.forEach((mStr, idx) => {
             const val = getInstallmentForMonth(emp, mStr);
             totals[idx] += val;
-            html += `<td class="month-col ${val > 0 ? 'text-primary' : 'text-muted opacity-25'}" style="font-size:0.75rem;">${val > 0 ? formatCurrency(val) : '---'}</td>`;
+            
+            // Atributos para baixa coletiva
+            const cellId = `cell-${emp.id}-${mStr}`;
+            const isSelected = selectedPayments.includes(cellId);
+            
+            html += `<td id="${cellId}" class="month-col ${val > 0 ? 'clickable-cell' : 'text-muted opacity-25'} ${isSelected ? 'selected-pay' : ''}" 
+                        style="font-size:0.75rem;" 
+                        onclick="${val > 0 ? `toggleCellSelection('${emp.id}', '${mStr}', ${val}, '${cellId}')` : ''}">
+                        ${val > 0 ? formatCurrency(val) : '---'}
+                     </td>`;
         });
         tr.innerHTML = html;
         body.appendChild(tr);
     });
 
+    // Calcular total projetado geral
+    let totalProjetadoGeral = totals.reduce((a, b) => a + b, 0);
+
     document.getElementById('projectionFooter').innerHTML = `
         <tr class="fw-bold">
-            <td class="bg-dark text-warning">TOTAL MENSAL</td>
+            <td class="bg-dark text-warning sticky-col-1">TOTAL MENSAL</td>
+            <td class="bg-dark text-info text-center sticky-col-2">${formatCurrency(totalProjetadoGeral)}</td>
+            <td class="bg-dark text-warning sticky-col-3">-</td>
             ${totals.map(v => `<td class="text-warning text-center">${formatCurrency(v)}</td>`).join('')}
         </tr>`;
+}
+
+// Variáveis para baixa coletiva
+let selectedPayments = []; // Array de IDs de células selecionadas
+let paymentDataMapping = {}; // Mapeia cellId para dados do pagamento
+
+window.toggleCellSelection = function(empId, monthStr, amount, cellId) {
+    const idx = selectedPayments.indexOf(cellId);
+    if (idx > -1) {
+        selectedPayments.splice(idx, 1);
+        delete paymentDataMapping[cellId];
+        document.getElementById(cellId)?.classList.remove('selected-pay');
+    } else {
+        selectedPayments.push(cellId);
+        paymentDataMapping[cellId] = { empId, monthStr, amount };
+        document.getElementById(cellId)?.classList.add('selected-pay');
+    }
+    updateBulkButton();
+}
+
+function updateBulkButton() {
+    let btn = document.getElementById('btnBulkPay');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'btnBulkPay';
+        btn.className = 'btn btn-success btn-sm shadow-sm position-fixed bottom-0 end-0 m-4';
+        btn.style.zIndex = '1050';
+        btn.onclick = processBulkPayments;
+        document.body.appendChild(btn);
+    }
+    
+    if (selectedPayments.length > 0) {
+        btn.style.display = 'block';
+        btn.innerHTML = `<i class="bi bi-check2-circle me-2"></i>CONFIRMAR BAIXA (${selectedPayments.length})`;
+    } else {
+        btn.style.display = 'none';
+    }
+}
+
+window.processBulkPayments = async function() {
+    if (!confirm(`Deseja confirmar a baixa de ${selectedPayments.length} parcelas selecionadas?`)) return;
+    
+    const btn = document.getElementById('btnBulkPay');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>PROCESSANDO...';
+
+    try {
+        // Agrupar por funcionário para otimizar updates
+        const groups = {};
+        selectedPayments.forEach(id => {
+            const data = paymentDataMapping[id];
+            if (!groups[data.empId]) groups[data.empId] = [];
+            groups[data.empId].push(data);
+        });
+
+        for (const empId in groups) {
+            const empData = allEmployees.find(e => e.id === empId);
+            if (!empData) continue;
+            
+            // Para cada empréstimo ativo do funcionário, vamos dar baixa conforme as parcelas selecionadas
+            // Isso assume que o usuário está dando baixa na "próxima" parcela do colaborador
+            // Simplificação: Se selecionou 2 meses, +2 paid_installments no primeiro empréstimo ativo encontrado
+            // Ou podemos ser mais precisos se soubermos qual empréstimo gerou aquela parcela
+            
+            const count = groups[empId].length;
+            const ln = empData._loans.find(l => calculateDebt({_loans: [l]}) > 0); // Primeiro empréstimo com saldo
+            
+            if (ln) {
+                const newPaid = (parseInt(ln.paid_installments) || 0) + count;
+                const { error } = await db.from('employee_loans').update({ paid_installments: newPaid }).eq('id', ln.id);
+                if (error) throw error;
+                
+                await db.from('employee_history').insert({
+                    employee_id: empId,
+                    change_date: new Date().toISOString().split('T')[0],
+                    event_type: 'Pagamento Empréstimo',
+                    observations: `[${empData.full_name}] [LID:${ln.id}] Baixa coletiva de ${count} parcela(s) via Projeção.`
+                });
+            }
+        }
+
+        alert('Baixas processadas com sucesso!');
+        selectedPayments = [];
+        paymentDataMapping = {};
+        updateBulkButton();
+        await init();
+    } catch (err) {
+        alert('Erro ao processar baixas: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-check2-circle me-2"></i>CONFIRMAR BAIXA (${selectedPayments.length})`;
+    }
 }
 
 // ─── DETAILED TABLE ───────────────────────────────────────────────────────────
@@ -279,23 +421,44 @@ function renderDetailedTable(filtered) {
         detailRow.style.display = 'none';
         detailRow.className = 'bg-light';
 
+        function elapsedMonths(sc) {
+            if (!sc) return 0;
+            const n = new Date();
+            const [y, m] = sc.split('-').map(Number);
+            let elapsed = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
+            // Considera dia útil p/ desconto (ajustado p/ dia 10 conforme lógica original)
+            if (n.getDate() < 10) elapsed--;
+            return Math.max(0, elapsed);
+        }
+
         let detailHTML = '<td colspan="9" class="ps-5 py-2"><div class="row g-2">';
         emp._loans.forEach((ln, i) => {
             const lnDebt = (() => {
                 const amount = parseFloat(ln.amount) || 0;
                 const inst = parseInt(ln.installments) || 0;
-                const sc = ln.start_cycle;
-                if (!amount || !inst || !sc) return amount;
-                const n = new Date();
-                const [y, m] = sc.split('-').map(Number);
-                let elapsed = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
-                if (n.getDate() < 10) elapsed--;
-                elapsed = Math.max(0, Math.min(elapsed, inst));
-                return Math.max(0, amount - elapsed * (amount / inst));
+                if (!amount || !inst || !ln.start_cycle) return amount;
+                
+                function getElapsed(cycle) {
+                    const n = new Date();
+                    const [y, m] = cycle.split('-').map(Number);
+                    let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
+                    if (n.getDate() < 10) e--;
+                    return Math.max(0, e);
+                }
+
+                const paid_inst = parseInt(ln.paid_installments) || 0;
+                const paid_extra = parseFloat(ln.amount_paid_extra) || 0;
+                const elapsed = getElapsed(ln.start_cycle);
+                
+                const totalPaidInstances = Math.max(0, Math.min(elapsed + paid_inst, inst));
+                return Math.max(0, amount - (totalPaidInstances * (amount / inst)) - paid_extra);
             })();
+
+            const isLiquidated = lnDebt <= 1; // 1 real tolerance for rounding
+            const paidInstTotal = Math.min(parseInt(ln.installments), (parseInt(elapsedMonths(ln.start_cycle)) + (parseInt(ln.paid_installments) || 0)));
             detailHTML += `
                 <div class="col-auto">
-                    <div class="border border-secondary rounded p-2 bg-white" style="min-width:200px;">
+                    <div class="border border-secondary rounded p-2 bg-white shadow-sm" style="min-width:220px;">
                         <div class="d-flex justify-content-between align-items-start mb-1">
                             <div class="small text-muted fw-bold"><i class="bi bi-cash me-1"></i>OP. #${i + 1}</div>
                             <button class="btn btn-xs btn-outline-danger p-0 px-1" onclick="deleteLoan('${ln.id}','${emp.full_name.replace(/'/g, "\\'")}')">
@@ -305,11 +468,29 @@ function renderDetailedTable(filtered) {
                         <div class="small">Valor: <span class="fw-bold text-dark">${formatCurrency(ln.amount)}</span></div>
                         <div class="small">Parcelas: <span class="text-dark">${ln.installments}x = ${formatCurrency(parseFloat(ln.amount) / ln.installments)}/mês</span></div>
                         <div class="small">Início: <span class="text-dark">${ln.start_cycle || '---'}</span></div>
-                        <div class="small d-flex align-items-center mt-1">
-                            Saldo: <span class="fw-bold ms-1 ${lnDebt <= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(lnDebt)}</span>
-                            ${lnDebt <= 0 ? '<span class="badge bg-success ms-2" style="font-size: 0.6rem;">LIQUIDADO</span>' : ''}
+                        <div class="mt-2">
+                             <div class="d-flex justify-content-between x-small text-muted mb-1">
+                                <span>Progresso: ${paidInstTotal}/${ln.installments}</span>
+                                <span>${Math.round((paidInstTotal / ln.installments) * 100)}%</span>
+                            </div>
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar ${isLiquidated ? 'bg-success' : 'bg-primary'}" role="progressbar" 
+                                    style="width: ${(paidInstTotal / ln.installments) * 100}%"></div>
+                            </div>
                         </div>
-                        ${ln.notes ? `<div class="small text-muted mt-1">${ln.notes}</div>` : ''}
+                        <div class="small d-flex align-items-center mt-2">
+                            Saldo: <span class="fw-bold ms-1 ${isLiquidated ? 'text-success' : 'text-danger'}">${formatCurrency(lnDebt)}</span>
+                            ${isLiquidated ? '<span class="liquidated-badge ms-2">LIQUIDADO</span>' : ''}
+                        </div>
+                        ${ln.notes ? `<div class="small text-muted mt-1 fst-italic">"${ln.notes}"</div>` : ''}
+                        <div class="mt-3 d-flex gap-2">
+                            <button class="btn btn-xs btn-primary d-flex align-items-center justify-content-center" style="width: 85%;" onclick="openPaymentModal('${ln.id}', '${emp.full_name.replace(/'/g, "\\'")}', ${lnDebt})" ${isLiquidated ? 'disabled' : ''}>
+                                <i class="bi bi-cash-coin me-1"></i>ANTECIPAR / LIQUIDAR
+                            </button>
+                            <button class="btn btn-xs btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 15%;" title="Ver Histórico / Estornar" onclick="openHistoryModal('${ln.id}', '${emp.full_name.replace(/'/g, "\\'")}')">
+                                <i class="bi bi-clock-history"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>`;
         });
@@ -742,3 +923,204 @@ window.clearFilters = function () {
     });
     renderDashboard();
 };
+
+// ─── PAYMENT / ANTICIPATION LOGIC ─────────────────────────────────────────────
+window.togglePaymentFields = function() {
+    const type = document.getElementById('paymentType').value;
+    document.getElementById('divPayInstallments').style.display = type === 'installments' ? 'block' : 'none';
+    document.getElementById('divPayAmount').style.display = type === 'amount' ? 'block' : 'none';
+}
+
+window.openPaymentModal = function(loanId, empName, currentBalance) {
+    document.getElementById('payLoanId').value = loanId;
+    document.getElementById('payEmployeeName').textContent = empName;
+    document.getElementById('payCurrentBalance').textContent = Number(currentBalance).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('payInstallmentsCount').value = '';
+    document.getElementById('payAmountValue').value = '';
+    document.getElementById('payNotes').value = '';
+    
+    if (typeof bootstrap !== 'undefined') {
+        const modalEl = document.getElementById('modalPayment');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    } else {
+        alert('Erro: Bootstrap não carregado.');
+    }
+}
+
+window.savePayment = async function() {
+    const loanId = document.getElementById('payLoanId').value;
+    const type = document.getElementById('paymentType').value;
+    const note = document.getElementById('payNotes').value;
+    const empName = document.getElementById('payEmployeeName').textContent;
+    
+    const allLoans = allEmployees.flatMap(e => e._loans || []);
+    const ln = allLoans.find(l => l.id === loanId);
+    if (!ln) { alert('Erro: Empréstimo não encontrado.'); return; }
+    
+    let updateData = {};
+    let historyMsg = '';
+    
+    if (type === 'installments') {
+        const count = parseInt(document.getElementById('payInstallmentsCount').value) || 0;
+        if (count <= 0) { alert('Informe a quantidade de parcelas.'); return; }
+        updateData.paid_installments = (parseInt(ln.paid_installments) || 0) + count;
+        historyMsg = `[LID:${loanId}] Antecipação de ${count} parcelas no empréstimo iniciado em ${ln.start_cycle}.`;
+    } else {
+        const amt = parseFloat(document.getElementById('payAmountValue').value) || 0;
+        if (amt <= 0) { alert('Informe o valor do pagamento.'); return; }
+        updateData.amount_paid_extra = (parseFloat(ln.amount_paid_extra) || 0) + amt;
+        historyMsg = `[LID:${loanId}] Pagamento extra de R$ ${amt.toLocaleString('pt-BR')} no empréstimo iniciado em ${ln.start_cycle}.`;
+    }
+    
+    if (note) historyMsg += ` Obs: ${note}`;
+
+    try {
+        const btn = document.querySelector('#modalPayment .btn-primary');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>PROCESSANDO...';
+        }
+
+        const { error } = await db.from('employee_loans').update(updateData).eq('id', loanId);
+        if (error) throw error;
+        
+        await db.from('employee_history').insert({
+            employee_id: ln.employee_id,
+            change_date: new Date().toISOString().split('T')[0],
+            event_type: 'Pagamento Empréstimo',
+            observations: `[${empName}] ${historyMsg}`
+        });
+        
+        const modalEl = document.getElementById('modalPayment');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        
+        await init(); 
+    } catch (err) {
+        alert('Erro ao registrar pagamento: ' + err.message);
+    } finally {
+        const btn = document.querySelector('#modalPayment .btn-primary');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'CONFIRMAR PAGAMENTO';
+        }
+    }
+}
+
+window.openHistoryModal = async function(loanId, empName) {
+    const body = document.getElementById('historyTableBody');
+    const empty = document.getElementById('historyEmptyMsg');
+    body.innerHTML = '<tr><td colspan="3" class="text-center p-4"><span class="spinner-border spinner-border-sm me-2"></span>Carregando histórico...</td></tr>';
+    empty.style.display = 'none';
+    
+    const modalEl = document.getElementById('modalHistory');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+
+    try {
+        const ln = allEmployees.flatMap(e => e._loans || []).find(l => l.id === loanId);
+        if (!ln) throw new Error('Empréstimo não encontrado.');
+
+        const { data, error } = await db.from('employee_history')
+            .select('*')
+            .eq('employee_id', ln.employee_id)
+            .eq('event_type', 'Pagamento Empréstimo')
+            .order('change_date', { ascending: false });
+
+        if (error) throw error;
+
+        const filtered = (data || []).filter(h => h.observations.includes(`[LID:${loanId}]`));
+
+        if (filtered.length === 0) {
+            body.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+
+        body.innerHTML = '';
+        filtered.forEach(h => {
+            const tr = document.createElement('tr');
+            const isReversed = h.observations.includes('[ESTORNADO]');
+            const displayMsg = h.observations.replace(`[LID:${loanId}] `, '').replace(`[${empName}] `, '').replace('[ESTORNADO]', '').trim();
+            
+            const btnHtml = isReversed 
+                ? `<button class="btn btn-xs btn-secondary" disabled style="opacity:0.6; cursor:not-allowed;">
+                    <i class="bi bi-check-all me-1"></i>Estornado
+                   </button>`
+                : `<button class="btn btn-xs btn-outline-danger" onclick="reversePayment('${h.id}', '${loanId}')">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Estornar
+                   </button>`;
+
+            tr.innerHTML = `
+                <td class="ps-3">${new Date(h.change_date + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
+                <td class="${isReversed ? 'text-muted text-decoration-line-through italic' : ''}">${displayMsg}</td>
+                <td class="text-center">${btnHtml}</td>
+            `;
+            body.appendChild(tr);
+        });
+    } catch (err) {
+        body.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Erro: ${err.message}</td></tr>`;
+    }
+}
+
+window.reversePayment = async function(historyId, loanId) {
+    if (!confirm('Deseja realmente estornar este pagamento? O saldo devedor será ajustado.')) return;
+
+    try {
+        const { data: h, error: hErr } = await db.from('employee_history').select('*').eq('id', historyId).single();
+        if (hErr) throw hErr;
+
+        let updateData = {};
+        const obs = h.observations;
+        
+        if (obs.includes('Antecipação de')) {
+            const match = obs.match(/Antecipação de (\d+) parcelas/);
+            if (match) updateData.paid_installments = -parseInt(match[1]);
+        } else if (obs.includes('Pagamento extra de R$')) {
+            const match = obs.match(/Pagamento extra de R\$ ([\d.,]+)/);
+            if (match) {
+                const val = parseFloat(match[1].replace(/\./g, '').replace(',', '.'));
+                updateData.amount_paid_extra = -val;
+            }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            alert('Não foi possível identificar os valores para estorno automático.');
+            return;
+        }
+
+        const { data: ln, error: lnErr } = await db.from('employee_loans').select('*').eq('id', loanId).single();
+        if (lnErr) throw lnErr;
+
+        if (updateData.paid_installments) {
+            updateData.paid_installments = (parseInt(ln.paid_installments) || 0) + updateData.paid_installments;
+        }
+        if (updateData.amount_paid_extra) {
+            updateData.amount_paid_extra = (parseFloat(ln.amount_paid_extra) || 0) + updateData.amount_paid_extra;
+        }
+
+        const { error: upErr } = await db.from('employee_loans').update(updateData).eq('id', loanId);
+        if (upErr) throw upErr;
+
+        // Marca o registro original como estornado para evitar duplicidade
+        await db.from('employee_history').update({
+            observations: h.observations + ' [ESTORNADO]'
+        }).eq('id', historyId);
+
+        await db.from('employee_history').insert({
+            employee_id: ln.employee_id,
+            change_date: new Date().toISOString().split('T')[0],
+            event_type: 'Estorno Empréstimo',
+            observations: `[ESTORNO] ${obs}`
+        });
+        
+        alert('Estorno realizado com sucesso!');
+        const modalEl = document.getElementById('modalHistory');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        await init();
+    } catch (err) {
+        alert('Erro ao estornar: ' + err.message);
+    }
+}
