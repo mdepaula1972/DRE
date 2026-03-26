@@ -122,31 +122,26 @@ function formatDate(d) {
 
 function calculateDebt(emp) {
     const now = new Date();
-    let totalDebt = 0;
+    let totalPaid = 0;
+    let totalAmount = 0;
 
     emp._loans.forEach(ln => {
         const amount = parseFloat(ln.amount) || 0;
         const inst = parseInt(ln.installments) || 0;
-        const sc = ln.start_cycle;
-        if (!amount || !inst || !sc) return;
+        const startCycle = ln.start_cycle;
+        if (!amount || !inst || !startCycle) return;
 
-        function getElapsed(cycle) {
-            const n = new Date();
-            const [y, m] = cycle.split('-').map(Number);
-            let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
-            if (n.getDate() < 10) e--;
-            return Math.max(0, e);
-        }
+        const [y, m] = startCycle.split('-').map(Number);
+        const start = new Date(y, m - 1, 1);
+        let elapsed = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+        if (now.getDate() < 10) elapsed--;
+        elapsed = Math.max(0, Math.min(elapsed, inst));
 
-        const paid_inst = parseInt(ln.paid_installments) || 0;
-        const paid_extra = parseFloat(ln.amount_paid_extra) || 0;
-        const elapsed = getElapsed(sc);
-
-        const totalPaidInstances = Math.max(0, Math.min(elapsed + paid_inst, inst));
-        const debt = Math.max(0, amount - (totalPaidInstances * (amount / inst)) - paid_extra);
-        totalDebt += debt;
+        totalPaid += elapsed * (amount / inst);
+        totalAmount += amount;
     });
-    return totalDebt;
+
+    return Math.max(0, totalAmount - totalPaid);
 }
 
 function calculateTaken(emp) {
@@ -168,29 +163,8 @@ function getInstallmentForMonth(emp, monthStr) {
         const startAbs = sy * 12 + sm;
         const endAbs = startAbs + inst - 1;
 
-        // Verificar se o empréstimo está ativo neste mês
         if (targetAbs >= startAbs && targetAbs <= endAbs) {
-            // Verificar se empréstimo já foi liquidado
-            const paid_inst = parseInt(ln.paid_installments) || 0;
-            const paid_extra = parseFloat(ln.amount_paid_extra) || 0;
-            
-            // Calcular saldo devedor atual
-            function getElapsed(cycle) {
-                const n = new Date();
-                const [y, m] = cycle.split('-').map(Number);
-                let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
-                if (n.getDate() < 10) e--;
-                return Math.max(0, e);
-            }
-            
-            const elapsed = getElapsed(sc);
-            const totalPaidInstances = Math.max(0, Math.min(elapsed + paid_inst, inst));
-            const currentBalance = Math.max(0, amount - (totalPaidInstances * (amount / inst)) - paid_extra);
-            
-            // Só adicionar parcela se ainda tiver saldo
-            if (currentBalance > 0) {
-                total += amount / inst;
-            }
+            total += amount / inst;
         }
     });
 
@@ -349,21 +323,12 @@ function renderDetailedTable(filtered) {
                 const inst = parseInt(ln.installments) || 0;
                 const sc = ln.start_cycle;
                 if (!amount || !inst || !sc) return amount;
-                
-                function getElapsed(cycle) {
-                    const n = new Date();
-                    const [y, m] = cycle.split('-').map(Number);
-                    let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
-                    if (n.getDate() < 10) e--;
-                    return Math.max(0, e);
-                }
-
-                const paid_inst = parseInt(ln.paid_installments) || 0;
-                const paid_extra = parseFloat(ln.amount_paid_extra) || 0;
-                const elapsed = getElapsed(sc);
-                
-                const totalPaidInstances = Math.max(0, Math.min(elapsed + paid_inst, inst));
-                return Math.max(0, amount - (totalPaidInstances * (amount / inst)) - paid_extra);
+                const n = new Date();
+                const [y, m] = sc.split('-').map(Number);
+                let elapsed = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
+                if (n.getDate() < 10) elapsed--;
+                elapsed = Math.max(0, Math.min(elapsed, inst));
+                return Math.max(0, amount - elapsed * (amount / inst));
             })();
             detailHTML += `
                 <div class="col-auto">
