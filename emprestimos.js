@@ -369,8 +369,8 @@ function renderDetailedTable(filtered) {
                                     💰 Liquidar
                                 </button>
                             ` : `
-                                <button class="btn btn-xs btn-outline-secondary flex-fill" disabled title="Empréstimo já liquidado">
-                                    ✅ Liquidado
+                                <button class="btn btn-xs btn-warning flex-fill" onclick="reverseLiquidation('${ln.id}', '${emp.full_name.replace(/'/g, "\\'")}')">
+                                    ↩️ Estornar
                                 </button>
                             `}
                         </div>
@@ -581,6 +581,66 @@ window.liquidateLoan = async function(loanId, empName, currentBalance) {
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = '💰 Liquidar';
+        }
+    }
+};
+
+// ─── LOAN REVERSAL ───────────────────────────────────────────────────────────────
+window.reverseLiquidation = async function(loanId, empName) {
+    if (!confirm(`Deseja ESTORNAR a liquidação deste empréstimo de ${empName}?\n\nEsta ação irá restaurar o empréstimo para status ATIVO.\n\nEsta ação é irreversível!`)) return;
+    
+    try {
+        const btn = document.querySelector(`[onclick*="reverseLiquidation('${loanId}'"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>PROCESSANDO...';
+        }
+
+        // Buscar dados atuais do empréstimo
+        const { data: loan, error: fetchErr } = await db.from('employee_loans')
+            .select('*')
+            .eq('id', loanId)
+            .single();
+        
+        if (fetchErr) throw fetchErr;
+        if (!loan) throw new Error('Empréstimo não encontrado');
+
+        // Calcular valor a estornar (último pagamento extra)
+        const installmentValue = parseFloat(loan.amount) / loan.installments;
+        const paidValue = (loan.paid_installments || 0) * installmentValue;
+        const totalPaid = paidValue + (parseFloat(loan.amount_paid_extra) || 0);
+        const currentBalance = Math.max(0, parseFloat(loan.amount) - totalPaid);
+        
+        // Para reverter, precisamos remover o último pagamento extra
+        // Vamos zerar o amount_paid_extra para restaurar o status original
+        const { error: updateErr } = await db.from('employee_loans')
+            .update({
+                amount_paid_extra: 0,
+                notes: (loan.notes || '').replace(/\[LIQUIDADO em .+?\]/g, '') + `\n[ESTORNADO em ${new Date().toLocaleDateString('pt-BR')}]`
+            })
+            .eq('id', loanId);
+        
+        if (updateErr) throw updateErr;
+
+        // Registrar no histórico
+        await db.from('employee_history').insert({
+            employee_id: loan.employee_id,
+            change_date: new Date().toISOString().split('T')[0],
+            event_type: 'Estorno Liquidação',
+            observations: `[${empName}] [LID:${loanId}] Liquidação estornada. Saldo restaurado: ${formatCurrency(currentBalance)}`
+        });
+
+        alert('✅ Liquidação estornada com sucesso! Empréstimo restaurado para ATIVO.');
+        await fetchData();
+        renderDashboard();
+        
+    } catch (err) {
+        alert('❌ Erro ao estornar liquidação: ' + err.message);
+        // Restaurar botão
+        const btn = document.querySelector(`[onclick*="reverseLiquidation('${loanId}'"]`);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '↩️ Estornar';
         }
     }
 };
