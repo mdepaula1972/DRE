@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <script src="auth-check.js?v=28.2"></script>
+    <script src="auth-check.js?v=31.1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DRE - Mar Brasil | Gestão Financeira</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -22,11 +22,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="styles.css?v=28.2">
-    <link rel="stylesheet" href="custom-fixes.css?v=28.2">
+    <link rel="stylesheet" href="styles.css?v=31.1">
+    <link rel="stylesheet" href="custom-fixes.css?v=31.1">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="Favicon.png">
-    <script src="version.js?v=28.2"></script>
+    <script src="version.js?v=32.6"></script>
 </head>
 
 <body>
@@ -125,7 +125,7 @@
                     <i class="bi bi-house-door me-1"></i>
                     <span class="d-none d-md-inline">Voltar ao Início</span>
                 </a>
-                <button class="btn btn-outline-danger" id="btnExportPDF" onclick="exportToPDF()">
+                <button class="btn btn-outline-danger" id="btnExportPDF" onclick="handlePDFExport()">
                     <i class="bi bi-file-earmark-pdf me-1"></i>
                     <span class="d-none d-md-inline">Exportar PDF</span>
                 </button>
@@ -391,7 +391,7 @@
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
-        class="d-none position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex justify-content-center align-items-center"
+        class="d-none position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 justify-content-center align-items-center"
         style="z-index: 2000;">
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
             <span class="visually-hidden">Carregando...</span>
@@ -408,7 +408,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <script src="script.js?v=28.4"></script>
+    <script src="script.js?v=32.6"></script>
+    <script src="dre-script-v3.js?v=32.6"></script>
+    <script src="ai.service.v2.js?v=32.6"></script>
+    <script src="brisinhai.js?v=32.6"></script>
     <script>
         // Sticky KPI Cards - add shadow on scroll
         window.addEventListener('scroll', () => {
@@ -428,10 +431,23 @@
                 document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION;
             }
         });
+
+        // Fallback direto para o botão PDF
+        function handlePDFExport() {
+            console.log('handlePDFExport chamado');
+            
+            // Apenas usar a função global do script.js
+            if (typeof window.exportToPDF === 'function') {
+                console.log('Usando window.exportToPDF');
+                window.exportToPDF();
+                return;
+            }
+            
+            console.error('Função window.exportToPDF não encontrada');
+            alert('Função de exportação PDF não encontrada. Por favor, recarregue a página.');
+        }
     </script>
-    <!-- BrisinhAI Scripts -->
-    <script src="ai.service.v2.js?v=28.2"></script>
-    <script src="brisinhai.js?v=28.2"></script>
+
     <!-- Modal Auditoria de Dados (Data Health) -->
     <div class="modal fade" id="auditModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered">

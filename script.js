@@ -2829,13 +2829,45 @@ function parseMarkdown(text) {
         .join('');
 }
 
-// 1. Open Modal
-function exportToPDF() {
-    new bootstrap.Modal(document.getElementById('reportOptionsModal')).show();
+// 1. Open Modal (Global)
+window.exportToPDF = function() {
+    const modalEl = document.getElementById('reportOptionsModal');
+    let modal = bootstrap.Modal.getInstance(modalEl);
+    if (!modal) {
+        modal = new bootstrap.Modal(modalEl);
+    }
+    modal.show();
+}
+
+
+// FUNÇÃO DE TESTE MÍNIMA - para debug do looping
+function testMinimalPDF() {
+    console.log('TESTE: Iniciando PDF mínimo...');
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text('TESTE - PDF Minimo', 10, 10);
+        doc.save('teste_minimo.pdf');
+        console.log('TESTE: PDF mínimo gerado com sucesso!');
+        return true;
+    } catch (e) {
+        console.error('TESTE: Erro:', e);
+        return false;
+    }
 }
 
 // 2. Start Generation from Modal
+let isGeneratingPDF = false;
+
 function startPDFGeneration() {
+    if (isGeneratingPDF) {
+        console.warn('PDF generation already in progress, ignoring duplicate call');
+        return;
+    }
+    
+    isGeneratingPDF = true;
+    console.log('Starting PDF generation...');
+    
     const options = {
         includeAI: document.getElementById('checkAI').checked,
         includeKPI: document.getElementById('checkKPI').checked,
@@ -2843,305 +2875,735 @@ function startPDFGeneration() {
         includeChartComp: document.getElementById('checkChartComp').checked,
         includeDetails: document.getElementById('checkDet').checked
     };
-    bootstrap.Modal.getInstance(document.getElementById('reportOptionsModal')).hide();
-    generatePDFWithOptions(options);
+    
+    // Hide modal
+    const modalEl = document.getElementById('reportOptionsModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+    
+    // Generate with forced timeout
+    const generateTimeout = setTimeout(() => {
+        console.error('PDF generation timeout - forcing cleanup');
+        isGeneratingPDF = false;
+        const loader = document.getElementById('loadingOverlay');
+        if (loader) {
+            loader.style.display = 'none';
+            loader.classList.add('d-none');
+            loader.classList.remove('d-flex');
+        }
+        alert('Tempo limite excedido ao gerar PDF. Tente novamente.');
+    }, 10000); // 10 seconds max
+    
+    generatePDFWithOptions(options).then(() => {
+        clearTimeout(generateTimeout);
+        isGeneratingPDF = false;
+        console.log('PDF generation completed successfully');
+    }).catch((err) => {
+        clearTimeout(generateTimeout);
+        isGeneratingPDF = false;
+        console.error('PDF generation failed:', err);
+    });
 }
 
-// 3. Generate PDF
+
+// 3. Generate PDF (Versão Executiva Completa)
 async function generatePDFWithOptions(options) {
+    console.log('Iniciando geração de PDF executivo v32.4...');
+    
     try {
-        const btnPDF = document.getElementById('btnExportPDF');
-        const btnLanding = document.getElementById('btnExportLanding');
-        const activeBtn = btnPDF || btnLanding;
-
-        let originalText = "";
-        if (activeBtn) {
-            originalText = activeBtn.innerHTML;
-            activeBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Gerando...';
-            activeBtn.disabled = true;
-        }
-
         const loader = document.getElementById('loadingOverlay');
-        if (loader) loader.classList.remove('d-none');
-
-        // --- 1. CONFIGURATION ---
-        const PAGE_WIDTH = 800; // px (Simplified width for A4 ratio mapping)
-        const PAGE_HEIGHT = 1130; // px (approx A4 ratio 1.414)
-        const CONTENT_MAX_HEIGHT = 1000; // px (Leave space for padding/margins)
-        const PAGE_PADDING = 40; // px
-
-        // --- 2. GATHER CONTENT ---
-        // AI Analysis
-        let aiAnalysisText = "";
-        if (options.includeAI && window.getBrisinhAIAnalysis) {
-            aiAnalysisText = await window.getBrisinhAIAnalysis();
+        if (loader) {
+            loader.classList.remove('d-none');
+            loader.classList.add('d-flex');
+            loader.style.display = 'flex';
         }
 
-        // Helper: Format Currency
-        const fmt = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const btnPDF = document.getElementById('btnExportPDF');
+        if (btnPDF) btnPDF.disabled = true;
 
-        // --- 3. PAGE BUILDER SYSTEM ---
-        const mainContainer = document.createElement('div');
-        Object.assign(mainContainer.style, {
-            position: 'absolute', top: '0', left: '-9999px', width: (PAGE_WIDTH + 40) + 'px' // Extra for borders
-        });
-        document.body.appendChild(mainContainer);
-
-        let pages = [];
-        let currentPage = createPage();
-        pages.push(currentPage);
-        mainContainer.appendChild(currentPage);
-
-        function createPage() {
-            const div = document.createElement('div');
-            Object.assign(div.style, {
-                width: PAGE_WIDTH + 'px',
-                height: PAGE_HEIGHT + 'px',
-                backgroundColor: 'white',
-                padding: PAGE_PADDING + 'px',
-                boxSizing: 'border-box',
-                position: 'relative',
-                fontFamily: "'Outfit', sans-serif",
-                color: '#262223',
-                overflow: 'hidden', // Hide overflow visually
-                display: 'flex',
-                flexDirection: 'column'
-            });
-            return div;
-        }
-
-        function addToPage(element) {
-            currentPage.appendChild(element);
-            // Check overflow
-            // We use scrollHeight of the content wrapper vs max height
-            // BUT since flexible layout, simple height check:
-            const totalHeight = Array.from(currentPage.children).reduce((acc, el) => acc + el.offsetHeight + (parseInt(el.style.marginBottom) || 0), 0);
-
-            // Adjust for padding
-            if (totalHeight > (PAGE_HEIGHT - (PAGE_PADDING * 2))) {
-                currentPage.removeChild(element);
-                currentPage = createPage();
-                pages.push(currentPage);
-                mainContainer.appendChild(currentPage);
-                // Optionally re-add minimal header/footer?
-                // For now, just continue flow
-                currentPage.appendChild(element);
-            }
-        }
-
-        // --- 4. BUILD HEADER ---
-        // We add header to the first page directly
-        const headerDiv = document.createElement('div');
-        headerDiv.innerHTML = `
-            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #F2911B; padding-bottom: 20px; margin-bottom: 30px;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div id="report-logo-ph"></div>
-                    <div>
-                        <h1 style="font-size: 24px; font-weight: 700; margin: 0;">Relatório Financeiro</h1>
-                        <p style="margin: 5px 0 0; color: #6c757d; font-size: 14px;">Mar Brasil</p>
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <p style="font-weight: 600; margin:0;">Ref: ${state.filters.periodos.join(', ') || 'Geral'}</p>
-                    <p style="font-size: 12px; color: #6c757d; margin:5px 0 0;">${new Date().toLocaleString('pt-BR')}</p>
-                </div>
-            </div>`;
-
-        // Handle Logo
-        try {
-            const logo = document.querySelector('header img');
-            if (logo) {
-                const c = document.createElement('canvas');
-                c.width = logo.naturalWidth; c.height = logo.naturalHeight;
-                c.getContext('2d').drawImage(logo, 0, 0);
-                const i = document.createElement('img');
-                i.src = c.toDataURL();
-                i.style.maxHeight = '40px';
-                headerDiv.querySelector('#report-logo-ph').appendChild(i);
-            }
-        } catch (e) { console.warn('Logo error', e); }
-
-        addToPage(headerDiv);
-
-        // --- 5. BUILD CONTENT BLOCKS ---
-
-        // A. AI ANALYSIS
-        if (options.includeAI) {
-            const aiContainer = document.createElement('div');
-            aiContainer.innerHTML = `
-                <div style="background: #f8f9fa; border-left: 5px solid #F2911B; padding: 20px; margin-bottom: 30px;">
-                    <h3 style="font-size: 16px; margin-bottom: 10px;">🤖 Análise BrisinhAI</h3>
-                    <div id="ai-content-body" style="font-size: 12px; line-height: 1.6;">${parseMarkdown(aiAnalysisText || "Análise indisponível.")}</div>
-                </div>
-            `;
-            // The AI container itself might be huge. If so, we should split it.
-            // Simplified approach: Add the whole AI block if it fits. If not, split paragraphs.
-            // Let's split paragraphs to be safe because AI text can be long.
-
-            const aiHeader = document.createElement('div');
-            aiHeader.innerHTML = `<h3 style="font-size: 16px; margin-bottom: 15px; border-left: 5px solid #F2911B; padding-left: 10px; background:#f8f9fa; padding:10px;">🤖 Análise BrisinhAI</h3>`;
-            addToPage(aiHeader);
-
-            const paragraphsInfo = parseMarkdown(aiAnalysisText || "Análise indisponível.");
-            // parseMarkdown returns string with <p>. construct a temp div to nodes.
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = paragraphsInfo;
-
-            Array.from(tempDiv.children).forEach(p => {
-                // Style fix
-                p.style.fontSize = "12px";
-                p.style.lineHeight = "1.5";
-                p.style.marginBottom = "8px";
-                p.style.background = "#fff"; // ensure bg
-                // Wrap in a lightweight container just for margin safety
-                const pWrapper = document.createElement('div');
-                pWrapper.appendChild(p.cloneNode(true));
-                addToPage(pWrapper);
-            });
-
-            // Spacer
-            const spacer = document.createElement('div'); spacer.style.height = '20px';
-            addToPage(spacer);
-        }
-
-        // B. KPI CARDS
-        if (options.includeKPI) {
-            const kpiDiv = document.createElement('div');
-            kpiDiv.style.zoom = "0.9"; // Scale down slightly to fit width
-            kpiDiv.innerHTML = `
-            <div style="margin-bottom: 30px;">
-                 <h3 style="font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #dee2e6;">Indicadores</h3>
-                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                    <div style="border: 1px solid #e9ecef; padding: 10px; border-radius: 6px;">
-                         <p style="font-size: 10px; text-transform: uppercase; margin:0;">Entradas</p>
-                         <p style="font-size: 16px; font-weight: 700; color: #2ecc71; margin:0;">${fmt(state.metrics.total_entradas || 0)}</p>
-                    </div>
-                    <div style="border: 1px solid #e9ecef; padding: 10px; border-radius: 6px;">
-                         <p style="font-size: 10px; text-transform: uppercase; margin:0;">Saídas</p>
-                         <p style="font-size: 16px; font-weight: 700; color: #e74c3c; margin:0;">${fmt(state.metrics.total_saidas || 0)}</p>
-                    </div>
-                    <div style="border: 1px solid #e9ecef; padding: 10px; border-radius: 6px;">
-                         <p style="font-size: 10px; text-transform: uppercase; margin:0;">Resultado</p>
-                         <p style="font-size: 16px; font-weight: 700; color: #F2911B; margin:0;">${fmt(state.metrics.resultado || 0)}</p>
-                    </div>
-                    <div style="border: 1px solid #e9ecef; padding: 10px; border-radius: 6px;">
-                         <p style="font-size: 10px; text-transform: uppercase; margin:0;">Margem</p>
-                         <p style="font-size: 16px; font-weight: 700; color: #3498db; margin:0;">${(state.metrics.perc_lucro || 0).toFixed(1)}%</p>
-                    </div>
-                 </div>
-            </div>`;
-            addToPage(kpiDiv);
-        }
-
-        // C. CHARTS
-        if (options.includeChartEvol || options.includeChartComp) {
-            // We'll create one block for charts. If it doesn't fit, it moves to next page.
-            const chartContainer = document.createElement('div');
-            chartContainer.style.display = 'grid';
-            chartContainer.style.gridTemplateColumns = (options.includeChartEvol && options.includeChartComp) ? '2fr 1fr' : '1fr';
-            chartContainer.style.gap = '20px';
-            chartContainer.style.marginBottom = '30px';
-            chartContainer.style.height = '300px'; // Fixed height constraint
-
-            let hasContent = false;
-            if (options.includeChartEvol) {
-                const wrap = document.createElement('div');
-                wrap.style.border = '1px solid #e9ecef'; wrap.style.padding = '10px'; wrap.style.borderRadius = '8px';
-                const mc = document.getElementById('mainChart');
-                if (mc) {
-                    const c = document.createElement('canvas');
-                    c.width = mc.width; c.height = mc.height; c.style.width = '100%'; c.style.height = '100%';
-                    c.getContext('2d').drawImage(mc, 0, 0);
-                    wrap.appendChild(c);
-                    chartContainer.appendChild(wrap);
-                    hasContent = true;
-                }
-            }
-            if (options.includeChartComp) {
-                const wrap = document.createElement('div');
-                wrap.style.border = '1px solid #e9ecef'; wrap.style.padding = '10px'; wrap.style.borderRadius = '8px';
-                const pc = document.getElementById('pieChart');
-                if (pc) {
-                    const c = document.createElement('canvas');
-                    c.width = pc.width; c.height = pc.height; c.style.width = '100%'; c.style.height = '100%'; c.style.objectFit = 'contain';
-                    c.getContext('2d').drawImage(pc, 0, 0);
-                    wrap.appendChild(c);
-                    chartContainer.appendChild(wrap);
-                    hasContent = true;
-                }
-            }
-
-            if (hasContent) addToPage(chartContainer);
-        }
-
-        // D. DETAILS
-        if (options.includeDetails) {
-            const detailsHeader = document.createElement('h3');
-            detailsHeader.innerHTML = 'Detalhes';
-            detailsHeader.style.fontSize = '16px';
-            detailsHeader.style.borderBottom = '1px solid #dee2e6';
-            addToPage(detailsHeader);
-
-            const table = document.createElement('table');
-            Object.assign(table.style, { width: '100%', fontSize: '12px', borderCollapse: 'collapse', marginBottom: '20px' });
-            table.innerHTML = `
-                <tr style="background: #f8f9fa;"><th style="padding: 8px; text-align: left;">Item</th><th style="padding: 8px; text-align: right;">Valor</th></tr>
-                <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Custos</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${fmt(state.metrics.total_custos || 0)}</td></tr>
-                <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Despesas</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${fmt(state.metrics.total_despesas || 0)}</td></tr>
-                <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Pessoal</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${fmt(state.metrics.pessoal || 0)}</td></tr>
-            `;
-            // Simple table fits easily.
-            addToPage(table);
-        }
-
-        // --- 6. RENDER PDF ---
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4'); // Portrait
-        const PDF_W = 210;
-        const PDF_H = 297;
-
-        // Render each page
-        for (let i = 0; i < pages.length; i++) {
-            if (i > 0) doc.addPage();
-
-            // Wait for render
-            await new Promise(r => setTimeout(r, 100)); // buffer
-
-            const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, logging: false });
-            const imgData = canvas.toDataURL('image/png');
-
-            // Fit to A4
-            doc.addImage(imgData, 'PNG', 0, 0, PDF_W, PDF_H);
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        // Paleta de cores executiva
+        const colors = {
+            primary: [242, 145, 27],
+            dark: [38, 34, 35],
+            success: [39, 174, 96],
+            danger: [192, 57, 43],
+            info: [41, 128, 185],
+            warning: [243, 156, 18],
+            purple: [142, 68, 173],
+            teal: [22, 160, 133],
+            gray: [149, 165, 166],
+            light: [236, 240, 241]
+        };
+        
+        const metrics = state.metrics || {};
+        const fmt = (val) => {
+            try {
+                return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            } catch (e) {
+                return 'R$ 0,00';
+            }
+        };
+        
+        // ===== CAPA EXECUTIVA =====
+        doc.setFillColor(...colors.primary);
+        doc.rect(0, 0, 210, 60, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(28);
+        doc.setFont(undefined, 'bold');
+        doc.text('RELATÓRIO FINANCEIRO', 105, 30, { align: 'center' });
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Demonstração de Resultados - ${getEmpresaTexto()}`, 105, 42, { align: 'center' });
+        
+        doc.setFontSize(11);
+        doc.text(`Período: ${getPeriodoTexto()}`, 105, 55, { align: 'center' });
+        
+        let y = 75;
+        
+        // ===== CARDS EXECUTIVOS =====
+        if (options && options.includeKPI) {
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...colors.dark);
+            doc.text('RESUMO EXECUTIVO', 20, y);
+            y += 12;
+            
+            // Cards em grid 2x2
+            const cards = [
+                { label: 'RECEITAS OPERACIONAIS', value: metrics.total_entradas, color: colors.success, icon: '↑' },
+                { label: 'CUSTOS & DESPESAS', value: metrics.total_saidas, color: colors.danger, icon: '↓' },
+                { label: 'RESULTADO', value: metrics.resultado, color: (metrics.resultado || 0) >= 0 ? colors.success : colors.danger, icon: (metrics.resultado || 0) >= 0 ? '+' : '-' },
+                { label: 'FCL (FLUXO CAIXA)', value: metrics.fcl, color: colors.info, icon: '◆' }
+            ];
+            
+            let cardX = 20;
+            let cardY = y;
+            
+            cards.forEach((card, index) => {
+                if (index === 2) {
+                    cardX = 20;
+                    cardY += 35;
+                }
+                
+                // Fundo do card
+                doc.setFillColor(...colors.light);
+                doc.roundedRect(cardX, cardY - 5, 85, 30, 3, 3, 'F');
+                
+                // Barra de cor
+                doc.setFillColor(...card.color);
+                doc.roundedRect(cardX, cardY - 5, 4, 30, 1, 1, 'F');
+                
+                // Label
+                doc.setFontSize(8);
+                doc.setTextColor(...colors.gray);
+                doc.setFont(undefined, 'normal');
+                doc.text(card.label, cardX + 8, cardY + 3);
+                
+                // Valor
+                doc.setFontSize(13);
+                doc.setTextColor(...colors.dark);
+                doc.setFont(undefined, 'bold');
+                doc.text(fmt(card.value || 0), cardX + 8, cardY + 18);
+                
+                cardX += 95;
+            });
+            
+            y = cardY + 40;
         }
-
-        doc.save(`Relatorio_MarBrasil_${new Date().toISOString().slice(0, 10)}.pdf`);
-
-        // Cleanup
-        document.body.removeChild(mainContainer);
-
-        const loaderCleanup = document.getElementById('loadingOverlay');
-        if (loaderCleanup) loaderCleanup.classList.add('d-none');
-
-        const btnCleanup = document.getElementById('btnExportPDF');
-        if (btnCleanup) {
-            btnCleanup.innerHTML = originalText;
-            btnCleanup.disabled = false;
+        
+        // ===== ANÁLISE AUTOMÁTICA LOCAL =====
+        if (options && options.includeAI) {
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...colors.primary);
+            doc.text('ANÁLISE ESTRATÉGICA (BRISINHAI)', 20, y);
+            y += 10;
+            
+            // Gerar análise local baseada nos dados
+            const analysis = generateLocalAnalysis(metrics);
+            
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.dark);
+            doc.setFontSize(9);
+            
+            // Processar análise com quebras de linha adequadas
+            const paragraphs = analysis.split('\n');
+            
+            paragraphs.forEach(paragraph => {
+                if (!paragraph.trim()) {
+                    y += 3;
+                    return;
+                }
+                
+                // Verificar se precisa de nova página antes de cada parágrafo
+                if (y > 265) {
+                    doc.addPage();
+                    y = 25;
+                }
+                
+                // Quebrar cada parágrafo em linhas que cabem (largura 125mm)
+                const lines = doc.splitTextToSize(paragraph.trim(), 125);
+                
+                lines.forEach(line => {
+                    if (y > 275) {
+                        doc.addPage();
+                        y = 25;
+                    }
+                    doc.text(line, 20, y);
+                    y += 4.5;
+                });
+            });
+            y += 8;
         }
+        
+        // ===== CARDS OPERACIONAIS =====
+        if (y > 240) {
+            doc.addPage();
+            y = 20;
+        }
+        
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.dark);
+        doc.text('INDICADORES OPERACIONAIS', 20, y);
+        y += 12;
+        
+        const operCards = [
+            { label: 'CUSTOS OPERACIONAIS', value: metrics.total_custos, color: colors.purple },
+            { label: 'DESPESAS RATEADAS', value: metrics.total_despesas, color: colors.warning },
+            { label: 'INVESTIMENTOS', value: metrics.total_investimentos, color: colors.teal },
+            { label: 'TOTAL IMPOSTOS', value: metrics.total_impostos, color: colors.gray }
+        ];
+        
+        let opCardX = 20;
+        let opCardY = y;
+        
+        operCards.forEach((card, index) => {
+            if (index === 2) {
+                opCardX = 20;
+                opCardY += 28;
+            }
+            
+            doc.setFillColor(...colors.light);
+            doc.roundedRect(opCardX, opCardY - 5, 85, 25, 2, 2, 'F');
+            
+            doc.setFillColor(...card.color);
+            doc.roundedRect(opCardX, opCardY - 5, 3, 25, 1, 1, 'F');
+            
+            doc.setFontSize(7);
+            doc.setTextColor(...colors.gray);
+            doc.text(card.label, opCardX + 6, opCardY + 2);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(...colors.dark);
+            doc.setFont(undefined, 'bold');
+            doc.text(fmt(card.value || 0), opCardX + 6, opCardY + 14);
+            
+            opCardX += 95;
+        });
+        
+        y = opCardY + 35;
+        
+        // ===== GRÁFICOS EXECUTIVOS =====
+        if (options && (options.includeChartEvol || options.includeChartComp)) {
+            doc.addPage();
+            y = 20;
+            
+            doc.setFillColor(...colors.primary);
+            doc.rect(0, 0, 210, 15, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('ANÁLISE GRÁFICA', 105, 10, { align: 'center' });
+            
+            y = 25;
+            
+            // Gráfico de Evolução (alta resolução 3x)
+            if (options.includeChartEvol) {
+                try {
+                    const mainCanvas = document.getElementById('mainChart');
+                    if (mainCanvas) {
+                        const tempCanvas = createHiResCanvas(mainCanvas, 3);
+                        const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                        
+                        doc.setFontSize(10);
+                        doc.setTextColor(...colors.dark);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('EVOLUÇÃO RECEITAS × DESPESAS', 20, y);
+                        y += 6;
+                        
+                        doc.addImage(imgData, 'PNG', 20, y, 170, 80);
+                        y += 90;
+                    }
+                } catch (e) {
+                    console.log('Erro gráfico evolução:', e);
+                }
+            }
+            
+            // Gráfico de Composição (full width, alta resolução)
+            if (options.includeChartComp) {
+                try {
+                    const pieCanvas = document.getElementById('pieChart');
+                    if (pieCanvas) {
+                        const tempCanvas = createHiResCanvas(pieCanvas, 3);
+                        const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                        
+                        if (y > 240) {
+                            doc.addPage();
+                            y = 20;
+                        }
+                        
+                        doc.setFontSize(10);
+                        doc.setTextColor(...colors.dark);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('COMPOSIÇÃO DE CUSTOS', 20, y);
+                        y += 6;
+                        
+                        doc.addImage(imgData, 'PNG', 20, y, 170, 70);
+                        y += 80;
+                    }
+                } catch (e) {
+                    console.log('Erro gráfico composição:', e);
+                }
+            }
+            
+            // Top 5 Despesas (full width, abaixo do composição)
+            try {
+                const topCanvas = document.getElementById('topExpensesChart');
+                if (topCanvas) {
+                    const tempCanvas = createHiResCanvas(topCanvas, 3);
+                    const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                    
+                    if (y > 240) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(...colors.dark);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('TOP 5 DESPESAS', 20, y);
+                    y += 6;
+                    
+                    doc.addImage(imgData, 'PNG', 20, y, 170, 70);
+                    y += 80;
+                }
+            } catch (e) {
+                console.log('Erro gráfico top despesas:', e);
+            }
+        }
+        
+        // ===== PÁGINA DETALHADA =====
+        if (options && options.includeDetails) {
+            doc.addPage();
+            
+            // Header
+            doc.setFillColor(...colors.primary);
+            doc.rect(0, 0, 210, 12, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('DETALHAMENTO COMPLETO', 105, 8, { align: 'center' });
+            
+            y = 20;
+            
+            // Seção: Pessoal
+            doc.setFontSize(12);
+            doc.setTextColor(...colors.primary);
+            doc.setFont(undefined, 'bold');
+            doc.text('COMPOSIÇÃO DE PESSOAL', 20, y);
+            y += 10;
+            
+            const pessoalItems = [
+                ['Credenciados', metrics.credenciados, colors.purple],
+                ['CLTs', metrics.clts, colors.info],
+                ['Terceirização', metrics.terceirizacao, colors.warning],
+                ['Total Pessoal', metrics.pessoal, colors.dark]
+            ];
+            
+            doc.setFontSize(9);
+            pessoalItems.forEach(([label, value, color]) => {
+                doc.setTextColor(...color);
+                doc.setFont(undefined, 'bold');
+                doc.text('■', 20, y);
+                doc.setTextColor(...colors.dark);
+                doc.setFont(undefined, 'normal');
+                doc.text(`${label}:`, 26, y);
+                doc.setFont(undefined, 'bold');
+                doc.text(fmt(value || 0), 80, y);
+                y += 6;
+            });
+            
+            y += 8;
+            
+            // Seção: Manutenção
+            doc.setFontSize(12);
+            doc.setTextColor(...colors.primary);
+            doc.setFont(undefined, 'bold');
+            doc.text('MANUTENÇÃO', 110, y - 8);
+            
+            const manutItems = [
+                ['Corretiva', metrics.corretiva, colors.danger],
+                ['Preventiva', metrics.preventiva, colors.success]
+            ];
+            
+            doc.setFontSize(9);
+            let manutY = y;
+            manutItems.forEach(([label, value, color]) => {
+                doc.setTextColor(...color);
+                doc.setFont(undefined, 'bold');
+                doc.text('■', 110, manutY);
+                doc.setTextColor(...colors.dark);
+                doc.setFont(undefined, 'normal');
+                doc.text(`${label}:`, 116, manutY);
+                doc.setFont(undefined, 'bold');
+                doc.text(fmt(value || 0), 170, manutY);
+                manutY += 6;
+            });
+            
+            y += 25;
+            
+            // Breakdown completo
+            if (y > 260) {
+                doc.addPage();
+                y = 20;
+            }
+            
+            doc.setFontSize(12);
+            doc.setTextColor(...colors.primary);
+            doc.setFont(undefined, 'bold');
+            doc.text('BREAKDOWN FINANCEIRO', 20, y);
+            y += 12;
+            
+            const allMetrics = [
+                ['Receitas Operacionais', metrics.total_entradas, colors.success],
+                ['(-) Impostos', metrics.total_impostos, colors.gray],
+                ['(-) Custos', metrics.total_custos, colors.purple],
+                ['(-) Despesas', metrics.total_despesas, colors.warning],
+                ['(-) Investimentos', metrics.total_investimentos, colors.teal],
+                ['(=) Resultado', metrics.resultado, (metrics.resultado || 0) >= 0 ? colors.success : colors.danger],
+                ['FCL', metrics.fcl, colors.info]
+            ];
+            
+            doc.setFontSize(9);
+            allMetrics.forEach(([label, value, color], index) => {
+                if (y > 280) {
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                // Linha separadora antes do resultado
+                if (label.includes('Resultado')) {
+                    doc.setDrawColor(...colors.gray);
+                    doc.setLineWidth(0.3);
+                    doc.line(20, y - 4, 190, y - 4);
+                }
+                
+                doc.setFillColor(...color);
+                doc.circle(22, y - 2, 2, 'F');
+                
+                doc.setTextColor(...colors.dark);
+                doc.setFont(undefined, 'normal');
+                doc.text(label, 28, y);
+                
+                doc.setFont(undefined, 'bold');
+                doc.text(fmt(value || 0), 150, y);
+                
+                y += 8;
+            });
+        }
+        
+        // ===== RODAPÉ EXECUTIVO =====
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            
+            // Linha superior
+            doc.setDrawColor(...colors.primary);
+            doc.setLineWidth(1);
+            doc.line(20, 285, 190, 285);
+            
+            doc.setFontSize(8);
+            doc.setTextColor(...colors.gray);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${getEmpresaTexto()} | Relatório DRE v${window.APP_VERSION || '32.6'}`, 20, 292);
+            doc.text(`Página ${i} de ${pageCount}`, 190, 292, { align: 'right' });
+            doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 105, 292, { align: 'center' });
+        }
+        
+        // Salvar
+        const filename = `Relatorio_Executivo_${getEmpresaTexto().replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+        doc.save(filename);
+        console.log('PDF executivo gerado com sucesso!');
 
     } catch (e) {
-        console.error(e);
-        alert("Erro no PDF: " + e.message);
+        console.error('Erro ao gerar PDF:', e);
+        alert('Erro ao gerar PDF: ' + e.message);
+    } finally {
+        const loader = document.getElementById('loadingOverlay');
+        if (loader) {
+            loader.style.display = 'none';
+            loader.classList.add('d-none');
+            loader.classList.remove('d-flex');
+        }
+        
+        const btnPDF = document.getElementById('btnExportPDF');
+        if (btnPDF) btnPDF.disabled = false;
+        
+        console.log('PDF completo finalizado');
+    }
+    
+    return Promise.resolve();
+}
 
-        const loaderErr = document.getElementById('loadingOverlay');
-        if (loaderErr) loaderErr.classList.add('d-none');
+// Helper: Criar canvas em alta resolução
+function createHiResCanvas(sourceCanvas, scale = 2) {
+    const tempCanvas = document.createElement('canvas');
+    const ctx = tempCanvas.getContext('2d');
+    tempCanvas.width = sourceCanvas.width * scale;
+    tempCanvas.height = sourceCanvas.height * scale;
+    ctx.scale(scale, scale);
+    ctx.drawImage(sourceCanvas, 0, 0);
+    return tempCanvas;
+}
 
-        const btnErr = document.getElementById('btnExportPDF');
-        if (btnErr) {
-            btnErr.innerHTML = 'Exportar PDF';
-            btnErr.disabled = false;
+// Helper: Gerar análise local aprimorada e rica em insights
+function generateLocalAnalysis(metrics) {
+    const fmt = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const pct = (val, total) => total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+    
+    const receitas = metrics.total_entradas || 0;
+    const saidas = metrics.total_saidas || 0;
+    const resultado = metrics.resultado || 0;
+    const fcl = metrics.fcl || 0;
+    const margem = receitas > 0 ? (resultado / receitas * 100) : 0;
+    
+    const custos = metrics.total_custos || 0;
+    const despesas = metrics.total_despesas || 0;
+    const impostos = metrics.total_impostos || 0;
+    const investimentos = metrics.total_investimentos || 0;
+    const pessoal = metrics.pessoal || 0;
+    const credenciados = metrics.credenciados || 0;
+    const clts = metrics.clts || 0;
+    const terceirizacao = metrics.terceirizacao || 0;
+    const corretiva = metrics.corretiva || 0;
+    const preventiva = metrics.preventiva || 0;
+    const totalManutencao = corretiva + preventiva;
+    
+    let sections = [];
+    
+    // === 1. RESUMO EXECUTIVO ===
+    sections.push('== RESUMO EXECUTIVO ==');
+    
+    if (resultado > 0) {
+        const classificacao = margem > 20 ? 'excelente' : margem > 10 ? 'saudável' : 'positiva mas desafiada';
+        sections.push(`A empresa apresenta performance financeira ${classificacao.toUpperCase()} no período analisado, com resultado de ${fmt(resultado)} (${margem.toFixed(1)}% de margem). ${margem > 15 ? 'Os indicadores demonstram gestão eficiente de custos e boa rentabilidade.' : 'Apesar do resultado positivo, há espaço para otimização de custos e aumento da margem operacional.'}`);
+    } else {
+        const deficitPct = receitas > 0 ? Math.abs(resultado / receitas * 100).toFixed(1) : 0;
+        sections.push(`ATENÇÃO CRÍTICA: O período registra déficit de ${fmt(Math.abs(resultado))} (${deficitPct}% das receitas). É fundamental implementar medidas corretivas imediatas para reverter este cenário. Recomenda-se análise detalhada de custos fixos e variáveis, além de avaliação de preços e mix de produtos/serviços.`);
+    }
+    
+    // === 2. SAÚDE FINANCEIRA ===
+    sections.push('');
+    sections.push('== SAÚDE FINANCEIRA ==');
+    
+    const liquidez = receitas > 0 ? (fcl / receitas * 100).toFixed(1) : 0;
+    if (fcl > 0) {
+        sections.push(`• FLUXO DE CAIXA LÍQUIDO: ${fmt(fcl)} (${liquidez}% da receita) - ${fcl > resultado ? 'A empresa gera mais caixa do que lucro contábil, indicando gestão eficiente de capital de giro.' : 'O FCL está alinhado com o resultado, sem distorções significativas no working capital.'}`);
+    } else {
+        sections.push(`• ALERTA DE LIQUIDEZ: FCL negativo em ${fmt(fcl)}. A empresa está consumindo caixa em suas operações. URGÊNCIA: Revisar políticas de pagamento/recebimento, avaliar estoques excessivos e negociar prazos com fornecedores.`);
+    }
+    
+    sections.push(`• ÍNDICE DE COBERTURA: ${receitas > 0 ? (receitas / saidas * 100).toFixed(1) : 0}% - Cada R$ 1,00 de receita cobre R$ ${(saidas/receitas).toFixed(2)} de despesas totais.`);
+    
+    // === 3. EFICIÊNCIA OPERACIONAL ===
+    sections.push('');
+    sections.push('== EFICIÊNCIA OPERACIONAL ==');
+    
+    const eficiencia = saidas > 0 ? (custos / saidas * 100).toFixed(1) : 0;
+    sections.push(`• COMPOSIÇÃO DAS SAÍDAS: Custos operacionais representam ${eficiencia}% do total de saídas. ${parseFloat(eficiencia) > 60 ? 'Alta dependência de custos diretos - característica de operações intensivas em recursos ou mão de obra.' : 'Estrutura enxuta com maior peso de despesas administrativas.'}`);
+    
+    if (impostos > 0) {
+        const cargaTrib = pct(impostos, receitas);
+        sections.push(`• CARGA TRIBUTÁRIA: ${cargaTrib}% da receita. ${parseFloat(cargaTrib) > 15 ? 'Carga acima da média do setor - avaliar planejamento tributário.' : 'Carga tributária dentro de parâmetros razoáveis.'}`);
+    }
+    
+    if (investimentos > 0) {
+        const capexPct = pct(investimentos, receitas);
+        sections.push(`• INVESTIMENTOS (CAPEX): ${fmt(investimentos)} (${capexPct}% da receita). ${parseFloat(capexPct) > 10 ? 'Nível expressivo de investimentos - fundamental monitorar retorno e payback.' : 'Investimentos moderados, mantendo capacidade produtiva.'}`);
+    }
+    
+    // === 4. ANÁLISE DE PESSOAL ===
+    if (pessoal > 0) {
+        sections.push('');
+        sections.push('== ANÁLISE DE PESSOAL ==');
+        
+        const folhaPct = pct(pessoal, receitas);
+        sections.push(`• FOLHA TOTAL: ${fmt(pessoal)} (${folhaPct}% da receita). ${parseFloat(folhaPct) > 35 ? 'ALERTA: Folha elevada, próxima ao limite de sustentabilidade. Avaliar produtividade e automatização.' : parseFloat(folhaPct) > 25 ? 'Folha dentro de faixa de atenção - monitorar produtividade.' : 'Folha enxuta e controlada.'}`);
+        
+        if (credenciados > 0 || clts > 0 || terceirizacao > 0) {
+            sections.push(`• MIX DE CONTRATAÇÃO:`);
+            if (credenciados > 0) sections.push(`  - Credenciados: ${fmt(credenciados)} (${pct(credenciados, pessoal)}%) - Flexibilidade operacional`);
+            if (clts > 0) sections.push(`  - CLTs: ${fmt(clts)} (${pct(clts, pessoal)}%) - Base estrutural`);
+            if (terceirizacao > 0) sections.push(`  - Terceirização: ${fmt(terceirizacao)} (${pct(terceirizacao, pessoal)}%) - Especialização externa`);
         }
     }
+    
+    // === 5. MANUTENÇÃO E ATIVOS ===
+    if (totalManutencao > 0) {
+        sections.push('');
+        sections.push('== GESTÃO DE ATIVOS ==');
+        
+        const manutPct = pct(totalManutencao, receitas);
+        sections.push(`• MANUTENÇÃO TOTAL: ${fmt(totalManutencao)} (${manutPct}% da receita)`);
+        
+        if (corretiva > 0 && preventiva > 0) {
+            const ratio = corretiva / preventiva;
+            sections.push(`• RAZÃO CORRETIVA/PREVENTIVA: ${ratio.toFixed(1)}:1`);
+            if (ratio > 2) {
+                sections.push(`  ⚠ ALERTA: Predominância de manutenção corretiva indica sub-investimento em prevenção. Recomenda-se inverter a lógica para reduzir paradas não planejadas.`);
+            } else {
+                sections.push(`  ✓ Gestão pró-ativa com equilíbrio entre manutenções.`);
+            }
+        }
+    }
+    
+    // === 6. BENCHMARKS E TENDÊNCIAS ===
+    sections.push('');
+    sections.push('== BENCHMARKS INTERNOS ==');
+    
+    const despesasOp = despesas - impostos;
+    if (despesasOp > 0) {
+        const despAdmPct = pct(despesasOp, receitas);
+        sections.push(`• DESPESAS ADMINISTRATIVAS: ${despAdmPct}% da receita. ${parseFloat(despAdmPct) > 20 ? 'Acima do ideal - revisar contratos, aluguéis e despesas gerais.' : 'Sob controle administrativo.'}`);
+    }
+    
+    // === 7. RECOMENDAÇÕES ESTRATÉGICAS ===
+    sections.push('');
+    sections.push('== RECOMENDAÇÕES ESTRATÉGICAS ==');
+    
+    const recomendacoes = [];
+    
+    if (margem < 5 && resultado > 0) {
+        recomendacoes.push('PRIORIDADE 1: Margem crítica. Implementar plano de contingência com redução imediata de despesas discricionárias e renegociação de contratos.');
+    }
+    if (margem >= 5 && margem < 10) {
+        recomendacoes.push('PRIORIDADE 2: Margem estreita. Mapear gargalos operacionais e implementar melhoria contínua (lean) para ganho de eficiência de 2-3%. Identificar e eliminar desperdícios.');
+    }
+    if (parseFloat(pct(impostos, receitas)) > 18) {
+        recomendacoes.push('Consultoria tributária: Avaliar regimes especiais, créditos e otimizações fiscais legalmente permitidas.');
+    }
+    if (parseFloat(pct(pessoal, receitas)) > 40) {
+        recomendacoes.push('Gestão de pessoal: Análise de produtividade por colaborador, revisão de processos e avaliação de automatizações pontuais.');
+    }
+    if (investimentos > receitas * 0.15) {
+        recomendacoes.push('Governança de investimentos: Estabelecer KPIs de retorno (ROI, payback) para projetos de CAPEX e revisar prioridades de alocação de capital.');
+    }
+    if (fcl < resultado * 0.5 && resultado > 0) {
+        recomendacoes.push('Gestão do giro: Revisão de prazos de recebimento e pagamento. Avaliar fomento comercial ou antecipação de recebíveis.');
+    }
+    
+    if (recomendacoes.length === 0) {
+        recomendacoes.push('Manter ritmo de monitoramento mensal e focar em eficiência operacional contínua.');
+        recomendacoes.push('Explorar oportunidades de crescimento sustentável, mantendo a disciplina de custos.');
+    }
+    
+    recomendacoes.forEach((rec, i) => {
+        sections.push(`${i + 1}. ${rec}`);
+    });
+    
+    // === 8. PRÓXIMOS PASSOS ===
+    sections.push('');
+    sections.push('== PRÓXIMOS PASSOS SUGERIDOS ==');
+    sections.push('• Reunião de análise com diretoria para validar diagnóstico');
+    sections.push('• Definição de comitê de gestão financeira (semanal)');
+    sections.push(`• Meta de margem para próximo período: ${margem > 0 ? (margem * 1.1).toFixed(1) : 5}% mínimo`);
+    sections.push('• Revisão de orçamento e forecast revisado');
+    
+    return sections.join('\n');
 }
+
+// Helper: Hex para RGB
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+    ] : [0, 0, 0];
+}
+
+// Helper: Obter texto do período a partir dos filtros ativos
+function getPeriodoTexto() {
+    // O filtro de período no HTML é filterPeriodo (múltiplo)
+    const periodoSelect = document.getElementById('filterPeriodo');
+    
+    // PRIORIDADE 1: Ler diretamente do select (o que o usuário realmente selecionou)
+    if (periodoSelect && periodoSelect.selectedOptions.length > 0) {
+        const selected = Array.from(periodoSelect.selectedOptions).map(o => o.value || o.text);
+        if (selected.length === 1) {
+            return selected[0];
+        } else if (selected.length <= 3) {
+            return selected.join(', ');
+        } else {
+            return `${selected[0]} a ${selected[selected.length - 1]}`;
+        }
+    }
+    
+    // PRIORIDADE 2: Tentar obter do state.dates
+    if (state.dates && state.dates.length > 0) {
+        const firstDate = state.dates[0];
+        const lastDate = state.dates[state.dates.length - 1];
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        return `${meses[firstDate.getMonth()]}/${firstDate.getFullYear()} - ${meses[lastDate.getMonth()]}/${lastDate.getFullYear()}`;
+    }
+    
+    // Último fallback
+    const now = new Date();
+    return `${now.getFullYear()}`;
+}
+
+// Helper: Obter texto da empresa selecionada
+function getEmpresaTexto() {
+    const empresaSelect = document.getElementById('filterEmpresa');
+    
+    // PRIORIDADE 1: Ler do select de empresas
+    if (empresaSelect && empresaSelect.selectedOptions.length > 0) {
+        const selected = Array.from(empresaSelect.selectedOptions).map(o => o.value || o.text);
+        
+        if (selected.length === 0 || (selected.length === 1 && selected[0] === '')) {
+            return 'Todas as Empresas';
+        }
+        if (selected.length === 1) {
+            return selected[0];
+        }
+        if (selected.length <= 3) {
+            return selected.join(', ');
+        }
+        return `${selected[0]} e +${selected.length - 1} empresas`;
+    }
+    
+    // PRIORIDADE 2: Verificar state.filters.empresas
+    if (state.filters && state.filters.empresas && state.filters.empresas.length > 0) {
+        const empresas = state.filters.empresas;
+        if (empresas.length === 1) {
+            return empresas[0];
+        }
+        if (empresas.length <= 3) {
+            return empresas.join(', ');
+        }
+        return `${empresas[0]} e +${empresas.length - 1} empresas`;
+    }
+    
+    // Fallback
+    return 'MarBrasil';
+}
+
+
 // Load persistent state on start
 document.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem('dre_state_raw');
@@ -3491,11 +3953,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // PDF Export Button
-    const btnExport = document.getElementById('btnExportPDF');
-    if (btnExport) {
-        btnExport.addEventListener('click', exportToPDF);
-    }
+    // PDF Export Button - REMOVIDO para evitar conflito com onclick no HTML
+    // const btnExport = document.getElementById('btnExportPDF');
+    // if (btnExport) {
+    //     btnExport.addEventListener('click', exportToPDF);
+    // }
 
     // Por Maquina Modal
     const btnPorMaquina = document.getElementById('btnPorMaquina');
