@@ -14,10 +14,53 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="styles.css?v=32.12">
-    <link rel="stylesheet" href="custom-fixes.css?v=32.12">
-    <link rel="icon" type="image/png" href="Favicon.png">
-    <script src="version.js?v=32.12"></script>
+    <link rel="stylesheet" href="styles.css?v=32.13">
+    <link rel="stylesheet" href="custom-fixes.css?v=32.13">
+    <script src="version.js?v=32.13"></script>
+    <script>
+        // Criar favicon dinâmico com versão
+        function createVersionFavicon() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            
+            // Fundo azul escuro
+            ctx.fillStyle = '#1e40af';
+            ctx.fillRect(0, 0, 32, 32);
+            
+            // Texto da versão
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Pegar versão do window.APP_VERSION
+            const version = window.APP_VERSION || '32.12';
+            const shortVersion = version.replace('v', '');
+            
+            // Desenhar versão
+            ctx.fillText(shortVersion, 16, 16);
+            
+            // Criar link do favicon
+            const link = document.createElement('link');
+            link.rel = 'icon';
+            link.type = 'image/png';
+            link.href = canvas.toDataURL();
+            
+            // Remover favicon antigo se existir
+            const oldFavicon = document.querySelector('link[rel="icon"]');
+            if (oldFavicon) {
+                oldFavicon.remove();
+            }
+            
+            // Adicionar novo favicon
+            document.head.appendChild(link);
+        }
+        
+        // Criar favicon quando carregar
+        window.addEventListener('DOMContentLoaded', createVersionFavicon);
+    </script>
 
     <style>
         .loan-indicator {
@@ -410,7 +453,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="timbrado_b64.js"></script>
-    <script src="emprestimos.js?v=32.12"></script>
+    <script src="emprestimos.js?v=32.13"></script>
     <script>
         // Live preview of installment value
         ['loanAmountInput', 'loanInstallmentsInput'].forEach(id => {

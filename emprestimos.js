@@ -168,8 +168,29 @@ function getInstallmentForMonth(emp, monthStr) {
         const startAbs = sy * 12 + sm;
         const endAbs = startAbs + inst - 1;
 
+        // Verificar se o empréstimo está ativo neste mês
         if (targetAbs >= startAbs && targetAbs <= endAbs) {
-            total += amount / inst;
+            // Verificar se empréstimo já foi liquidado
+            const paid_inst = parseInt(ln.paid_installments) || 0;
+            const paid_extra = parseFloat(ln.amount_paid_extra) || 0;
+            
+            // Calcular saldo devedor atual
+            function getElapsed(cycle) {
+                const n = new Date();
+                const [y, m] = cycle.split('-').map(Number);
+                let e = (n.getFullYear() - y) * 12 + (n.getMonth() - (m - 1));
+                if (n.getDate() < 10) e--;
+                return Math.max(0, e);
+            }
+            
+            const elapsed = getElapsed(sc);
+            const totalPaidInstances = Math.max(0, Math.min(elapsed + paid_inst, inst));
+            const currentBalance = Math.max(0, amount - (totalPaidInstances * (amount / inst)) - paid_extra);
+            
+            // Só adicionar parcela se ainda tiver saldo
+            if (currentBalance > 0) {
+                total += amount / inst;
+            }
         }
     });
 
