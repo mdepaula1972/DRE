@@ -200,7 +200,31 @@ function renderProjection(filtered) {
     const months = [];
     const headers = ['COLABORADOR', 'TOTAL PROJETADO'];
 
-    for (let i = 0; i < 12; i++) {
+    // Calcular até qual mês devemos mostrar (último mês de qualquer empréstimo ativo)
+    let maxMonthAbs = now.getFullYear() * 12 + (now.getMonth() + 1) + 11; // Mínimo: 12 meses à frente
+    
+    filtered.forEach(emp => {
+        if (!emp._loans || emp._loans.length === 0) return;
+        emp._loans.forEach(ln => {
+            const amount = parseFloat(ln.amount) || 0;
+            const inst = parseInt(ln.installments) || 0;
+            const sc = ln.start_cycle;
+            if (!amount || !inst || !sc) return;
+            
+            const [y, m] = sc.split('-').map(Number);
+            // Mês final deste empréstimo (start + installments - 1)
+            const endAbs = y * 12 + m + inst - 1;
+            if (endAbs > maxMonthAbs) {
+                maxMonthAbs = endAbs;
+            }
+        });
+    });
+
+    // Gerar array de meses do atual até o máximo
+    const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
+    const totalMonths = maxMonthAbs - currentAbs + 1;
+    
+    for (let i = 0; i < totalMonths; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         const mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         const label = d.toLocaleString('pt-BR', { month: 'short' }).toUpperCase() + '/' + String(d.getFullYear()).slice(2);
@@ -212,12 +236,12 @@ function renderProjection(filtered) {
 
     const body = document.getElementById('projectionBody');
     body.innerHTML = '';
-    const totals = new Array(12).fill(0);
+    const totals = new Array(months.length).fill(0);
 
     filtered.forEach(emp => {
         const tr = document.createElement('tr');
         
-        // Calcular total projetado (soma das parcelas dos 12 meses)
+        // Calcular total projetado (soma das parcelas de todos os meses)
         let totalProjetado = 0;
         months.forEach(mStr => {
             totalProjetado += getInstallmentForMonth(emp, mStr);
