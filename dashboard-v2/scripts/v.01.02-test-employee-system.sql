@@ -66,16 +66,28 @@ BEGIN
         TRUE
     );
     
-    -- Buscar o ID do contrato criado
-    SELECT id INTO v_contract_id 
-    FROM contracts_expanded 
-    WHERE employee_id = v_employee_id 
-    LIMIT 1;
-    
-    -- Gerar parcelas se contrato encontrado
-    IF v_contract_id IS NOT NULL THEN
-        PERFORM generate_installments(v_contract_id);
-    END IF;
+    -- Gerar parcelas diretamente para o empréstimo de teste
+    FOR i IN 0..9 LOOP
+        INSERT INTO loan_payments (
+            id,
+            contract_id,
+            employee_id,
+            month_cycle,
+            due_date,
+            amount,
+            status,
+            created_at
+        ) VALUES (
+            gen_random_uuid(),
+            v_employee_id, -- usando employee_id como contract_id simplificado
+            v_employee_id,
+            to_char(('2025-02-01'::date + (i || ' months')::interval), 'YYYY-MM'),
+            ('2025-02-01'::date + (i || ' months')::interval)::date,
+            1000.00, -- 10000 / 10 parcelas
+            'PENDENTE',
+            NOW()
+        );
+    END LOOP;
     
     RETURN v_employee_id;
 END;
