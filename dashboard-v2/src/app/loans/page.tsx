@@ -10,6 +10,7 @@ import { SideDrawer } from "@/components/loans/SideDrawer";
 import { PaymentProcessingModal } from "@/components/loans/PaymentProcessingModal";
 import { LoansService, formatCurrency } from "@/services/loans.service";
 import { Employee, LoanStats, ProjectionData } from "@/types/loans";
+import { useDataMode } from "@/contexts/DataModeContext";
 import { 
   Receipt, 
   PiggyBank, 
@@ -25,6 +26,7 @@ import {
 } from "lucide-react";
 
 export default function LoansPage() {
+  const { isTestMode } = useDataMode();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<string | undefined>(undefined);
@@ -42,10 +44,10 @@ export default function LoansPage() {
   // Error states
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch data on mount
+  // Fetch data on mount and when test mode changes
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isTestMode]);
 
   const fetchData = async () => {
     setError(null);
@@ -53,7 +55,7 @@ export default function LoansPage() {
     try {
       // Fetch stats
       setIsLoadingStats(true);
-      const statsData = await LoansService.getStats();
+      const statsData = await LoansService.getStats(isTestMode);
       setStats(statsData);
     } catch (err) {
       console.error('Erro ao carregar estatísticas:', err);
@@ -65,7 +67,7 @@ export default function LoansPage() {
     try {
       // Fetch employees
       setIsLoadingEmployees(true);
-      const employeesData = await LoansService.getEmployees();
+      const employeesData = await LoansService.getEmployees(undefined, isTestMode);
       setEmployees(employeesData);
     } catch (err) {
       console.error('Erro ao carregar colaboradores:', err);
@@ -77,7 +79,7 @@ export default function LoansPage() {
     try {
       // Fetch projections
       setIsLoadingProjections(true);
-      const projectionsData = await LoansService.getProjections();
+      const projectionsData = await LoansService.getProjections(isTestMode);
       setProjections(projectionsData);
     } catch (err) {
       console.error('Erro ao carregar projeções:', err);

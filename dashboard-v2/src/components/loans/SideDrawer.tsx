@@ -5,6 +5,7 @@ import { X, Wallet, ArrowUpRight, History, CreditCard, Clock, CheckCircle, Rotat
 import { motion, AnimatePresence } from "framer-motion";
 import { Employee, Contract } from "@/types/loans";
 import { LoansService, formatCurrency, formatDate } from "@/services/loans.service";
+import { useDataMode } from "@/contexts/DataModeContext";
 import { ContractCard } from "./ContractCard";
 
 interface SideDrawerProps {
@@ -14,6 +15,7 @@ interface SideDrawerProps {
 }
 
 export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
+  const { isTestMode } = useDataMode();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
@@ -25,7 +27,7 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
     if (isOpen && employeeId) {
       fetchEmployeeData(employeeId);
     }
-  }, [isOpen, employeeId]);
+  }, [isOpen, employeeId, isTestMode]);
 
   const fetchEmployeeData = async (id: string) => {
     setIsLoading(true);
@@ -33,8 +35,8 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
     
     try {
       const [empData, contractsData] = await Promise.all([
-        LoansService.getEmployeeDetails(id),
-        LoansService.getEmployeeContracts(id)
+        LoansService.getEmployeeDetails(id, isTestMode),
+        LoansService.getEmployeeContracts(id, isTestMode)
       ]);
       
       setEmployee(empData);

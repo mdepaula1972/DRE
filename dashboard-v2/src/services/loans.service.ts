@@ -1,12 +1,17 @@
 import { supabase } from '@/lib/supabase';
 import { Employee, Contract, LoanStats, ProjectionData, FilterParams } from '@/types/loans';
 
+// Helper to get view name based on data mode
+function getViewName(baseName: string, isTestMode?: boolean): string {
+  return isTestMode ? `${baseName}_test` : baseName;
+}
+
 export class LoansService {
   // Buscar todos os colaboradores com estatísticas
-  static async getEmployees(filters?: FilterParams): Promise<Employee[]> {
-    console.log('[LoansService] Buscando colaboradores...');
+  static async getEmployees(filters?: FilterParams, isTestMode?: boolean): Promise<Employee[]> {
+    console.log('[LoansService] Buscando colaboradores...', isTestMode ? '(MODO TESTE)' : '');
     const { data, error } = await supabase
-      .from('employee_loans_summary')
+      .from(getViewName('employee_loans_summary', isTestMode))
       .select('*');
 
     if (error) {
@@ -31,9 +36,9 @@ export class LoansService {
   }
 
   // Buscar estatísticas gerais
-  static async getStats(): Promise<LoanStats> {
+  static async getStats(isTestMode?: boolean): Promise<LoanStats> {
     const { data, error } = await supabase
-      .from('loan_stats')
+      .from(getViewName('loan_stats', isTestMode))
       .select('*')
       .single();
 
@@ -69,9 +74,9 @@ export class LoansService {
   }
 
   // Buscar projeção de recebimentos
-  static async getProjections(): Promise<ProjectionData[]> {
+  static async getProjections(isTestMode?: boolean): Promise<ProjectionData[]> {
     const { data, error } = await supabase
-      .from('loan_projections')
+      .from(getViewName('loan_projections', isTestMode))
       .select('*')
       .order('month', { ascending: true });
 
@@ -88,9 +93,9 @@ export class LoansService {
   }
 
   // Buscar contratos de um colaborador
-  static async getEmployeeContracts(employeeId: string): Promise<Contract[]> {
+  static async getEmployeeContracts(employeeId: string, isTestMode?: boolean): Promise<Contract[]> {
     const { data, error } = await supabase
-      .from('contracts')
+      .from(getViewName('contracts', isTestMode))
       .select('*')
       .eq('employee_id', employeeId)
       .order('start_date', { ascending: false });
@@ -118,9 +123,9 @@ export class LoansService {
   }
 
   // Buscar detalhes de um colaborador
-  static async getEmployeeDetails(employeeId: string): Promise<Employee | null> {
+  static async getEmployeeDetails(employeeId: string, isTestMode?: boolean): Promise<Employee | null> {
     const { data, error } = await supabase
-      .from('employee_loans_summary')
+      .from(getViewName('employee_loans_summary', isTestMode))
       .select('*')
       .eq('employee_id', employeeId)
       .single();

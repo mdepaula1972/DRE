@@ -1,8 +1,11 @@
 "use client";
 
-import { PlusCircle, FileText, Users, Home, LogOut, Box } from "lucide-react";
+import { PlusCircle, FileText, Users, Home, Box, Database, CheckCircle2, FlaskConical } from "lucide-react";
+import { useDataMode } from "@/contexts/DataModeContext";
 
 export function HeaderDashboard() {
+  const { dataMode, setDataMode, isTestMode } = useDataMode();
+
   return (
     <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
       {/* Logo Section */}
@@ -58,6 +61,28 @@ export function HeaderDashboard() {
           <Home size={18} />
           <span>Voltar ao Início</span>
         </button>
+
+        {/* Data Mode Selector */}
+        <div className="flex items-center gap-2 pl-4 border-l border-slate-200">
+          <span className="text-xs text-slate-500 font-medium hidden lg:block">Dados:</span>
+          <select
+            value={dataMode}
+            onChange={(e) => setDataMode(e.target.value as "production" | "test")}
+            className={`text-xs font-bold px-3 py-2 rounded-lg border-2 outline-none transition-all cursor-pointer ${
+              isTestMode
+                ? "bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200"
+                : "bg-emerald-100 border-emerald-300 text-emerald-700 hover:bg-emerald-200"
+            }`}
+          >
+            <option value="production">Produção</option>
+            <option value="test">Teste</option>
+          </select>
+          {isTestMode ? (
+            <FlaskConical size={16} className="text-amber-500" />
+          ) : (
+            <CheckCircle2 size={16} className="text-emerald-500" />
+          )}
+        </div>
       </div>
     </header>
   );
