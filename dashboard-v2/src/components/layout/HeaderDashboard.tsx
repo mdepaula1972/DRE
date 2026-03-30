@@ -1,11 +1,59 @@
 "use client";
 
-import { PlusCircle, FileText, Users, Home, Box, Database, CheckCircle2, FlaskConical } from "lucide-react";
+import { useState, useEffect } from "react";
+import { PlusCircle, FileText, Users, Home, Box, CheckCircle2, FlaskConical, UserPlus, Trash2 } from "lucide-react";
 import { useDataMode } from "@/contexts/DataModeContext";
 import { APP_VERSION } from "@/version";
+import { TestEmployeeService } from "@/services/test-employee.service";
 
 export function HeaderDashboard() {
   const { dataMode, setDataMode, isTestMode } = useDataMode();
+  const [hasTestEmployee, setHasTestEmployee] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    checkTestEmployee();
+  }, []);
+
+  const checkTestEmployee = async () => {
+    const exists = await TestEmployeeService.hasTestEmployee();
+    setHasTestEmployee(exists);
+  };
+
+  const handleCreateTestEmployee = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      const id = await TestEmployeeService.createTestEmployee();
+      if (id) {
+        setMessage('Colaborador teste criado!');
+        setHasTestEmployee(true);
+        window.location.reload();
+      }
+    } catch (error) {
+      setMessage('Erro ao criar: ' + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRemoveTestData = async () => {
+    if (!confirm('Tem certeza que deseja remover todos os dados de teste?')) return;
+    
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      const result = await TestEmployeeService.removeTestData();
+      setMessage(result);
+      setHasTestEmployee(false);
+      window.location.reload();
+    } catch (error) {
+      setMessage('Erro ao remover: ' + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -85,6 +133,40 @@ export function HeaderDashboard() {
             <CheckCircle2 size={16} className="text-emerald-500" />
           )}
         </div>
+
+        {/* Test Employee Management */}
+        <div className="flex items-center gap-2 pl-4 border-l border-slate-200">
+          {!hasTestEmployee ? (
+            <button
+              onClick={handleCreateTestEmployee}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-lg text-xs font-semibold transition-all border border-purple-200 disabled:opacity-50"
+              title="Criar colaborador fictício para testes"
+            >
+              <UserPlus size={14} />
+              <span>Criar Teste</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleRemoveTestData}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-semibold transition-all border border-red-200 disabled:opacity-50"
+              title="Remover colaborador e dados de teste"
+            >
+              <Trash2 size={14} />
+              <span>Remover Teste</span>
+            </button>
+          )}
+        </div>
+
+        {/* Message Toast */}
+        {message && (
+          <div className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg text-sm font-medium z-50 ${
+            message.includes('Erro') ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
+          }`}>
+            {message}
+          </div>
+        )}
       </div>
     </header>
   );
