@@ -18,8 +18,7 @@ CREATE TABLE IF NOT EXISTS employees_test (
   loan_installments INTEGER,
   loan_start_cycle TEXT,
   loan_request_date DATE,
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  created_at TIMESTAMP
 );
 
 -- ========================================
@@ -34,13 +33,13 @@ INSERT INTO employees_test (
   id, email, corporate_name, status, company, 
   pj_type, remuneration, loans_data, loan_amount, 
   loan_installments, loan_start_cycle, loan_request_date, 
-  created_at, updated_at
+  created_at
 )
 SELECT 
   id, email, corporate_name, status, company, 
   pj_type, remuneration, loans_data, loan_amount, 
   loan_installments, loan_start_cycle, loan_request_date, 
-  created_at, updated_at
+  created_at
 FROM employees;
 
 -- Verificar quantidade de registros copiados
