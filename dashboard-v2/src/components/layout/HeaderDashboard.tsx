@@ -2,6 +2,7 @@
 
 import { PlusCircle, FileText, Users, Home, Box, Database, CheckCircle2, FlaskConical } from "lucide-react";
 import { useDataMode } from "@/contexts/DataModeContext";
+import { APP_VERSION } from "@/version";
 
 export function HeaderDashboard() {
   const { dataMode, setDataMode, isTestMode } = useDataMode();
@@ -24,6 +25,7 @@ export function HeaderDashboard() {
           <div className="flex flex-col">
             <div className="flex items-baseline gap-2">
               <span className="text-xl font-black text-slate-900 tracking-tight">MAR BRASIL</span>
+              <span className="text-[10px] font-mono bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">{APP_VERSION}</span>
             </div>
             <span className="text-xs font-medium text-slate-500">Serviços e Locações</span>
           </div>
