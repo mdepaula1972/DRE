@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS employees_test (
   company TEXT,
   pj_type TEXT,
   remuneration NUMERIC,
-  loans_data TEXT,
+  loans_data JSONB,
   loan_amount NUMERIC,
   loan_installments INTEGER,
   loan_start_cycle TEXT,
