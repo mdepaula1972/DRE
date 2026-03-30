@@ -142,10 +142,10 @@ WHERE emp.is_test = FALSE OR emp.is_test IS NULL;
 -- Recriar outras views dependentes
 CREATE OR REPLACE VIEW loan_stats AS
 SELECT 
-    COALESCE(SUM(total_loaned), 0) as total_emprestado,
-    COALESCE(SUM(total_balance), 0) as saldo_devedor,
-    COALESCE(SUM(total_received), 0) as total_recebido,
-    COALESCE(SUM(monthly_installment), 0) as recebivel_mes,
+    COALESCE((SELECT SUM(total_loaned) FROM employee_loans_summary), 0) as total_emprestado,
+    COALESCE((SELECT SUM(total_balance) FROM employee_loans_summary), 0) as saldo_devedor,
+    COALESCE((SELECT SUM(total_received) FROM employee_loans_summary), 0) as total_recebido,
+    COALESCE((SELECT SUM(monthly_installment) FROM employee_loans_summary), 0) as recebivel_mes,
     (SELECT COUNT(*) FROM contracts_expanded WHERE status = 'ATIVO')::int as contratos_ativos,
     (SELECT COUNT(*) FROM contracts_expanded WHERE status = 'LIQUIDADO')::int as contratos_liquidados,
     COALESCE((SELECT MAX(value) FROM contracts_expanded), 0) as maior_emprestimo,
