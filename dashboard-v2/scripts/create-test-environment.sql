@@ -32,8 +32,18 @@ CREATE TABLE IF NOT EXISTS employees_test (
 TRUNCATE TABLE employees_test;
 
 -- Copiar todos os dados da employees para employees_test
-INSERT INTO employees_test 
-SELECT * FROM employees;
+INSERT INTO employees_test (
+  id, email, corporate_name, fantasy_name, status, company, 
+  pj_type, wages, remuneration, loans_data, loan_amount, 
+  loan_installments, loan_start_cycle, loan_request_date, 
+  created_at, updated_at
+)
+SELECT 
+  id, email, corporate_name, fantasy_name, status, company, 
+  pj_type, wages, remuneration, loans_data, loan_amount, 
+  loan_installments, loan_start_cycle, loan_request_date, 
+  created_at, updated_at
+FROM employees;
 
 -- Verificar quantidade de registros copiados
 -- SELECT COUNT(*) as total_copied FROM employees_test;
