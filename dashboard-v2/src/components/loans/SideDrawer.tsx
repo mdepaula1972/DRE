@@ -16,6 +16,8 @@ interface SideDrawerProps {
 export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,11 +39,22 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
       
       setEmployee(empData);
       setContracts(contractsData);
+      setFilteredContracts(contractsData);
+      setStatusFilter('all');
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
       setError('Falha ao carregar dados do colaborador');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleStatusFilter = (status: string) => {
+    setStatusFilter(status);
+    if (status === 'all') {
+      setFilteredContracts(contracts);
+    } else {
+      setFilteredContracts(contracts.filter(c => c.status === status));
     }
   };
 
@@ -143,15 +156,31 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
 
               {/* Contratos */}
               <div className="space-y-4">
-                <h3 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
-                  <CreditCard size={14} className="text-emerald-600" />
-                  Contratos Ativos ({contracts.length})
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
+                    <CreditCard size={14} className="text-emerald-600" />
+                    Contratos ({filteredContracts.length})
+                  </h3>
+                  
+                  {/* Filtro de Status */}
+                  <div className="flex items-center gap-2">
+                    <select 
+                      value={statusFilter}
+                      onChange={(e) => handleStatusFilter(e.target.value)}
+                      className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+                    >
+                      <option value="all">Todos</option>
+                      <option value="ATIVO">Ativos</option>
+                      <option value="LIQUIDADO">Liquidados</option>
+                      <option value="ATRASADO">Atrasados</option>
+                    </select>
+                  </div>
+                </div>
                 
-                {contracts.length === 0 ? (
+                {filteredContracts.length === 0 ? (
                   <p className="text-sm text-slate-400 text-center py-4">Nenhum contrato encontrado</p>
                 ) : (
-                  contracts.map(contract => (
+                  filteredContracts.map(contract => (
                     <ContractCard
                       key={contract.id}
                       contract={{
@@ -163,7 +192,7 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
                         nextPayment: formatDate(contract.nextPaymentDate),
                         endDate: formatDate(contract.endDate || contract.nextPaymentDate),
                         status: contract.status,
-                        startDate: contract.startDate
+                        startDate: formatDate(contract.startDate)
                       }}
                     />
                   ))

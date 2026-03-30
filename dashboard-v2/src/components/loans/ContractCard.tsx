@@ -24,9 +24,24 @@ interface ContractCardProps {
 }
 
 const statusMap = {
-  ATIVO: { bg: "bg-emerald-100", text: "text-emerald-700", label: "ATIVO" },
-  LIQUIDADO: { bg: "bg-slate-100", text: "text-slate-600", label: "LIQUIDADO" },
-  ATRASADO: { bg: "bg-red-100", text: "text-red-700", label: "ATRASADO" },
+  ATIVO: { 
+    bg: "bg-emerald-500", 
+    text: "text-white", 
+    label: "ATIVO",
+    shadow: "shadow-emerald-200"
+  },
+  LIQUIDADO: { 
+    bg: "bg-slate-500", 
+    text: "text-white", 
+    label: "LIQUIDADO",
+    shadow: "shadow-slate-200"
+  },
+  ATRASADO: { 
+    bg: "bg-red-500", 
+    text: "text-white", 
+    label: "ATRASADO",
+    shadow: "shadow-red-200"
+  },
 };
 
 export function ContractCard({ 
@@ -52,7 +67,7 @@ export function ContractCard({
             <p className="text-[10px] text-slate-400 font-semibold">Início: {contract.startDate}</p>
           </div>
         </div>
-        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${status.bg} ${status.text}`}>
+        <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full uppercase ${status.bg} ${status.text} shadow-sm ${status.shadow}`}>
           {status.label}
         </span>
       </div>
