@@ -1,9 +1,11 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.07";
+export const APP_VERSION = "v.01.09";
 export const VERSION_DATE = "2026-03-30";
 export const VERSION_CHANGELOG = [
+  "v.01.09 - Fix loan_stats view column references",
+  "v.01.08 - Fix empty employee_name by using full_name as fallback",
   "v.01.07 - Add test employee management buttons in UI",
   "v.01.06 - Generate installments directly without view dependency",
   "v.01.05 - Fix generate_installments to use contract_id",
