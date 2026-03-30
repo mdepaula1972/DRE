@@ -26,6 +26,7 @@ CREATE OR REPLACE FUNCTION create_test_employee()
 RETURNS UUID AS $$
 DECLARE
     v_employee_id UUID;
+    v_contract_id UUID;
 BEGIN
     -- Gerar ID único
     v_employee_id := gen_random_uuid();
@@ -65,8 +66,16 @@ BEGIN
         TRUE
     );
     
-    -- Gerar parcelas para o empréstimo de teste
-    PERFORM generate_installments(v_employee_id);
+    -- Buscar o ID do contrato criado
+    SELECT id INTO v_contract_id 
+    FROM contracts_expanded 
+    WHERE employee_id = v_employee_id 
+    LIMIT 1;
+    
+    -- Gerar parcelas se contrato encontrado
+    IF v_contract_id IS NOT NULL THEN
+        PERFORM generate_installments(v_contract_id);
+    END IF;
     
     RETURN v_employee_id;
 END;
