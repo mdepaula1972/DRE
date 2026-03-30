@@ -34,6 +34,7 @@ BEGIN
     INSERT INTO employees (
         id,
         email,
+        full_name,
         corporate_name,
         status,
         company,
@@ -49,6 +50,7 @@ BEGIN
     ) VALUES (
         v_employee_id,
         'teste@marbrasil.com',
+        'Colaborador Teste',
         'COLABORADOR TESTE (FICTÍCIO)',
         'Ativo',
         'MarBR',
