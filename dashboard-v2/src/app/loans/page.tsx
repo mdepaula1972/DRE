@@ -7,6 +7,7 @@ import { StatCard } from "@/components/loans/StatCard";
 import { ProjectionChart } from "@/components/loans/ProjectionChart";
 import { EmployeeTable } from "@/components/loans/EmployeeTable";
 import { SideDrawer } from "@/components/loans/SideDrawer";
+import { PaymentProcessingModal } from "@/components/loans/PaymentProcessingModal";
 import { LoansService, formatCurrency } from "@/services/loans.service";
 import { Employee, LoanStats, ProjectionData } from "@/types/loans";
 import { 
@@ -19,11 +20,13 @@ import {
   TrendingUp, 
   Timer,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  CreditCard
 } from "lucide-react";
 
 export default function LoansPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<string | undefined>(undefined);
   
   // Data states
@@ -122,6 +125,17 @@ export default function LoansPage() {
             </button>
           </div>
         )}
+
+        {/* Botão Processar Parcelas */}
+        <div className="mb-4 flex justify-end">
+          <button
+            onClick={() => setIsPaymentModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md"
+          >
+            <CreditCard size={18} />
+            Processar Parcelas
+          </button>
+        </div>
 
         {/* Primeiro Grid - Cards Principais Financeiros */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -266,6 +280,12 @@ export default function LoansPage() {
         isOpen={isDrawerOpen} 
         onClose={() => setIsDrawerOpen(false)} 
         employeeId={selectedEmployee}
+      />
+
+      {/* Modal de Processamento de Parcelas */}
+      <PaymentProcessingModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
       />
     </main>
   );
