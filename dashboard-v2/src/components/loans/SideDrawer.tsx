@@ -161,6 +161,7 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
                         balance: formatCurrency(contract.balance),
                         installments: `${contract.installments}x de ${formatCurrency(contract.installmentValue)}`,
                         nextPayment: formatDate(contract.nextPaymentDate),
+                        endDate: formatDate(contract.endDate || contract.nextPaymentDate),
                         status: contract.status,
                         startDate: contract.startDate
                       }}

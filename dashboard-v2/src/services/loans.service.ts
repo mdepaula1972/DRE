@@ -110,6 +110,7 @@ export class LoansService {
       installmentValue: item.installment_value || 0,
       installmentsPaid: 0,
       nextPaymentDate: item.next_payment_date || '-',
+      endDate: item.end_date || item.next_payment_date || '-',
       status: item.status || 'ATIVO',
       startDate: item.start_date || '-',
       description: item.description || '',
@@ -186,12 +187,12 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
-// Função auxiliar para formatar data
+// Função auxiliar para formatar data (padrão BR: dd/mm/aaaa)
 export function formatDate(date: string): string {
   if (!date || date === '-') return '-';
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(date));
+  const d = new Date(date);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
 }

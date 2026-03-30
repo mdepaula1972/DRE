@@ -9,6 +9,7 @@ interface Contract {
   balance: string;
   installments: string;
   nextPayment: string;
+  endDate: string;
   status: "ATIVO" | "LIQUIDADO" | "ATRASADO";
   startDate: string;
 }
@@ -71,8 +72,8 @@ export function ContractCard({
           <p className="text-sm font-black text-slate-800 tabular-nums">{contract.installments}</p>
         </div>
         <div>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Próxima Parcela</p>
-          <p className="text-sm font-black text-emerald-600 tabular-nums">{contract.nextPayment}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Última Parcela</p>
+          <p className="text-sm font-black text-emerald-600 tabular-nums">{contract.endDate}</p>
         </div>
       </div>
 

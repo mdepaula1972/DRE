@@ -24,6 +24,7 @@ export interface Contract {
   installmentValue: number;
   installmentsPaid: number;
   nextPaymentDate: string;
+  endDate?: string;
   status: "ATIVO" | "LIQUIDADO" | "ATRASADO";
   startDate: string;
   description?: string;
