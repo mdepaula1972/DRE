@@ -45,7 +45,6 @@ BEGIN
         loan_start_cycle,
         loan_request_date,
         created_at,
-        updated_at,
         is_test
     ) VALUES (
         v_employee_id,
@@ -60,7 +59,6 @@ BEGIN
         10,
         '2025-02',
         '2025-01-15',
-        NOW(),
         NOW(),
         TRUE
     );
