@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.14";
+export const APP_VERSION = "v.01.15";
 export const VERSION_DATE = "2026-03-31";
 export const VERSION_CHANGELOG = [
+  "v.01.15 - Implement live FilterBar: search by name, empresa, status, vinculo, liquidados toggle",
   "v.01.14 - Fix action buttons (remove confirm/prompt blockers); fix hasTestEmployee query; pass contractUrl to ContractCard",
   "v.01.13 - Replace URL link with native secure file upload to Supabase Storage (contracts bucket)",
   "v.01.12 - Add detailed Contract Timeline and Contract URL attachment capability",

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { HeaderDashboard } from "@/components/layout/HeaderDashboard";
-import { FilterBar } from "@/components/loans/FilterBar";
+import { FilterBar, FilterValues } from "@/components/loans/FilterBar";
 import { StatCard } from "@/components/loans/StatCard";
 import { ProjectionChart } from "@/components/loans/ProjectionChart";
 import { EmployeeTable } from "@/components/loans/EmployeeTable";
@@ -33,6 +33,7 @@ export default function LoansPage() {
   
   // Data states
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [stats, setStats] = useState<LoanStats | null>(null);
   const [projections, setProjections] = useState<ProjectionData[]>([]);
   
@@ -69,6 +70,7 @@ export default function LoansPage() {
       setIsLoadingEmployees(true);
       const employeesData = await LoansService.getEmployees(undefined, isTestMode);
       setEmployees(employeesData);
+      setFilteredEmployees(employeesData); // Reset filters on data refresh
     } catch (err) {
       console.error('Erro ao carregar colaboradores:', err);
       setError('Falha ao carregar colaboradores');
@@ -93,6 +95,29 @@ export default function LoansPage() {
     setIsDrawerOpen(true);
   };
 
+  const handleFilterChange = (filters: FilterValues) => {
+    let result = [...employees];
+
+    if (filters.search) {
+      const term = filters.search.toLowerCase();
+      result = result.filter(e => e.name.toLowerCase().includes(term));
+    }
+    if (filters.empresa) {
+      result = result.filter(e => e.company === filters.empresa);
+    }
+    if (filters.status) {
+      result = result.filter(e => e.status === filters.status);
+    }
+    if (filters.vinculo) {
+      result = result.filter(e => e.linkType === filters.vinculo);
+    }
+    if (!filters.incluirLiquidados) {
+      result = result.filter(e => e.status !== 'Quitado');
+    }
+
+    setFilteredEmployees(result);
+  };
+
   // Loading placeholder for stat cards
   const StatCardSkeleton = () => (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 animate-pulse">
@@ -112,7 +137,7 @@ export default function LoansPage() {
         
         <HeaderDashboard />
         
-        <FilterBar />
+        <FilterBar onFilterChange={handleFilterChange} />
 
         {/* Error message */}
         {error && (
@@ -238,7 +263,7 @@ export default function LoansPage() {
             <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
               Detalhamento por Colaborador
               <span className="bg-white px-2 py-0.5 rounded border border-slate-200 text-[10px] text-slate-500">
-                {isLoadingEmployees ? '...' : `${employees.length} registros`}
+                {isLoadingEmployees ? '...' : `${filteredEmployees.length} de ${employees.length} registros`}
               </span>
             </h3>
             
@@ -260,7 +285,7 @@ export default function LoansPage() {
             </div>
           ) : (
             <EmployeeTable 
-              employees={employees}
+              employees={filteredEmployees}
               onEmployeeClick={handleEmployeeClick} 
             />
           )}
