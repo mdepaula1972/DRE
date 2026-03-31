@@ -14,6 +14,13 @@ interface EmployeeTableProps {
 export function EmployeeTable({ employees, onEmployeeClick }: EmployeeTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Label dinâmico do mês de competência atual
+  const now = new Date();
+  const currentMonthLabel = now.toLocaleString('pt-BR', { month: 'short', year: '2-digit' })
+    .toUpperCase().replace('. ', '/');
+  const currentMonthFull = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
   const handleRowClick = (emp: Employee) => {
     if (onEmployeeClick) {
       onEmployeeClick(emp.id);
@@ -53,7 +60,12 @@ export function EmployeeTable({ employees, onEmployeeClick }: EmployeeTableProps
               <th className="py-3 px-4">Total Tomado</th>
               <th className="py-3 px-4">Total Recebido</th>
               <th className="py-3 px-4">Saldo Devedor</th>
-              <th className="py-3 px-4">Parcela Mês</th>
+              <th className="py-3 px-4">
+                <div className="flex flex-col">
+                  <span>Parcela Mês</span>
+                  <span className="text-[9px] font-semibold text-emerald-600 normal-case tracking-normal">{currentMonthLabel}</span>
+                </div>
+              </th>
               <th className="py-3 px-4">Contratos</th>
               <th className="py-3 px-4 text-center">Ações</th>
             </tr>
@@ -72,6 +84,8 @@ export function EmployeeTable({ employees, onEmployeeClick }: EmployeeTableProps
                   employee={emp} 
                   isExpanded={expandedId === emp.id}
                   onToggle={() => handleRowClick(emp)}
+                  currentMonthStr={currentMonthStr}
+                  currentMonthFull={currentMonthFull}
                 />
               ))
             )}
@@ -85,11 +99,15 @@ export function EmployeeTable({ employees, onEmployeeClick }: EmployeeTableProps
 function EmployeeRow({ 
   employee, 
   isExpanded, 
-  onToggle 
+  onToggle,
+  currentMonthStr,
+  currentMonthFull,
 }: { 
   employee: Employee; 
   isExpanded: boolean; 
-  onToggle: () => void; 
+  onToggle: () => void;
+  currentMonthStr: string;
+  currentMonthFull: string;
 }) {
   const { isTestMode } = useDataMode();
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -190,7 +208,13 @@ function EmployeeRow({
                   <div className="col-span-full text-center text-slate-400 py-8 text-sm">
                     Nenhum contrato encontrado.
                   </div>
-                ) : contracts.map((contract, i) => (
+                ) : contracts.map((contract, i) => {
+                  // Calcula a parcela deste contrato para o mês atual
+                  const installmentThisMonth = contract.status === 'LIQUIDADO'
+                    ? 0
+                    : Number(contract.installmentValue);
+
+                  return (
                   <div key={contract.id} className="bg-white p-4 rounded-xl border border-primary/10 shadow-sm relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-100 transition-opacity">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
@@ -217,13 +241,25 @@ function EmployeeRow({
                         <span className="text-slate-500">Parcelas:</span>
                         <span className="font-bold text-slate-800">{contract.installments}x de {formatCurrency(Number(contract.installmentValue))}</span>
                       </div>
+                      {/* Parcela do mês atual - linha auditoria */}
+                      <div className="flex justify-between items-center text-[11px] bg-emerald-50 rounded-lg px-2 py-1.5 mt-1">
+                        <span className="text-emerald-700 font-semibold capitalize">
+                          Parcela {currentMonthFull}:
+                        </span>
+                        <span className={`font-black tabular-nums ${
+                          installmentThisMonth > 0 ? 'text-emerald-700' : 'text-slate-400'
+                        }`}>
+                          {installmentThisMonth > 0 ? formatCurrency(installmentThisMonth) : '— Quitado/Postergado'}
+                        </span>
+                      </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
                        <button className="p-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[9px] font-bold uppercase hover:bg-emerald-100 transition-colors">Liquidar</button>
                        <button className="p-1.5 bg-slate-100 text-slate-700 rounded-lg text-[9px] font-bold uppercase hover:bg-slate-200 transition-colors">Detalhes</button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </td>
