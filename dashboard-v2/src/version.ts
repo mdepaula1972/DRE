@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.16";
+export const APP_VERSION = "v.01.17";
 export const VERSION_DATE = "2026-03-31";
 export const VERSION_CHANGELOG = [
+  "v.01.17 - Fix chart tooltip to show BRL 2-decimal format; fix postponed installments not deducted from monthly receivable",
   "v.01.16 - Fix filter semantics (Quitado=employee/Liquidado=contract); stat cards react to active filters",
   "v.01.15 - Implement live FilterBar: search by name, empresa, status, vinculo, liquidados toggle",
   "v.01.14 - Fix action buttons (remove confirm/prompt blockers); fix hasTestEmployee query; pass contractUrl to ContractCard",
