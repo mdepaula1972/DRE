@@ -64,22 +64,6 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
     return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   };
 
-  // Mock data fallback when no employee loaded
-  const mockEmployee: Employee = {
-    id: '1',
-    name: 'Ana Carolina Pereira da Silva Medaglia Moura',
-    company: 'MayBR',
-    linkType: 'PJ',
-    remuneration: 13500,
-    totalTaken: 183300,
-    totalReceived: 69499.25,
-    balance: 113800.75,
-    monthInstallment: 1400,
-    contractsCount: 5,
-    status: 'Ativo'
-  };
-
-  const displayEmployee = employee || mockEmployee;
 
   return (
     <AnimatePresence>
@@ -105,16 +89,16 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
             <div className="p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
-                  {getInitials(displayEmployee.name)}
+                  {employee ? getInitials(employee.name) : '?'}
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
-                    {displayEmployee.name}
+                    {employee?.name ?? 'Carregando...'}
                   </h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400">{displayEmployee.company}</span>
+                    <span className="text-[10px] font-bold text-slate-400">{employee?.company ?? ''}</span>
                     <span className="w-1 h-1 rounded-full bg-slate-300" />
-                    <span className="text-[10px] font-bold text-emerald-600">{displayEmployee.linkType}</span>
+                    <span className="text-[10px] font-bold text-emerald-600">{employee?.linkType ?? ''}</span>
                   </div>
                 </div>
               </div>
@@ -137,24 +121,28 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
             ) : (
             <div className="p-6 space-y-8">
               {/* Resumo Financeiro */}
+              {employee ? (
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Total Tomado</p>
-                  <p className="text-lg font-black text-slate-900 tabular-nums">{formatCurrency(displayEmployee.totalTaken)}</p>
+                  <p className="text-lg font-black text-slate-900 tabular-nums">{formatCurrency(employee.totalTaken)}</p>
                 </div>
                 <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
                   <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Total Já Recebido</p>
-                  <p className="text-lg font-black text-emerald-600 tabular-nums">{formatCurrency(displayEmployee.totalReceived)}</p>
+                  <p className="text-lg font-black text-emerald-600 tabular-nums">{formatCurrency(employee.totalReceived)}</p>
                 </div>
                 <div className="bg-red-50 p-4 rounded-xl border border-red-100">
                   <p className="text-[10px] font-bold text-red-600 uppercase mb-1">Saldo Devedor</p>
-                  <p className="text-lg font-black text-red-600 tabular-nums">{formatCurrency(displayEmployee.balance)}</p>
+                  <p className="text-lg font-black text-red-600 tabular-nums">{formatCurrency(employee.balance)}</p>
                 </div>
                 <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
                   <p className="text-[10px] font-bold text-amber-600 uppercase mb-1">Remuneração</p>
-                  <p className="text-lg font-black text-amber-600 tabular-nums">{formatCurrency(displayEmployee.remuneration)}</p>
+                  <p className="text-lg font-black text-amber-600 tabular-nums">{formatCurrency(employee.remuneration)}</p>
                 </div>
               </div>
+              ) : (
+                <div className="text-center text-slate-400 text-sm py-4">Dados não disponíveis</div>
+              )}
 
               {/* Contratos */}
               <div className="space-y-4">

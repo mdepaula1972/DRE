@@ -1,203 +1,370 @@
 import { supabase } from '@/lib/supabase';
-import { Employee, Contract, LoanStats, ProjectionData, FilterParams } from '@/types/loans';
+import { Employee, Contract, LoanStats, ProjectionData } from '@/types/loans';
 
-// Helper to get view name based on data mode
-function getViewName(baseName: string, isTestMode?: boolean): string {
-  return isTestMode ? `${baseName}_test` : baseName;
+// ─── Raw types from Supabase tables ─────────────────────────────────────────
+
+interface RawEmployee {
+  id: string;
+  full_name: string;
+  company: string;
+  employment_type: string;
+  remuneration: number | string;
+  status: string;
 }
 
+interface RawLoan {
+  id: string;
+  employee_id: string;
+  amount: number | string;
+  installments: number;
+  start_cycle: string; // YYYY-MM
+  amount_paid_extra?: number | string;
+  notes?: string;
+  request_date?: string;
+  paid_installments?: number;
+  postponed_months?: number;
+}
+
+// ─── Calculation helpers (mirror of legacy emprestimos.js logic) ─────────────
+
+function calcDebtForLoan(ln: RawLoan): number {
+  const amount = parseFloat(String(ln.amount)) || 0;
+  const inst = parseInt(String(ln.installments)) || 0;
+  const sc = ln.start_cycle;
+  if (!amount || !inst || !sc) return 0;
+
+  const now = new Date();
+  const [y, m] = sc.split('-').map(Number);
+  let elapsed = (now.getFullYear() - y) * 12 + (now.getMonth() - (m - 1));
+  if (now.getDate() < 10) elapsed--;
+  elapsed = Math.max(0, Math.min(elapsed, inst));
+
+  const standardPaid = elapsed * (amount / inst);
+  const extraPaid = parseFloat(String(ln.amount_paid_extra)) || 0;
+  return Math.max(0, amount - (standardPaid + extraPaid));
+}
+
+function calcReceivedForLoan(ln: RawLoan): number {
+  const amount = parseFloat(String(ln.amount)) || 0;
+  const inst = parseInt(String(ln.installments)) || 0;
+  const sc = ln.start_cycle;
+  if (!amount || !inst || !sc) return 0;
+
+  const now = new Date();
+  const [y, m] = sc.split('-').map(Number);
+  let elapsed = (now.getFullYear() - y) * 12 + (now.getMonth() - (m - 1));
+  if (now.getDate() < 10) elapsed--;
+  elapsed = Math.max(0, Math.min(elapsed, inst));
+
+  const standardPaid = elapsed * (amount / inst);
+  const extraPaid = parseFloat(String(ln.amount_paid_extra)) || 0;
+  return standardPaid + extraPaid;
+}
+
+function calcInstallmentForMonth(ln: RawLoan, monthStr: string): number {
+  const [ty, tm] = monthStr.split('-').map(Number);
+  const targetAbs = ty * 12 + tm;
+  const amount = parseFloat(String(ln.amount)) || 0;
+  const inst = parseInt(String(ln.installments)) || 0;
+  const sc = ln.start_cycle;
+  if (!amount || !inst || !sc) return 0;
+
+  const [sy, sm] = sc.split('-').map(Number);
+  const startAbs = sy * 12 + sm;
+  const endAbs = startAbs + inst - 1;
+  return (targetAbs >= startAbs && targetAbs <= endAbs) ? amount / inst : 0;
+}
+
+function loanStatus(ln: RawLoan): 'ATIVO' | 'LIQUIDADO' | 'ATRASADO' {
+  return calcDebtForLoan(ln) <= 0 ? 'LIQUIDADO' : 'ATIVO';
+}
+
+function loanEndDate(ln: RawLoan): string {
+  if (!ln.start_cycle || !ln.installments) return '-';
+  const [y, m] = ln.start_cycle.split('-').map(Number);
+  const endAbs = y * 12 + m + ln.installments - 1;
+  const ey = Math.floor((endAbs - 1) / 12);
+  const em = ((endAbs - 1) % 12) + 1;
+  return `${ey}-${String(em).padStart(2, '0')}-10`;
+}
+
+function loanNextPayment(ln: RawLoan): string {
+  if (!ln.start_cycle || !ln.installments) return '-';
+  const now = new Date();
+  const [sy, sm] = ln.start_cycle.split('-').map(Number);
+  const startAbs = sy * 12 + sm;
+  const endAbs = startAbs + ln.installments - 1;
+  const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
+  if (currentAbs > endAbs) return '-';
+  const nextAbs = Math.max(currentAbs, startAbs);
+  const ny = Math.floor((nextAbs - 1) / 12);
+  const nm = ((nextAbs - 1) % 12) + 1;
+  return `${ny}-${String(nm).padStart(2, '0')}-10`;
+}
+
+// ─── Fetch helpers ───────────────────────────────────────────────────────────
+
+async function fetchLoans(): Promise<RawLoan[]> {
+  const { data, error } = await supabase
+    .from('employee_loans')
+    .select('id,employee_id,amount,installments,start_cycle,amount_paid_extra,notes,request_date,paid_installments,postponed_months');
+
+  if (error) throw new Error(`Falha ao buscar empréstimos: ${error.message}`);
+  return (data || []) as RawLoan[];
+}
+
+async function fetchEmployees(): Promise<RawEmployee[]> {
+  const { data, error } = await supabase
+    .from('employees')
+    .select('id,full_name,company,employment_type,remuneration,status')
+    .order('full_name');
+
+  if (error) throw new Error(`Falha ao buscar colaboradores: ${error.message}`);
+  return (data || []) as RawEmployee[];
+}
+
+// ─── LoansService ────────────────────────────────────────────────────────────
+
 export class LoansService {
-  // Buscar todos os colaboradores com estatísticas
-  static async getEmployees(filters?: FilterParams, isTestMode?: boolean): Promise<Employee[]> {
-    console.log('[LoansService] Buscando colaboradores...', isTestMode ? '(MODO TESTE)' : '');
-    const { data, error } = await supabase
-      .from(getViewName('employee_loans_summary', isTestMode))
-      .select('*');
 
-    if (error) {
-      console.error('[LoansService] Erro ao buscar colaboradores:', error);
-      throw new Error(`Falha ao carregar colaboradores: ${error.message}`);
-    }
+  /** Lista colaboradores que possuem empréstimo */
+  static async getEmployees(_filters?: unknown, _isTestMode?: boolean): Promise<Employee[]> {
+    console.log('[LoansService] Buscando colaboradores via employee_loans...');
 
-    console.log('[LoansService] Colaboradores encontrados:', data?.length || 0);
-    return data?.map(item => ({
-      id: item.employee_id,
-      name: item.employee_name,
-      company: item.company || 'MayBR',
-      linkType: item.link_type || 'CLT',
-      remuneration: item.remuneration || 0,
-      totalTaken: item.total_loaned || 0,
-      totalReceived: item.total_received || 0,
-      balance: item.total_balance || 0,
-      monthInstallment: item.monthly_installment || 0,
-      contractsCount: item.active_contracts || 0,
-      status: item.status || 'Ativo',
-    })) || [];
+    const [emps, loans] = await Promise.all([fetchEmployees(), fetchLoans()]);
+
+    const loansByEmp = new Map<string, RawLoan[]>();
+    loans.forEach(ln => {
+      const arr = loansByEmp.get(ln.employee_id) || [];
+      arr.push(ln);
+      loansByEmp.set(ln.employee_id, arr);
+    });
+
+    const now = new Date();
+    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const result: Employee[] = [];
+    emps.forEach(emp => {
+      const empLoans = loansByEmp.get(emp.id) || [];
+      if (empLoans.length === 0) return;
+
+      const totalTaken = empLoans.reduce((a, ln) => a + (parseFloat(String(ln.amount)) || 0), 0);
+      const balance = empLoans.reduce((a, ln) => a + calcDebtForLoan(ln), 0);
+      const totalReceived = empLoans.reduce((a, ln) => a + calcReceivedForLoan(ln), 0);
+      const monthInstallment = empLoans.reduce((a, ln) => a + calcInstallmentForMonth(ln, currentMonthStr), 0);
+
+      result.push({
+        id: emp.id,
+        name: emp.full_name,
+        company: emp.company || 'MarBR',
+        linkType: emp.employment_type || 'CLT',
+        remuneration: parseFloat(String(emp.remuneration)) || 0,
+        totalTaken,
+        totalReceived,
+        balance,
+        monthInstallment,
+        contractsCount: empLoans.length,
+        status: balance > 0 ? 'Ativo' : 'Quitado',
+      });
+    });
+
+    console.log('[LoansService] Colaboradores com empréstimos:', result.length);
+    return result;
   }
 
-  // Buscar estatísticas gerais
-  static async getStats(isTestMode?: boolean): Promise<LoanStats> {
-    const { data, error } = await supabase
-      .from(getViewName('loan_stats', isTestMode))
-      .select('*')
-      .single();
+  /** Estatísticas gerais calculadas dos dados reais */
+  static async getStats(_isTestMode?: boolean): Promise<LoanStats> {
+    const [emps, loans] = await Promise.all([fetchEmployees(), fetchLoans()]);
 
-    if (error) {
-      console.error('Erro ao buscar estatísticas:', error);
-      // Retorna valores padrão em caso de erro
-      return {
-        totalEmprestado: 0,
-        saldoDevedor: 0,
-        totalRecebido: 0,
-        recebivelMes: 0,
-        contratosAtivos: 0,
-        contratosLiquidados: 0,
-        maiorEmprestimo: 0,
-        maiorEmprestimoRef: '-',
-        proximoEncerrar: '-',
-        parcelasRestantes: 0,
-      };
+    const empMap = new Map(emps.map(e => [e.id, e]));
+    const now = new Date();
+    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    let totalEmprestado = 0, saldoDevedor = 0, totalRecebido = 0, recebivelMes = 0;
+    let contratosAtivos = 0, contratosLiquidados = 0;
+    let maiorEmprestimo = 0, maiorEmprestimoRef = '-';
+    let menorEndAbs = Infinity;
+    let proximoEncerrarLoan: RawLoan | null = null;
+
+    loans.forEach(ln => {
+      const amount = parseFloat(String(ln.amount)) || 0;
+      const debt = calcDebtForLoan(ln);
+      const status = loanStatus(ln);
+
+      totalEmprestado += amount;
+      saldoDevedor += debt;
+      totalRecebido += calcReceivedForLoan(ln);
+      recebivelMes += calcInstallmentForMonth(ln, currentMonthStr);
+
+      if (status === 'ATIVO') {
+        contratosAtivos++;
+        if (ln.start_cycle && ln.installments) {
+          const [sy, sm] = ln.start_cycle.split('-').map(Number);
+          const endAbs = sy * 12 + sm + ln.installments - 1;
+          if (endAbs < menorEndAbs) {
+            menorEndAbs = endAbs;
+            proximoEncerrarLoan = ln;
+          }
+        }
+      } else {
+        contratosLiquidados++;
+      }
+
+      if (amount > maiorEmprestimo) {
+        maiorEmprestimo = amount;
+        const emp = empMap.get(ln.employee_id);
+        maiorEmprestimoRef = emp?.full_name?.split(' ')[0] || '-';
+      }
+    });
+
+    let proximoEncerrar = '-', parcelasRestantes = 0;
+    if (proximoEncerrarLoan) {
+      const pl = proximoEncerrarLoan as RawLoan;
+      const emp = empMap.get(pl.employee_id);
+      proximoEncerrar = emp?.full_name?.split(' ')[0] || '-';
+      const [sy, sm] = pl.start_cycle.split('-').map(Number);
+      const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
+      const elapsed = Math.max(0, currentAbs - (sy * 12 + sm));
+      parcelasRestantes = Math.max(0, pl.installments - elapsed);
     }
 
     return {
-      totalEmprestado: data?.total_emprestado || 0,
-      saldoDevedor: data?.saldo_devedor || 0,
-      totalRecebido: data?.total_recebido || 0,
-      recebivelMes: data?.recebivel_mes || 0,
-      contratosAtivos: data?.contratos_ativos || 0,
-      contratosLiquidados: data?.contratos_liquidados || 0,
-      maiorEmprestimo: data?.maior_emprestimo || 0,
-      maiorEmprestimoRef: data?.maior_emprestimo_ref || '-',
-      proximoEncerrar: data?.proximo_encerrar || '-',
-      parcelasRestantes: data?.parcelas_restantes || 0,
+      totalEmprestado, saldoDevedor, totalRecebido, recebivelMes,
+      contratosAtivos, contratosLiquidados,
+      maiorEmprestimo, maiorEmprestimoRef,
+      proximoEncerrar, parcelasRestantes,
     };
   }
 
-  // Buscar projeção de recebimentos
-  static async getProjections(isTestMode?: boolean): Promise<ProjectionData[]> {
-    const { data, error } = await supabase
-      .from(getViewName('loan_projections', isTestMode))
-      .select('*')
-      .order('month', { ascending: true });
+  /** Projeção mensal dos recebíveis */
+  static async getProjections(_isTestMode?: boolean): Promise<ProjectionData[]> {
+    const loans = await fetchLoans();
+    const now = new Date();
 
-    if (error) {
-      console.error('Erro ao buscar projeções:', error);
-      return [];
+    let maxMonthAbs = now.getFullYear() * 12 + (now.getMonth() + 1) + 11;
+    loans.forEach(ln => {
+      if (!ln.start_cycle || !ln.installments) return;
+      const [sy, sm] = ln.start_cycle.split('-').map(Number);
+      const endAbs = sy * 12 + sm + ln.installments - 1;
+      if (endAbs > maxMonthAbs) maxMonthAbs = endAbs;
+    });
+
+    const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
+    const result: ProjectionData[] = [];
+
+    for (let abs = currentAbs; abs <= maxMonthAbs; abs++) {
+      const y = Math.floor((abs - 1) / 12);
+      const m = ((abs - 1) % 12) + 1;
+      const monthStr = `${y}-${String(m).padStart(2, '0')}`;
+      const label = new Date(y, m - 1, 1)
+        .toLocaleString('pt-BR', { month: 'short', year: '2-digit' })
+        .toUpperCase()
+        .replace('. ', '/');
+
+      const total = loans.reduce((a, ln) => a + calcInstallmentForMonth(ln, monthStr), 0);
+      result.push({ month: label, total, previsto: total });
     }
 
-    return data?.map(item => ({
-      month: item.month,
-      total: item.total || 0,
-      previsto: item.previsto || 0,
-    })) || [];
+    return result;
   }
 
-  // Buscar contratos de um colaborador
-  static async getEmployeeContracts(employeeId: string, isTestMode?: boolean): Promise<Contract[]> {
+  /** Empréstimos de um colaborador específico */
+  static async getEmployeeContracts(employeeId: string, _isTestMode?: boolean): Promise<Contract[]> {
     const { data, error } = await supabase
-      .from(getViewName('contracts', isTestMode))
-      .select('*')
+      .from('employee_loans')
+      .select('id,employee_id,amount,installments,start_cycle,amount_paid_extra,notes,request_date,paid_installments,postponed_months')
       .eq('employee_id', employeeId)
-      .order('start_date', { ascending: false });
+      .order('request_date', { ascending: false });
 
     if (error) {
-      console.error('Erro ao buscar contratos:', error);
-      throw new Error('Falha ao carregar contratos');
+      console.error('[LoansService] Erro ao buscar empréstimos:', error);
+      throw new Error('Falha ao carregar empréstimos');
     }
 
-    return data?.map(item => ({
-      id: item.id,
-      employee_id: item.employee_id,
-      operationNumber: item.operation_number || item.id.slice(-4),
-      value: item.value || 0,
-      balance: item.balance || 0,
-      installments: item.installments || 0,
-      installmentValue: item.installment_value || 0,
-      installmentsPaid: 0,
-      nextPaymentDate: item.next_payment_date || '-',
-      endDate: item.end_date || item.next_payment_date || '-',
-      status: item.status || 'ATIVO',
-      startDate: item.start_date || '-',
-      description: item.description || '',
-    })) || [];
+    const loans = (data || []) as RawLoan[];
+
+    return loans.map((ln, idx) => {
+      const amount = parseFloat(String(ln.amount)) || 0;
+      const installmentValue = ln.installments > 0 ? amount / ln.installments : 0;
+      const balance = calcDebtForLoan(ln);
+
+      return {
+        id: ln.id,
+        employee_id: ln.employee_id,
+        operationNumber: `OP-${String(idx + 1).padStart(2, '0')}`,
+        value: amount,
+        balance,
+        installments: ln.installments || 0,
+        installmentValue,
+        installmentsPaid: ln.paid_installments || 0,
+        nextPaymentDate: loanNextPayment(ln),
+        endDate: loanEndDate(ln),
+        status: loanStatus(ln),
+        startDate: ln.start_cycle ? `${ln.start_cycle}-01` : '-',
+        description: ln.notes || '',
+      };
+    });
   }
 
-  // Buscar detalhes de um colaborador
-  static async getEmployeeDetails(employeeId: string, isTestMode?: boolean): Promise<Employee | null> {
-    const { data, error } = await supabase
-      .from(getViewName('employee_loans_summary', isTestMode))
-      .select('*')
-      .eq('employee_id', employeeId)
-      .single();
+  /** Detalhes financeiros de um colaborador */
+  static async getEmployeeDetails(employeeId: string, _isTestMode?: boolean): Promise<Employee | null> {
+    const [empRes, loansRes] = await Promise.all([
+      supabase.from('employees')
+        .select('id,full_name,company,employment_type,remuneration,status')
+        .eq('id', employeeId)
+        .single(),
+      supabase.from('employee_loans')
+        .select('id,employee_id,amount,installments,start_cycle,amount_paid_extra,paid_installments')
+        .eq('employee_id', employeeId),
+    ]);
 
-    if (error) {
-      console.error('Erro ao buscar detalhes do colaborador:', error);
+    if (empRes.error || !empRes.data) {
+      console.error('[LoansService] Colaborador não encontrado:', empRes.error);
       return null;
     }
 
-    if (!data) return null;
+    const emp = empRes.data as RawEmployee;
+    const loans = (loansRes.data || []) as RawLoan[];
+    const now = new Date();
+    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const totalTaken = loans.reduce((a, ln) => a + (parseFloat(String(ln.amount)) || 0), 0);
+    const balance = loans.reduce((a, ln) => a + calcDebtForLoan(ln), 0);
+    const totalReceived = loans.reduce((a, ln) => a + calcReceivedForLoan(ln), 0);
+    const monthInstallment = loans.reduce((a, ln) => a + calcInstallmentForMonth(ln, currentMonthStr), 0);
 
     return {
-      id: data.employee_id,
-      name: data.employee_name,
-      company: data.company || 'MayBR',
-      linkType: data.link_type || 'CLT',
-      remuneration: data.remuneration || 0,
-      totalTaken: data.total_loaned || 0,
-      totalReceived: data.total_received || 0,
-      balance: data.total_balance || 0,
-      monthInstallment: data.monthly_installment || 0,
-      contractsCount: data.active_contracts || 0,
-      status: data.status || 'Ativo',
+      id: emp.id,
+      name: emp.full_name,
+      company: emp.company || 'MarBR',
+      linkType: emp.employment_type || 'CLT',
+      remuneration: parseFloat(String(emp.remuneration)) || 0,
+      totalTaken,
+      totalReceived,
+      balance,
+      monthInstallment,
+      contractsCount: loans.length,
+      status: balance > 0 ? 'Ativo' : 'Quitado',
     };
-  }
-
-  // Ações sobre contratos
-  static async liquidateContract(contractId: string): Promise<void> {
-    const { error } = await supabase
-      .rpc('liquidate_contract', { contract_id: contractId });
-
-    if (error) {
-      console.error('Erro ao liquidar contrato:', error);
-      throw new Error('Falha ao liquidar contrato');
-    }
-  }
-
-  static async postponeContract(contractId: string, months: number): Promise<void> {
-    const { error } = await supabase
-      .rpc('postpone_contract', { contract_id: contractId, months });
-
-    if (error) {
-      console.error('Erro ao postergar contrato:', error);
-      throw new Error('Falha ao postergar contrato');
-    }
-  }
-
-  static async anticipatePayment(contractId: string, amount: number): Promise<void> {
-    const { error } = await supabase
-      .rpc('anticipate_payment', { contract_id: contractId, amount });
-
-    if (error) {
-      console.error('Erro ao antecipar pagamento:', error);
-      throw new Error('Falha ao antecipar pagamento');
-    }
   }
 }
 
-// Função auxiliar para formatar valores monetários
+// ─── Formatters ───────────────────────────────────────────────────────────────
+
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-  }).format(value);
+  }).format(value || 0);
 }
 
-// Função auxiliar para formatar data (padrão BR: dd/mm/aaaa)
 export function formatDate(date: string): string {
   if (!date || date === '-') return '-';
-  const d = new Date(date);
-  const day = d.getDate().toString().padStart(2, '0');
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  try {
+    const clean = date.split('T')[0];
+    const [y, m, d] = clean.split('-');
+    return `${d}/${m}/${y}`;
+  } catch {
+    return '-';
+  }
 }
