@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.18";
+export const APP_VERSION = "v.01.19";
 export const VERSION_DATE = "2026-03-31";
 export const VERSION_CHANGELOG = [
+  "v.01.19 - Fix critical math bug: postponed month now correctly returns R$0 in receivable (position-based hole detection)",
   "v.01.18 - Add dynamic month label to Parcela Mês column and show monthly installment per contract in detail row",
   "v.01.17 - Fix chart tooltip to show BRL 2-decimal format; fix postponed installments not deducted from monthly receivable",
   "v.01.16 - Fix filter semantics (Quitado=employee/Liquidado=contract); stat cards react to active filters",

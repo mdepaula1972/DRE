@@ -89,21 +89,22 @@ function calcInstallmentForMonth(ln: RawLoan, monthStr: string): number {
   const startAbs = sy * 12 + sm;
   const postponed = parseInt(String(ln.postponed_months)) || 0;
 
-  // O fim do contrato foi empurrado pra frente pelos meses postergados
+  // O contrato se estende pelos meses postergados
   const endAbs = startAbs + inst - 1 + postponed;
 
-  // Meses postergados = os últimos N meses do contrato original passam a ser
-  // os primeiros N meses bloqueados (sem cobrança). Ex: contrato de 10 meses
-  // com 2 postergados: meses 1-2 originais foram empurrados pro fim.
-  // Na prática, o "buraco" de cobrança fica no início do período de extenção.
-  // O início do período congelado é: startAbs + inst (o primeiro mês após o contrato original)
-  const frozenStart = startAbs + inst;
-  const frozenEnd = startAbs + inst + postponed - 1;
+  // Fora do intervalo do contrato: sem valor
+  if (targetAbs < startAbs || targetAbs > endAbs) return 0;
 
-  // Se o mês alvo cai na janela de prorrogação, não cobra nada naquele mês
-  if (postponed > 0 && targetAbs >= frozenStart && targetAbs <= frozenEnd) return 0;
+  // O "buraco" de cobrança está logo após o último mês pago:
+  //   posições (elapsed+1) até (elapsed+postponed) contando a partir do início do contrato.
+  // Isso exclui corretamente o mês postergado (ex: Março/26 postergado → pos elapsed+1 = 0).
+  if (postponed > 0) {
+    const elapsed = getElapsedMonths(ln);        // meses efetivamente pagos (já desconta postponed)
+    const posFromStart = targetAbs - startAbs + 1; // posição 1-indexada do mês alvo no contrato
+    if (posFromStart >= elapsed + 1 && posFromStart <= elapsed + postponed) return 0;
+  }
 
-  return (targetAbs >= startAbs && targetAbs <= endAbs) ? amount / inst : 0;
+  return amount / inst;
 }
 
 function loanStatus(ln: RawLoan): 'ATIVO' | 'LIQUIDADO' | 'ATRASADO' {
