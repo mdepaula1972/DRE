@@ -472,6 +472,41 @@ export class LoansService {
     if (error) throw new Error(`Falha ao salvar URL do contrato: ${error.message}`);
   }
 
+  static async uploadContractFile(
+    contractId: string,
+    file: File,
+    isTestMode?: boolean
+  ): Promise<string> {
+    const folder = isTestMode ? 'test' : 'production';
+    const ext = file.name.split('.').pop() || 'pdf';
+    const storagePath = `${folder}/${contractId}.${ext}`;
+
+    // Remove versão anterior (se existir) sem travar por erro de 404
+    await supabase.storage.from('contracts').remove([storagePath]);
+
+    const { error: uploadError } = await supabase.storage
+      .from('contracts')
+      .upload(storagePath, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) throw new Error(`Falha no upload: ${uploadError.message}`);
+
+    // Salva o caminho interno (não a URL pública) na tabela
+    const table = isTestMode ? 'employee_loans_test' : 'employee_loans';
+    const { error: dbError } = await supabase.from(table).update({ contract_url: storagePath }).eq('id', contractId);
+    if (dbError) throw new Error(`Arquivo enviado, mas falha ao salvar referência: ${dbError.message}`);
+
+    return storagePath;
+  }
+
+  static async getContractSignedUrl(storagePath: string): Promise<string> {
+    const { data, error } = await supabase.storage
+      .from('contracts')
+      .createSignedUrl(storagePath, 60); // 60 segundos de validade
+
+    if (error || !data?.signedUrl) throw new Error(`Falha ao gerar link de acesso: ${error?.message}`);
+    return data.signedUrl;
+  }
+
   static async getContractTimeline(contractId: string, isTestMode?: boolean) {
     const table = isTestMode ? 'employee_loans_test' : 'employee_loans';
     const { data: loan, error } = await supabase.from(table).select('*').eq('id', contractId).single();

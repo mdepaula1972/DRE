@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ArrowUpRight, Clock, CheckCircle, History, RotateCcw, ChevronDown, ChevronUp, Link as LinkIcon, Paperclip, Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowUpRight, Clock, CheckCircle, RotateCcw, ChevronDown, ChevronUp, Paperclip, Check, Upload, ExternalLink, Loader2 } from "lucide-react";
 import { useDataMode } from "@/contexts/DataModeContext";
 import { LoansService } from "@/services/loans.service";
 
@@ -64,6 +64,9 @@ export function ContractCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [isLoadingTimeline, setIsLoadingTimeline] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isOpeningFile, setIsOpeningFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const fetchTimeline = async () => {
     setIsLoadingTimeline(true);
@@ -83,15 +86,39 @@ export function ContractCard({
     }
   }, [isExpanded]);
 
-  const handleAttachContract = async () => {
-    const url = window.prompt("Cole aqui o link do contrato (Google Drive, OneDrive, etc):", contract.contractUrl || "");
-    if (url !== null) {
-      try {
-        await LoansService.updateContractUrl(contract.id, url, isTestMode);
-        if (onDataChanged) onDataChanged();
-      } catch (err) {
-        alert("Erro ao salvar anexo.");
-      }
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const MAX_MB = 10;
+    if (file.size > MAX_MB * 1024 * 1024) {
+      alert(`Arquivo muito grande. Limite: ${MAX_MB}MB.`);
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      await LoansService.uploadContractFile(contract.id, file, isTestMode);
+      if (onDataChanged) onDataChanged();
+    } catch (err: any) {
+      alert(`Erro ao enviar arquivo: ${err.message}`);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleOpenFile = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!contract.contractUrl) return;
+    setIsOpeningFile(true);
+    try {
+      const signedUrl = await LoansService.getContractSignedUrl(contract.contractUrl);
+      window.open(signedUrl, '_blank', 'noopener,noreferrer');
+    } catch (err: any) {
+      alert(`Falha ao abrir o arquivo: ${err.message}`);
+    } finally {
+      setIsOpeningFile(false);
     }
   };
 
@@ -178,39 +205,51 @@ export function ContractCard({
           </div>
 
           {/* Anexo de Contrato */}
-          <div className="mb-6 bg-white p-3 rounded-xl border border-dashed border-slate-300 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                <Paperclip size={14} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.docx,.doc,.jpg,.jpeg,.png"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+          <div className="mb-6 bg-white p-3 rounded-xl border border-dashed border-slate-300">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${contract.contractUrl ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                  {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Paperclip size={14} />}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800">Termo do Contrato</p>
+                  {isUploading ? (
+                    <p className="text-[10px] text-sky-600 font-semibold">Enviando arquivo...</p>
+                  ) : contract.contractUrl ? (
+                    <p className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                      <Check size={10} /> Arquivo salvo com segurança
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-slate-400 font-semibold">Nenhum arquivo anexado</p>
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-800">Termo do Contrato</p>
-                {contract.contractUrl ? (
-                  <p className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                    <Check size={10} /> Anexado
-                  </p>
-                ) : (
-                  <p className="text-[10px] text-slate-400 font-semibold">Nenhum link salvo</p>
+              <div className="flex gap-2">
+                {contract.contractUrl && (
+                  <button
+                    onClick={handleOpenFile}
+                    disabled={isOpeningFile}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center gap-1 disabled:opacity-50"
+                  >
+                    {isOpeningFile ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />}
+                    Abrir
+                  </button>
                 )}
-              </div>
-            </div>
-            <div className="flex gap-2">
-              {contract.contractUrl && (
-                <a 
-                  href={contract.contractUrl} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition"
+                <button
+                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                  disabled={isUploading}
+                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition flex items-center gap-1 disabled:opacity-50"
                 >
-                  Abrir
-                </a>
-              )}
-              <button 
-                onClick={handleAttachContract}
-                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition flex items-center gap-1"
-              >
-                <LinkIcon size={12} /> {contract.contractUrl ? "Alterar" : "Anexar URL"}
-              </button>
+                  <Upload size={12} /> {contract.contractUrl ? 'Substituir' : 'Enviar Arquivo'}
+                </button>
+              </div>
             </div>
           </div>
 
