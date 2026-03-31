@@ -36,6 +36,23 @@ export default function LoansPage() {
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [stats, setStats] = useState<LoanStats | null>(null);
   const [projections, setProjections] = useState<ProjectionData[]>([]);
+
+  // Calcula os totais dos cards dinamicamente a partir do array filtrado
+  const computeStats = (list: Employee[], base: LoanStats | null): LoanStats | null => {
+    if (!base) return null;
+    if (list.length === 0) return { ...base, totalEmprestado: 0, saldoDevedor: 0, totalRecebido: 0, recebivelMes: 0, contratosAtivos: 0, contratosLiquidados: 0 };
+    return {
+      ...base, // Mantém maiorEmprestimo, proximoEncerrar etc do global
+      totalEmprestado: list.reduce((s, e) => s + e.totalTaken, 0),
+      saldoDevedor: list.reduce((s, e) => s + e.balance, 0),
+      totalRecebido: list.reduce((s, e) => s + e.totalReceived, 0),
+      recebivelMes: list.reduce((s, e) => s + e.monthInstallment, 0),
+      contratosAtivos: list.filter(e => e.status === 'Ativo').length,
+      contratosLiquidados: list.filter(e => e.status === 'Quitado').length,
+    };
+  };
+
+  const filteredStats = computeStats(filteredEmployees, stats);
   
   // Loading states
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
@@ -98,6 +115,10 @@ export default function LoansPage() {
   const handleFilterChange = (filters: FilterValues) => {
     let result = [...employees];
 
+    // Por padrão, oculta colaboradores totalmente quitados
+    if (!filters.incluirQuitados) {
+      result = result.filter(e => e.status !== 'Quitado');
+    }
     if (filters.search) {
       const term = filters.search.toLowerCase();
       result = result.filter(e => e.name.toLowerCase().includes(term));
@@ -105,14 +126,8 @@ export default function LoansPage() {
     if (filters.empresa) {
       result = result.filter(e => e.company === filters.empresa);
     }
-    if (filters.status) {
-      result = result.filter(e => e.status === filters.status);
-    }
     if (filters.vinculo) {
       result = result.filter(e => e.linkType === filters.vinculo);
-    }
-    if (!filters.incluirLiquidados) {
-      result = result.filter(e => e.status !== 'Quitado');
     }
 
     setFilteredEmployees(result);
@@ -173,32 +188,31 @@ export default function LoansPage() {
               <StatCardSkeleton />
               <StatCardSkeleton />
             </>
-          ) : stats && (
+          ) : filteredStats && (
             <>
               <StatCard 
                 title="Total Emprestado"
-                value={formatCurrency(stats.totalEmprestado)}
+                value={formatCurrency(filteredStats.totalEmprestado)}
                 icon={<Receipt size={22} />}
                 color="blue"
               />
               <StatCard 
                 title="Saldo Devedor"
-                value={formatCurrency(stats.saldoDevedor)}
+                value={formatCurrency(filteredStats.saldoDevedor)}
                 icon={<PiggyBank size={22} />}
                 color="red"
               />
               <StatCard 
                 title="Total Já Recebido"
-                value={formatCurrency(stats.totalRecebido)}
+                value={formatCurrency(filteredStats.totalRecebido)}
                 icon={<HandCoins size={22} />}
                 color="green"
               />
               <StatCard 
                 title="Recebível no Mês"
-                value={formatCurrency(stats.recebivelMes)}
+                value={formatCurrency(filteredStats.recebivelMes)}
                 icon={<CalendarClock size={22} />}
                 color="emerald"
-                trend="+12%"
               />
             </>
           )}
@@ -213,34 +227,35 @@ export default function LoansPage() {
               <StatCardSkeleton />
               <StatCardSkeleton />
             </>
-          ) : stats && (
+          ) : filteredStats && (
             <>
               <StatCard 
-                title="Contratos Ativos"
-                value={stats.contratosAtivos.toString()}
+                title="Colaboradores Ativos"
+                value={filteredStats.contratosAtivos.toString()}
                 icon={<FileCheck size={22} />}
                 color="purple"
-                description="Acumulado histórico"
+                description="Com dívida ativa"
               />
               <StatCard 
-                title="Contratos Liquidados"
-                value={stats.contratosLiquidados.toString()}
+                title="Totalmente Quitados"
+                value={filteredStats.contratosLiquidados.toString()}
                 icon={<Files size={22} />}
                 color="amber"
+                description="Sem dívida pendente"
               />
               <StatCard 
                 title="Maior Empréstimo"
-                value={formatCurrency(stats.maiorEmprestimo)}
+                value={formatCurrency(stats?.maiorEmprestimo ?? 0)}
                 icon={<TrendingUp size={22} />}
                 color="sky"
-                description={`Ref: ${stats.maiorEmprestimoRef}`}
+                description={`Ref: ${stats?.maiorEmprestimoRef ?? '-'}`}
               />
               <StatCard 
                 title="Próximo a Encerrar"
-                value={stats.proximoEncerrar}
+                value={stats?.proximoEncerrar ?? '-'}
                 icon={<Timer size={22} />}
                 color="slate"
-                description={`${stats.parcelasRestantes} parcelas restantes`}
+                description={`${stats?.parcelasRestantes ?? 0} parcelas restantes`}
               />
             </>
           )}
