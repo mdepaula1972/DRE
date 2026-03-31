@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
-import { Employee } from "@/types/loans";
-import { formatCurrency } from "@/services/loans.service";
+import { useState, useEffect } from "react";
+import { ChevronDown, ChevronUp, ExternalLink, Loader2 } from "lucide-react";
+import { Employee, Contract } from "@/types/loans";
+import { LoansService, formatCurrency } from "@/services/loans.service";
+import { useDataMode } from "@/contexts/DataModeContext";
 
 interface EmployeeTableProps {
   employees: Employee[];
@@ -90,6 +91,20 @@ function EmployeeRow({
   isExpanded: boolean; 
   onToggle: () => void; 
 }) {
+  const { isTestMode } = useDataMode();
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isExpanded) {
+      setIsLoading(true);
+      LoansService.getEmployeeContracts(employee.id, isTestMode)
+        .then(setContracts)
+        .catch(console.error)
+        .finally(() => setIsLoading(false));
+    }
+  }, [isExpanded, employee.id, isTestMode]);
+
   return (
     <>
       <tr 
@@ -167,32 +182,45 @@ function EmployeeRow({
           <td colSpan={10} className="p-0 border-t-0">
             <div className="bg-primary/5 p-6 animate-in slide-in-from-top-2 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="bg-white p-4 rounded-xl border border-primary/10 shadow-sm relative overflow-hidden group">
+                {isLoading ? (
+                  <div className="col-span-full flex justify-center items-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+                  </div>
+                ) : contracts.length === 0 ? (
+                  <div className="col-span-full text-center text-slate-400 py-8 text-sm">
+                    Nenhum contrato encontrado.
+                  </div>
+                ) : contracts.map((contract, i) => (
+                  <div key={contract.id} className="bg-white p-4 rounded-xl border border-primary/10 shadow-sm relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">ATIVO</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+                        contract.status === 'ATIVO' ? 'bg-primary/10 text-primary' : 
+                        contract.status === 'LIQUIDADO' ? 'bg-success/10 text-success' : 'bg-red-100 text-red-600'
+                      }`}>
+                        {contract.status}
+                      </span>
                     </div>
                     <h4 className="text-xs font-black text-slate-800 mb-3 flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">#0{i}</div>
-                      OP. #128{i}
+                      <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">#0{i + 1}</div>
+                      {contract.operationNumber || `OP. #${i + 1}`}
                     </h4>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-[11px]">
                         <span className="text-slate-500">Valor Tomado:</span>
-                        <span className="font-bold text-slate-800">R$ 15.000,00</span>
+                        <span className="font-bold text-slate-800">{formatCurrency(Number(contract.value))}</span>
                       </div>
                       <div className="flex justify-between items-center text-[11px]">
                         <span className="text-slate-500">Saldo Devedor:</span>
-                        <span className="font-bold text-red-600">R$ 5.400,00</span>
+                        <span className="font-bold text-red-600">{formatCurrency(Number(contract.balance))}</span>
                       </div>
                       <div className="flex justify-between items-center text-[11px]">
                         <span className="text-slate-500">Parcelas:</span>
-                        <span className="font-bold text-slate-800">12x de R$ 1.250,00</span>
+                        <span className="font-bold text-slate-800">{contract.installments}x de {formatCurrency(Number(contract.installmentValue))}</span>
                       </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
-                       <button className="p-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[9px] font-bold uppercase hover:bg-emerald-100">Liquidar</button>
-                       <button className="p-1.5 bg-slate-100 text-slate-700 rounded-lg text-[9px] font-bold uppercase hover:bg-slate-200">Detalhes</button>
+                       <button className="p-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[9px] font-bold uppercase hover:bg-emerald-100 transition-colors">Liquidar</button>
+                       <button className="p-1.5 bg-slate-100 text-slate-700 rounded-lg text-[9px] font-bold uppercase hover:bg-slate-200 transition-colors">Detalhes</button>
                     </div>
                   </div>
                 ))}

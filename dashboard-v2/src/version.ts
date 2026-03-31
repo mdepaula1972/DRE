@@ -1,9 +1,12 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.09";
-export const VERSION_DATE = "2026-03-30";
+export const APP_VERSION = "v.01.12";
+export const VERSION_DATE = "2026-03-31";
 export const VERSION_CHANGELOG = [
+  "v.01.12 - Add detailed Contract Timeline and Contract URL attachment capability",
+  "v.01.11 - Fix math offset bug in calcDebtForLoan; impl SideDrawer actions (posterg/antecip/liquidar/revert)",
+  "v.01.10 - Add real-time dynamic EmployeeTable inline expansion connected to test environment",
   "v.01.09 - Fix loan_stats view column references",
   "v.01.08 - Fix empty employee_name by using full_name as fallback",
   "v.01.07 - Add test employee management buttons in UI",

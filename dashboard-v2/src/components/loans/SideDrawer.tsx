@@ -12,9 +12,10 @@ interface SideDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   employeeId?: string;
+  onDataChanged?: () => void;
 }
 
-export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
+export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideDrawerProps) {
   const { isTestMode } = useDataMode();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -62,6 +63,52 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  };
+
+  const handleAction = async (actionName: string, actionFn: Promise<void>) => {
+    if (!employeeId) return;
+    setIsLoading(true);
+    try {
+      await actionFn;
+      await fetchEmployeeData(employeeId); // Refresh interior do Drawer
+      if (onDataChanged) {
+        onDataChanged(); // Propaga pro Pai (Dashboard) recarregar
+      }
+    } catch (err: any) {
+      console.error(`Erro ao ${actionName}:`, err);
+      setError(`Falha na ação: ${err.message}`);
+      setIsLoading(false);
+    }
+  };
+
+  const onLiquidar = (contractId: string) => {
+    if (confirm('Tem certeza que deseja marcar este contrato como totalmente LIQUIDADO?')) {
+      handleAction('liquidar', LoansService.liquidateContract(contractId, isTestMode));
+    }
+  };
+
+  const onPostergar = (contractId: string) => {
+    if (confirm('Postergar em 1 mês o prazo deste contrato?')) {
+      handleAction('postergar', LoansService.postponeContract(contractId, isTestMode));
+    }
+  };
+
+  const onAntecipar = (contractId: string) => {
+    const qtyStr = window.prompt('Quantas parcelas o colaborador quer antecipar agora?', '1');
+    if (qtyStr !== null) {
+      const qty = parseInt(qtyStr);
+      if (!isNaN(qty) && qty > 0) {
+        handleAction('antecipar', LoansService.anticipateInstallment(contractId, qty, isTestMode));
+      } else {
+        alert('Número de parcelas inválido.');
+      }
+    }
+  };
+
+  const onReverter = (contractId: string) => {
+    if (confirm('ATENÇÃO: Deseja reverter este contrato à sua linha do tempo original (desfazendo antecipações e postergações)?')) {
+      handleAction('reverter', LoansService.revertContractOffsets(contractId, isTestMode));
+    }
   };
 
 
@@ -184,6 +231,11 @@ export function SideDrawer({ isOpen, onClose, employeeId }: SideDrawerProps) {
                         status: contract.status,
                         startDate: formatDate(contract.startDate)
                       }}
+                      onLiquidar={() => onLiquidar(contract.id)}
+                      onPostergar={() => onPostergar(contract.id)}
+                      onAntecipar={() => onAntecipar(contract.id)}
+                      onReverter={() => onReverter(contract.id)}
+                      onEditar={() => alert('Edição manual desabilitada nesta versão. Favor usar os botões de fluxo primários.')}
                     />
                   ))
                 )}

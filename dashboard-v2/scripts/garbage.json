@@ -1,0 +1,190 @@
+[
+  {
+    "name": "despesas",
+    "count": 5633
+  },
+  {
+    "name": "omie_dre",
+    "count": 0
+  },
+  {
+    "name": "financeiro_detalhado",
+    "count": 17988
+  },
+  {
+    "name": "recebimentos",
+    "count": 80
+  },
+  {
+    "name": "dre_base_dashboard",
+    "count": 7986
+  },
+  {
+    "name": "contracts_test",
+    "count": 21
+  },
+  {
+    "name": "notas_fiscais",
+    "count": 216
+  },
+  {
+    "name": "loan_payments",
+    "count": 0
+  },
+  {
+    "name": "omie_olap_raw",
+    "count": 7986
+  },
+  {
+    "name": "impostos_trimestrais",
+    "count": 0
+  },
+  {
+    "name": "mutuos_dividendos",
+    "count": 33
+  },
+  {
+    "name": "sync_log",
+    "count": 2
+  },
+  {
+    "name": "employees_loan_backup",
+    "count": 56
+  },
+  {
+    "name": "loan_stats_test",
+    "count": 1
+  },
+  {
+    "name": "contracts",
+    "count": 2
+  },
+  {
+    "name": "comissoes",
+    "count": 391
+  },
+  {
+    "name": "erp_config",
+    "count": 2
+  },
+  {
+    "name": "employee_loans_summary",
+    "count": 54
+  },
+  {
+    "name": "employees",
+    "count": 57
+  },
+  {
+    "name": "loan_payments_backup",
+    "count": 20
+  },
+  {
+    "name": "employee_loans",
+    "count": 20
+  },
+  {
+    "name": "headcount_mensal",
+    "count": 8
+  },
+  {
+    "name": "dados_csv",
+    "count": 267
+  },
+  {
+    "name": "employees_test",
+    "count": 54
+  },
+  {
+    "name": "omie_sync_data",
+    "count": 0
+  },
+  {
+    "name": "employee_history",
+    "count": 29
+  },
+  {
+    "name": "loan_payments_test",
+    "count": 0
+  },
+  {
+    "name": "test_data_only",
+    "count": 3
+  },
+  {
+    "name": "equipe",
+    "count": 5
+  },
+  {
+    "name": "contracts_expanded",
+    "count": 2
+  },
+  {
+    "name": "user_profiles",
+    "count": 1
+  },
+  {
+    "name": "contratos_base",
+    "count": 47
+  },
+  {
+    "name": "orcamentos",
+    "count": 8
+  },
+  {
+    "name": "v_loans_consolidated",
+    "count": 20
+  },
+  {
+    "name": "projetos",
+    "count": 35
+  },
+  {
+    "name": "loan_stats",
+    "count": 1
+  },
+  {
+    "name": "dre_categoria_override",
+    "count": 12
+  },
+  {
+    "name": "employee_loans_summary_test",
+    "count": 15
+  },
+  {
+    "name": "modules",
+    "count": 11
+  },
+  {
+    "name": "loan_projections_test",
+    "count": 12
+  },
+  {
+    "name": "contracts_expanded_test",
+    "count": 21
+  },
+  {
+    "name": "user_permissions",
+    "count": 0
+  },
+  {
+    "name": "dre_mensal",
+    "count": 584
+  },
+  {
+    "name": "contract_equipment",
+    "count": 0
+  },
+  {
+    "name": "loan_projections",
+    "count": 12
+  },
+  {
+    "name": "v_notas_fiscais_completas",
+    "count": 216
+  },
+  {
+    "name": "loan_operations_history",
+    "count": 0
+  }
+]

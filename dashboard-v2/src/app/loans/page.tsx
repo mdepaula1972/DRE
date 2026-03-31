@@ -282,6 +282,7 @@ export default function LoansPage() {
         isOpen={isDrawerOpen} 
         onClose={() => setIsDrawerOpen(false)} 
         employeeId={selectedEmployee}
+        onDataChanged={fetchData}
       />
 
       {/* Modal de Processamento de Parcelas */}

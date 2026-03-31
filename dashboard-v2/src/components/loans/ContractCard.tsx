@@ -1,6 +1,9 @@
 "use client";
 
-import { ArrowUpRight, Clock, CheckCircle, History, RotateCcw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowUpRight, Clock, CheckCircle, History, RotateCcw, ChevronDown, ChevronUp, Link as LinkIcon, Paperclip, Check } from "lucide-react";
+import { useDataMode } from "@/contexts/DataModeContext";
+import { LoansService } from "@/services/loans.service";
 
 interface Contract {
   id: string;
@@ -12,6 +15,7 @@ interface Contract {
   endDate: string;
   status: "ATIVO" | "LIQUIDADO" | "ATRASADO";
   startDate: string;
+  contractUrl?: string;
 }
 
 interface ContractCardProps {
@@ -21,6 +25,7 @@ interface ContractCardProps {
   onLiquidar?: () => void;
   onEditar?: () => void;
   onReverter?: () => void;
+  onDataChanged?: () => void;
 }
 
 const statusMap = {
@@ -50,30 +55,73 @@ export function ContractCard({
   onPostergar, 
   onLiquidar, 
   onEditar, 
-  onReverter 
+  onReverter,
+  onDataChanged,
 }: ContractCardProps) {
   const status = statusMap[contract.status];
+  const { isTestMode } = useDataMode();
+  
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [isLoadingTimeline, setIsLoadingTimeline] = useState(false);
+  
+  const fetchTimeline = async () => {
+    setIsLoadingTimeline(true);
+    try {
+      const data = await LoansService.getContractTimeline(contract.id, isTestMode);
+      setTimeline(data);
+    } catch (err) {
+      console.error("Erro ao buscar extrato do contrato", err);
+    } finally {
+      setIsLoadingTimeline(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isExpanded && timeline.length === 0) {
+      fetchTimeline();
+    }
+  }, [isExpanded]);
+
+  const handleAttachContract = async () => {
+    const url = window.prompt("Cole aqui o link do contrato (Google Drive, OneDrive, etc):", contract.contractUrl || "");
+    if (url !== null) {
+      try {
+        await LoansService.updateContractUrl(contract.id, url, isTestMode);
+        if (onDataChanged) onDataChanged();
+      } catch (err) {
+        alert("Erro ao salvar anexo.");
+      }
+    }
+  };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative transition-all hover:border-emerald-200 hover:shadow-md">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
-            #{contract.operationNumber}
+    <div className="bg-white border border-slate-200 rounded-xl shadow-sm relative transition-all hover:border-emerald-200 hover:shadow-md overflow-hidden">
+      
+      {/* Header Interativo (Toggle Expand) */}
+      <div 
+        className="p-5 cursor-pointer hover:bg-slate-50 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
+              #{contract.operationNumber}
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900">OP. #{contract.id}</p>
+              <p className="text-[10px] text-slate-400 font-semibold">Início: {contract.startDate}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-black text-slate-900">OP. #{contract.id}</p>
-            <p className="text-[10px] text-slate-400 font-semibold">Início: {contract.startDate}</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full uppercase ${status.bg} ${status.text} shadow-sm ${status.shadow}`}>
+              {status.label}
+            </span>
+            {isExpanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
           </div>
         </div>
-        <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full uppercase ${status.bg} ${status.text} shadow-sm ${status.shadow}`}>
-          {status.label}
-        </span>
-      </div>
 
-      {/* Info Grid */}
-      <div className="grid grid-cols-2 gap-y-3 mb-5">
+        <div className="grid grid-cols-2 gap-y-3">
         <div>
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Valor do Empréstimo</p>
           <p className="text-sm font-black text-slate-800 tabular-nums">{contract.value}</p>
@@ -92,44 +140,132 @@ export function ContractCard({
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="grid grid-cols-3 gap-2">
-        <button 
-          onClick={onAntecipar}
-          className="flex flex-col items-center gap-1 p-2 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-600 hover:text-sky-600 transition-all border border-transparent hover:border-sky-100"
-        >
-          <ArrowUpRight size={16} />
-          <span className="text-[9px] font-bold uppercase">Antecipar</span>
-        </button>
-        <button 
-          onClick={onPostergar}
-          className="flex flex-col items-center gap-1 p-2 rounded-lg bg-slate-50 hover:bg-amber-50 text-slate-600 hover:text-amber-600 transition-all border border-transparent hover:border-amber-100"
-        >
-          <Clock size={16} />
-          <span className="text-[9px] font-bold uppercase">Postergar</span>
-        </button>
-        <button 
-          onClick={onLiquidar}
-          className="flex flex-col items-center gap-1 p-2 rounded-lg bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-all border border-transparent hover:border-emerald-100"
-        >
-          <CheckCircle size={16} />
-          <span className="text-[9px] font-bold uppercase">Liquidar</span>
-        </button>
-        <button 
-          onClick={onEditar}
-          className="flex flex-col items-center gap-1 p-2 rounded-lg bg-slate-50 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all border border-transparent hover:border-slate-200"
-        >
-          <History size={16} />
-          <span className="text-[9px] font-bold uppercase">Editar</span>
-        </button>
-        <button 
-          onClick={onReverter}
-          className="flex flex-col items-center gap-1 p-2 rounded-lg bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 transition-all border border-transparent hover:border-red-100 col-span-2"
-        >
-          <RotateCcw size={16} />
-          <span className="text-[9px] font-bold uppercase">Reverter Parcelas</span>
-        </button>
       </div>
+      
+      {/* Expanded Area */}
+      {isExpanded && (
+        <div className="border-t border-slate-100 bg-slate-50 p-5">
+          {/* Ações (Movidas pra cá) */}
+          <div className="grid grid-cols-3 gap-2 mb-6">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onAntecipar?.(); }}
+              className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white hover:bg-sky-50 text-slate-600 hover:text-sky-600 transition-all border border-slate-200 hover:border-sky-200"
+            >
+              <ArrowUpRight size={16} />
+              <span className="text-[9px] font-bold uppercase">Antecipar</span>
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onPostergar?.(); }}
+              className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white hover:bg-amber-50 text-slate-600 hover:text-amber-600 transition-all border border-slate-200 hover:border-amber-200"
+            >
+              <Clock size={16} />
+              <span className="text-[9px] font-bold uppercase">Postergar</span>
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onLiquidar?.(); }}
+              className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-all border border-slate-200 hover:border-emerald-200"
+            >
+              <CheckCircle size={16} />
+              <span className="text-[9px] font-bold uppercase">Liquidar</span>
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onReverter?.(); }}
+              className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 transition-all border border-slate-200 hover:border-red-200 col-span-3"
+            >
+              <RotateCcw size={16} />
+              <span className="text-[9px] font-bold uppercase">Reverter Todas Transações Deste Contrato</span>
+            </button>
+          </div>
+
+          {/* Anexo de Contrato */}
+          <div className="mb-6 bg-white p-3 rounded-xl border border-dashed border-slate-300 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                <Paperclip size={14} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-800">Termo do Contrato</p>
+                {contract.contractUrl ? (
+                  <p className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                    <Check size={10} /> Anexado
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-slate-400 font-semibold">Nenhum link salvo</p>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {contract.contractUrl && (
+                <a 
+                  href={contract.contractUrl} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition"
+                >
+                  Abrir
+                </a>
+              )}
+              <button 
+                onClick={handleAttachContract}
+                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition flex items-center gap-1"
+              >
+                <LinkIcon size={12} /> {contract.contractUrl ? "Alterar" : "Anexar URL"}
+              </button>
+            </div>
+          </div>
+
+          {/* Timeline de Parcelas */}
+          <div>
+            <h4 className="text-xs font-black text-slate-800 mb-3 ml-2 flex items-center gap-2">
+              EXTRATO DE PARCELAS
+              {isLoadingTimeline && <span className="text-[10px] text-slate-400 font-normal">Carregando...</span>}
+            </h4>
+            <div className="space-y-0.5 relative before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+              {timeline.map((item, idx) => {
+                let dotColor = "bg-slate-300 border-white";
+                let textColor = "text-slate-500";
+                
+                if (item.status === 'PAGO') {
+                  dotColor = "bg-emerald-500 border-emerald-100";
+                  textColor = "text-emerald-700 font-bold";
+                } else if (item.status === 'ANTECIPADO') {
+                  dotColor = "bg-sky-500 border-sky-100";
+                  textColor = "text-sky-700 font-bold";
+                } else if (item.status === 'POSTERGADO') {
+                  dotColor = "bg-amber-400 border-amber-100";
+                  textColor = "text-amber-600 font-bold";
+                } else {
+                  dotColor = "bg-slate-300 border-white";
+                  textColor = "text-slate-500";
+                }
+
+                return (
+                  <div key={idx} className="flex flex-row items-center gap-4 relative pl-8 py-2 hover:bg-slate-100/50 rounded-lg transition-colors group">
+                    {/* Dot */}
+                    <div className={`absolute left-2 w-[11px] h-[11px] rounded-full border-2 ${dotColor} z-10 transition-transform group-hover:scale-125`} />
+                    
+                    <div className="flex-1 flex justify-between items-center">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-slate-800">
+                          {item.label}
+                        </span>
+                        <span className={`text-[10px] ${textColor}`}>
+                          {item.index > 0 ? `Parcela ${item.index}` : 'Suspensão'} • {item.status}
+                        </span>
+                      </div>
+                      {item.amount > 0 && (
+                        <span className="text-xs font-bold text-slate-800 font-mono">
+                          R$ {item.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

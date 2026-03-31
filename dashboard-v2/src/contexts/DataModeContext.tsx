@@ -14,12 +14,14 @@ const DataModeContext = createContext<DataModeContextType | undefined>(undefined
 
 export function DataModeProvider({ children }: { children: ReactNode }) {
   const [dataMode, setDataModeState] = useState<DataMode>("production");
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("dataMode") as DataMode;
     if (saved && (saved === "production" || saved === "test")) {
       setDataModeState(saved);
     }
+    setIsMounted(true);
   }, []);
 
   const setDataMode = (mode: DataMode) => {
@@ -28,6 +30,8 @@ export function DataModeProvider({ children }: { children: ReactNode }) {
     // Recarregar a página para aplicar a mudança
     window.location.reload();
   };
+
+  if (!isMounted) return null;
 
   return (
     <DataModeContext.Provider value={{ 
