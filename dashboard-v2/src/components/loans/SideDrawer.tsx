@@ -82,15 +82,11 @@ export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideD
   };
 
   const onLiquidar = (contractId: string) => {
-    if (confirm('Tem certeza que deseja marcar este contrato como totalmente LIQUIDADO?')) {
-      handleAction('liquidar', LoansService.liquidateContract(contractId, isTestMode));
-    }
+    handleAction('liquidar', LoansService.liquidateContract(contractId, isTestMode));
   };
 
   const onPostergar = (contractId: string) => {
-    if (confirm('Postergar em 1 mês o prazo deste contrato?')) {
-      handleAction('postergar', LoansService.postponeContract(contractId, isTestMode));
-    }
+    handleAction('postergar', LoansService.postponeContract(contractId, isTestMode));
   };
 
   const onAntecipar = (contractId: string) => {
@@ -106,9 +102,7 @@ export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideD
   };
 
   const onReverter = (contractId: string) => {
-    if (confirm('ATENÇÃO: Deseja reverter este contrato à sua linha do tempo original (desfazendo antecipações e postergações)?')) {
-      handleAction('reverter', LoansService.revertContractOffsets(contractId, isTestMode));
-    }
+    handleAction('reverter', LoansService.revertContractOffsets(contractId, isTestMode));
   };
 
 
@@ -229,13 +223,18 @@ export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideD
                         nextPayment: formatDate(contract.nextPaymentDate),
                         endDate: formatDate(contract.endDate || contract.nextPaymentDate),
                         status: contract.status,
-                        startDate: formatDate(contract.startDate)
+                        startDate: formatDate(contract.startDate),
+                        contractUrl: contract.contractUrl || ''
                       }}
                       onLiquidar={() => onLiquidar(contract.id)}
                       onPostergar={() => onPostergar(contract.id)}
                       onAntecipar={() => onAntecipar(contract.id)}
                       onReverter={() => onReverter(contract.id)}
                       onEditar={() => alert('Edição manual desabilitada nesta versão. Favor usar os botões de fluxo primários.')}
+                      onDataChanged={() => {
+                        if (employeeId) fetchEmployeeData(employeeId);
+                        if (onDataChanged) onDataChanged();
+                      }}
                     />
                   ))
                 )}

@@ -98,8 +98,9 @@ export class TestEmployeeService {
   // Verificar se existe colaborador teste
   static async hasTestEmployee(): Promise<boolean> {
     try {
+      // Consulta diretamente a tabela de teste (a view summary_test não existe)
       const { data, error } = await supabase
-        .from('employee_loans_summary_test')
+        .from('employee_loans_test')
         .select('id')
         .limit(1);
 
@@ -108,7 +109,7 @@ export class TestEmployeeService {
         return false;
       }
 
-      return data && data.length > 0;
+      return data !== null && data.length > 0;
     } catch (error) {
       console.error('Erro em hasTestEmployee:', error);
       return false;

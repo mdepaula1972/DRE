@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.13";
+export const APP_VERSION = "v.01.14";
 export const VERSION_DATE = "2026-03-31";
 export const VERSION_CHANGELOG = [
+  "v.01.14 - Fix action buttons (remove confirm/prompt blockers); fix hasTestEmployee query; pass contractUrl to ContractCard",
   "v.01.13 - Replace URL link with native secure file upload to Supabase Storage (contracts bucket)",
   "v.01.12 - Add detailed Contract Timeline and Contract URL attachment capability",
   "v.01.11 - Fix math offset bug in calcDebtForLoan; impl SideDrawer actions (posterg/antecip/liquidar/revert)",
