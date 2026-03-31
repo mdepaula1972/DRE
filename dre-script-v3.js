@@ -1,10 +1,11 @@
 // Update: 09/12/2025 09:52 - Fix CLTs and Pessoal Calculations
 
-// Configuration
-const CONFIG = {
-    VERSION: "27.1",
-    LAST_UPDATE: "06/01/2026",
-    COLORS: {
+// Configuration - só declarar se não existir (evitar conflito com script.js)
+if (typeof CONFIG === 'undefined') {
+    const CONFIG = {
+        VERSION: "27.1",
+        LAST_UPDATE: "06/01/2026",
+        COLORS: {
         primary: '#F2911B',
         secondary: '#262223',
         success: '#2ecc71',
@@ -69,6 +70,7 @@ const CONFIG = {
         { titulo: "Preventiva", tipo: "card", var: "preventiva", categorias: ["Preventiva - B2G", "Manutenção Preventiva"] }
     ]
 };
+}
 
 // State
 let state = {
@@ -406,9 +408,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const uEl = document.getElementById('lastUpdate');
     if (uEl) uEl.textContent = `Aguardando dados... (v${CONFIG.VERSION})`;
+
+    // PDF Export Button - REMOVIDO para evitar conflito
+    // Usar apenas window.exportToPDF() do script.js
 });
-
-
 
 function normalizeMes(mes) {
     return mes.trim().charAt(0).toUpperCase() + mes.trim().slice(1).toLowerCase();
@@ -2154,239 +2157,13 @@ function downloadCSV(csv, filename) {
 }
 
 // ========================================
-// PDF EXPORT FUNCTION
+// PDF EXPORT FUNCTION (Removida - usar modal do script.js)
 // ========================================
-async function exportToPDF() {
-    try {
-        // Show loading overlay
-        document.getElementById('loadingOverlay').classList.remove('d-none');
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
-
-        let yPosition = 20;
-        const pageWidth = 210;
-        const pageHeight = 297;
-        const margin = 15;
-
-        // ========== PÁGINA 1: CABEÇALHO E FILTROS ==========
-
-        // Logo (se existir)
-        const logo = document.querySelector('header img');
-        if (logo && logo.complete) {
-            try {
-                const logoCanvas = await html2canvas(logo, { scale: 2 });
-                const logoData = logoCanvas.toDataURL('image/png');
-                doc.addImage(logoData, 'PNG', margin, yPosition, 40, 10);
-            } catch (e) {
-                console.log('Logo não capturado');
-            }
-        }
-
-        // Título
-        doc.setFontSize(20);
-        doc.setTextColor(38, 34, 35);
-        doc.text('Demonstração do Resultado - DRE', pageWidth / 2, yPosition + 15, { align: 'center' });
-
-        // Data de geração
-        doc.setFontSize(10);
-        doc.setTextColor(108, 117, 125);
-        const dataGeracao = new Date().toLocaleString('pt-BR');
-        doc.text(`Gerado em: ${dataGeracao}`, pageWidth / 2, yPosition + 22, { align: 'center' });
-
-        yPosition = 50;
-
-        // Filtros aplicados
-        doc.setFontSize(12);
-        doc.setTextColor(38, 34, 35);
-        doc.text('Filtros Aplicados:', margin, yPosition);
-        yPosition += 7;
-
-        doc.setFontSize(10);
-        doc.setTextColor(108, 117, 125);
-
-        const filtros = [];
-        if (state.filters.anos?.length > 0) filtros.push(`Anos: ${state.filters.anos.join(', ')}`);
-        if (state.filters.meses?.length > 0) filtros.push(`Meses: ${state.filters.meses.join(', ')}`);
-        if (state.filters.empresas?.length > 0) filtros.push(`Empresas: ${state.filters.empresas.join(', ')}`);
-        if (state.filters.projetos?.length > 0) filtros.push(`Projetos: ${state.filters.projetos.join(', ')}`);
-
-        if (filtros.length === 0) {
-            doc.text('Todos os dados (sem filtros)', margin + 5, yPosition);
-            yPosition += 6;
-        } else {
-            filtros.forEach(filtro => {
-                doc.text(`• ${filtro}`, margin + 5, yPosition);
-                yPosition += 6;
-            });
-        }
-
-        yPosition += 10;
-
-        // ========== CARDS PRINCIPAIS ==========
-        doc.setFontSize(14);
-        doc.setTextColor(38, 34, 35);
-        doc.text('Indicadores Principais', margin, yPosition);
-        yPosition += 10;
-
-        const kpiData = [
-            { label: 'Receitas Operacionais', value: state.metrics.total_entradas || 0 },
-            { label: 'Total Saídas', value: state.metrics.total_saidas || 0 },
-            { label: 'Resultado', value: state.metrics.resultado || 0 },
-            { label: 'FCL', value: state.metrics.fcl || 0 }
-        ];
-
-        const cardWidth = (pageWidth - 2 * margin - 9) / 2;
-        const cardHeight = 25;
-        let xPos = margin;
-        let row = 0;
-
-        kpiData.forEach((kpi, index) => {
-            if (index % 2 === 0 && index > 0) {
-                row++;
-                xPos = margin;
-            }
-
-            const yPos = yPosition + (row * (cardHeight + 5));
-
-            // Fundo do card
-            doc.setFillColor(245, 245, 245);
-            doc.rect(xPos, yPos, cardWidth, cardHeight, 'F');
-
-            // Label
-            doc.setFontSize(9);
-            doc.setTextColor(108, 117, 125);
-            doc.text(kpi.label, xPos + 3, yPos + 7);
-
-            // Valor
-            doc.setFontSize(14);
-            doc.setTextColor(38, 34, 35);
-            doc.text(formatCurrency(kpi.value), xPos + 3, yPos + 17);
-
-            xPos += cardWidth + 3;
-        });
-
-        yPosition += (Math.ceil(kpiData.length / 2) * (cardHeight + 5)) + 15;
-
-        // ========== NOVA PÁGINA: GRÁFICOS ==========
-        doc.addPage();
-        yPosition = 20;
-
-        doc.setFontSize(14);
-        doc.setTextColor(38, 34, 35);
-        doc.text('Análise Gráfica', margin, yPosition);
-        yPosition += 10;
-
-        // Capturar gráfico principal
-        const mainChart = document.getElementById('mainChart');
-        if (mainChart) {
-            try {
-                const chartCanvas = await html2canvas(mainChart.parentElement, {
-                    scale: 2,
-                    backgroundColor: '#ffffff'
-                });
-                const chartData = chartCanvas.toDataURL('image/png');
-                doc.addImage(chartData, 'PNG', margin, yPosition, pageWidth - 2 * margin, 80);
-                yPosition += 90;
-            } catch (e) {
-                console.log('Gráfico não capturado', e);
-            }
-        }
-
-        // Capturar gráfico de pizza
-        const pieChart = document.getElementById('pieChart');
-        if (pieChart) {
-            try {
-                const pieCanvas = await html2canvas(pieChart.parentElement, {
-                    scale: 2,
-                    backgroundColor: '#ffffff'
-                });
-                const pieData = pieCanvas.toDataURL('image/png');
-                const pieWidth = 80;
-                doc.addImage(pieData, 'PNG', (pageWidth - pieWidth) / 2, yPosition, pieWidth, 80);
-            } catch (e) {
-                console.log('Gráfico pizza não capturado', e);
-            }
-        }
-
-        // ========== CARDS SECUNDÁRIOS ==========
-        doc.addPage();
-        yPosition = 20;
-
-        doc.setFontSize(14);
-        doc.setTextColor(38, 34, 35);
-        doc.text('Indicadores Detalhados', margin, yPosition);
-        yPosition += 10;
-
-        const kpiSecondary = [
-            { label: 'Total Impostos', value: state.metrics.total_impostos || 0 },
-            { label: 'Total Custos', value: state.metrics.total_custos || 0 },
-            { label: 'Total Despesas', value: state.metrics.total_despesas || 0 },
-            { label: 'Total Investimentos', value: state.metrics.total_investimentos || 0 },
-            { label: 'Pessoal', value: state.metrics.pessoal || 0 },
-            { label: 'Mútuo Entradas', value: state.metrics.mutuo_entradas || 0 },
-            { label: 'Mútuo Saídas', value: state.metrics.mutuo_saidas || 0 },
-            { label: 'Dividendos', value: state.metrics.dividendos || 0 },
-            { label: 'Corretiva', value: state.metrics.corretiva || 0 },
-            { label: 'Preventiva', value: state.metrics.preventiva || 0 },
-            { label: 'Margem Lucro %', value: state.metrics.perc_lucro || 0, isPercent: true },
-            { label: 'Margem FCL %', value: state.metrics.perc_fcl || 0, isPercent: true }
-        ];
-
-        const secCardWidth = (pageWidth - 2 * margin - 6) / 3;
-        const secCardHeight = 20;
-        let secXPos = margin;
-        let secRow = 0;
-
-        kpiSecondary.forEach((kpi, index) => {
-            if (index % 3 === 0 && index > 0) {
-                secRow++;
-                secXPos = margin;
-            }
-
-            const yPos = yPosition + (secRow * (secCardHeight + 5));
-
-            if (yPos > pageHeight - 40) {
-                doc.addPage();
-                yPosition = 20;
-                secRow = 0;
-                doc.setFontSize(14);
-                doc.text('Indicadores Detalhados (cont.)', margin, yPosition);
-                yPosition += 10;
-            }
-
-            const finalYPos = yPosition + (secRow * (secCardHeight + 5));
-
-            doc.setFillColor(250, 250, 250);
-            doc.rect(secXPos, finalYPos, secCardWidth, secCardHeight, 'F');
-            doc.setDrawColor(230, 230, 230);
-            doc.rect(secXPos, finalYPos, secCardWidth, secCardHeight);
-
-            doc.setFontSize(8);
-            doc.setTextColor(108, 117, 125);
-            doc.text(kpi.label, secXPos + 2, finalYPos + 6);
-
-            doc.setFontSize(11);
-            doc.setTextColor(38, 34, 35);
-            const displayValue = kpi.isPercent ? kpi.value.toFixed(2) + '%' : formatCurrency(kpi.value);
-            doc.text(displayValue, secXPos + 2, finalYPos + 14);
-
-            secXPos += secCardWidth + 2;
-        });
+// Função exportToPDFDirect removida para evitar conflitos
+// Usar window.exportToPDF() do script.js que abre modal de opções
 
 
-        // Salvar PDF
-        doc.save(`DRE_${new Date().toISOString().split('T')[0]}.pdf`);
 
-        // Hide loading
-        document.getElementById('loadingOverlay').classList.add('d-none');
-
-    } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
-        alert('Erro ao gerar PDF. Verifique o console para mais detalhes.');
-        document.getElementById('loadingOverlay').classList.add('d-none');
-    }
-}
 
 // ========================================
 // MODAL POR MÁQUINA

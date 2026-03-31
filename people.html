@@ -118,6 +118,9 @@
             <button id="btnClearFilters" class="btn btn-outline-light btn-sm w-100 mt-2">
                 <i class="bi bi-x-circle me-2"></i>Limpar Filtros
             </button>
+            <div class="mt-4 pt-4 border-top border-secondary text-white-50 text-center small">
+                <small>Versão: <span class="appVersionText">v0.0</span></small>
+            </div>
         </div>
     </div>
 
@@ -134,7 +137,7 @@
             <div class="d-flex align-items-center gap-3">
                 <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" style="max-height: 120px;">
                 <div>
-                    <h1 class="h3 fw-bold text-dark mb-0">PeopleBoard</h1>
+                    <h1 class="h3 fw-bold text-dark mb-0">PeopleBoard <span class="appVersionText text-muted fw-normal" style="font-size: 0.8rem; vertical-align: middle; margin-left: 8px;"></span></h1>
                     <p class="text-muted mb-0">Gestão de Pessoal e Cadastros</p>
                 </div>
             </div>
@@ -751,6 +754,19 @@
     <!-- BrisinhAI Scripts Oficial -->
     <script src="ai.service.v2.js?v=28.10"></script>
     <script src="brisinhai.js?v=28.10"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                // Atualizar título da aba
+                document.title = `PeopleBoard v${window.APP_VERSION} - Mar Brasil | Gestão de Pessoal`;
+                
+                // Atualizar todos os elementos com a classe appVersionText (ex: cabeçalho e sidebar)
+                document.querySelectorAll('.appVersionText').forEach(el => {
+                    el.textContent = 'v' + window.APP_VERSION;
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

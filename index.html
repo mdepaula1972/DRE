@@ -469,9 +469,12 @@
         v0.0
     </div>
     <script>
-        // Version Updater
         document.addEventListener('DOMContentLoaded', () => {
             if (window.APP_VERSION) {
+                // Atualizar título da aba
+                document.title = `Mar Brasil v${window.APP_VERSION} | Portal Financeiro`;
+                
+                // Atualizar todos os elementos com a classe appVersionText
                 document.querySelectorAll('.appVersionText').forEach(el => {
                     el.textContent = 'v' + window.APP_VERSION;
                 });

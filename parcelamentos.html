@@ -112,7 +112,7 @@
             <div class="d-flex align-items-center gap-3">
                 <img src="Mar-Brasil-sem-fundo-preto.png" alt="Logo Mar Brasil" style="max-height: 60px;">
                 <div>
-                    <h1 class="h3 fw-bold text-dark mb-0">Gestão de Parcelamentos</h1>
+                    <h1 class="h3 fw-bold text-dark mb-0">Gestão de Parcelamentos <span class="appVersionText text-muted fw-normal" style="font-size: 0.8rem; vertical-align: middle; margin-left: 8px;"></span></h1>
                     <p class="text-muted mb-0" id="lastUpdate">Aguardando dados...</p>
                 </div>
             </div>
@@ -272,7 +272,17 @@
         // Version Updater
         document.addEventListener('DOMContentLoaded', () => {
             if (window.APP_VERSION) {
-                document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION;
+                // Atualizar título da aba
+                document.title = `Parcelamentos v${window.APP_VERSION} - Mar Brasil`;
+                
+                // Atualizar todos os elementos com a classe appVersionText
+                document.querySelectorAll('.appVersionText').forEach(el => {
+                    el.textContent = 'v' + window.APP_VERSION;
+                });
+
+                // Compatibilidade com ID antigo se existir
+                const display = document.getElementById('appVersionDisplay');
+                if (display) display.textContent = 'v' + window.APP_VERSION;
             }
         });
     </script>

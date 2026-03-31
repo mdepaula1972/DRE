@@ -202,7 +202,7 @@ function renderProjection(filtered) {
 
     // Calcular até qual mês devemos mostrar (último mês de qualquer empréstimo ativo)
     let maxMonthAbs = now.getFullYear() * 12 + (now.getMonth() + 1) + 11; // Mínimo: 12 meses à frente
-
+    
     filtered.forEach(emp => {
         if (!emp._loans || emp._loans.length === 0) return;
         emp._loans.forEach(ln => {
@@ -210,7 +210,7 @@ function renderProjection(filtered) {
             const inst = parseInt(ln.installments) || 0;
             const sc = ln.start_cycle;
             if (!amount || !inst || !sc) return;
-
+            
             const [y, m] = sc.split('-').map(Number);
             // Mês final deste empréstimo (start + installments - 1)
             const endAbs = y * 12 + m + inst - 1;
@@ -223,7 +223,7 @@ function renderProjection(filtered) {
     // Gerar array de meses do atual até o máximo
     const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
     const totalMonths = maxMonthAbs - currentAbs + 1;
-
+    
     for (let i = 0; i < totalMonths; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         const mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -240,16 +240,16 @@ function renderProjection(filtered) {
 
     filtered.forEach(emp => {
         const tr = document.createElement('tr');
-
+        
         // Calcular total projetado (soma das parcelas de todos os meses)
         let totalProjetado = 0;
         months.forEach(mStr => {
             totalProjetado += getInstallmentForMonth(emp, mStr);
         });
-
+        
         let html = `<td class="fw-bold border-end bg-light sticky-col-name" style="min-width:250px;">${emp.full_name}</td>`;
         html += `<td class="fw-bold text-primary text-center bg-light border-end sticky-col-total" style="min-width:130px;">${formatCurrency(totalProjetado)}</td>`;
-
+        
         months.forEach((mStr, idx) => {
             const val = getInstallmentForMonth(emp, mStr);
             totals[idx] += val;
@@ -514,9 +514,9 @@ window.deleteLoan = async function (loanId, empName) {
 };
 
 // ─── LOAN LIQUIDATION ─────────────────────────────────────────────────────────────
-window.liquidateLoan = async function (loanId, empName, currentBalance) {
+window.liquidateLoan = async function(loanId, empName, currentBalance) {
     if (!confirm(`Deseja liquidar totalmente este empréstimo de ${empName}?\n\nValor a pagar: ${formatCurrency(currentBalance)}\n\nEsta ação é irreversível!`)) return;
-
+    
     try {
         const btn = document.querySelector(`[onclick*="liquidateLoan('${loanId}'"]`);
         if (btn) {
@@ -529,7 +529,7 @@ window.liquidateLoan = async function (loanId, empName, currentBalance) {
             .select('*')
             .eq('id', loanId)
             .single();
-
+        
         if (fetchErr) throw fetchErr;
         if (!loan) throw new Error('Empréstimo não encontrado');
 
@@ -537,7 +537,7 @@ window.liquidateLoan = async function (loanId, empName, currentBalance) {
         const installmentValue = parseFloat(loan.amount) / loan.installments;
         const paidValue = (loan.paid_installments || 0) * installmentValue;
         const extraPayment = currentBalance; // Saldo restante para liquidar
-
+        
         // Atualizar empréstimo
         const { error: updateErr } = await db.from('employee_loans')
             .update({
@@ -545,7 +545,7 @@ window.liquidateLoan = async function (loanId, empName, currentBalance) {
                 notes: (loan.notes || '') + `\n[LIQUIDADO em ${new Date().toLocaleDateString('pt-BR')}]`
             })
             .eq('id', loanId);
-
+        
         if (updateErr) throw updateErr;
 
         // Registrar no histórico
@@ -559,7 +559,7 @@ window.liquidateLoan = async function (loanId, empName, currentBalance) {
         alert('✅ Empréstimo liquidado com sucesso!');
         await fetchData();
         renderDashboard();
-
+        
     } catch (err) {
         alert('❌ Erro ao liquidar empréstimo: ' + err.message);
         // Restaurar botão
@@ -572,9 +572,9 @@ window.liquidateLoan = async function (loanId, empName, currentBalance) {
 };
 
 // ─── LOAN REVERSAL ───────────────────────────────────────────────────────────────
-window.reverseLiquidation = async function (loanId, empName) {
+window.reverseLiquidation = async function(loanId, empName) {
     if (!confirm(`Deseja ESTORNAR a liquidação deste empréstimo de ${empName}?\n\nEsta ação irá restaurar o empréstimo para status ATIVO.\n\nEsta ação é irreversível!`)) return;
-
+    
     try {
         const btn = document.querySelector(`[onclick*="reverseLiquidation('${loanId}'"]`);
         if (btn) {
@@ -587,7 +587,7 @@ window.reverseLiquidation = async function (loanId, empName) {
             .select('*')
             .eq('id', loanId)
             .single();
-
+        
         if (fetchErr) throw fetchErr;
         if (!loan) throw new Error('Empréstimo não encontrado');
 
@@ -596,7 +596,7 @@ window.reverseLiquidation = async function (loanId, empName) {
         const paidValue = (loan.paid_installments || 0) * installmentValue;
         const totalPaid = paidValue + (parseFloat(loan.amount_paid_extra) || 0);
         const currentBalance = Math.max(0, parseFloat(loan.amount) - totalPaid);
-
+        
         // Para reverter, precisamos remover o último pagamento extra
         // Vamos zerar o amount_paid_extra para restaurar o status original
         const { error: updateErr } = await db.from('employee_loans')
@@ -605,7 +605,7 @@ window.reverseLiquidation = async function (loanId, empName) {
                 notes: (loan.notes || '').replace(/\[LIQUIDADO em .+?\]/g, '') + `\n[ESTORNADO em ${new Date().toLocaleDateString('pt-BR')}]`
             })
             .eq('id', loanId);
-
+        
         if (updateErr) throw updateErr;
 
         // Registrar no histórico
@@ -619,7 +619,7 @@ window.reverseLiquidation = async function (loanId, empName) {
         alert('✅ Liquidação estornada com sucesso! Empréstimo restaurado para ATIVO.');
         await fetchData();
         renderDashboard();
-
+        
     } catch (err) {
         alert('❌ Erro ao estornar liquidação: ' + err.message);
         // Restaurar botão
