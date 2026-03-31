@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { PlusCircle, FileText, Users, Home, Box, CheckCircle2, FlaskConical, UserPlus, Trash2 } from "lucide-react";
+import { PlusCircle, FileText, Users, Home, Box, CheckCircle2, FlaskConical, UserPlus, Trash2, Download } from "lucide-react";
 import { useDataMode } from "@/contexts/DataModeContext";
 import { APP_VERSION } from "@/version";
 import { TestEmployeeService } from "@/services/test-employee.service";
+import { ReportExportService } from "@/services/report-export.service";
 
 export function HeaderDashboard() {
   const { dataMode, setDataMode, isTestMode } = useDataMode();
@@ -55,6 +56,19 @@ export function HeaderDashboard() {
     }
   };
 
+  const handleExportReport = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      await ReportExportService.exportFullReport();
+      setMessage('Relatório exportado com sucesso!');
+    } catch (error) {
+      setMessage('Erro ao exportar: ' + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
       {/* Logo Section */}
@@ -92,6 +106,16 @@ export function HeaderDashboard() {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2">
+        <button 
+          onClick={handleExportReport}
+          disabled={isLoading}
+          className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-blue-200 disabled:opacity-50"
+          title="Exportar relatório completo para CSV"
+        >
+          <Download size={18} />
+          <span>Exportar</span>
+        </button>
+
         <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm">
           <PlusCircle size={18} />
           <span>Novo Empréstimo</span>
