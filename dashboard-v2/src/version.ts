@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.23";
+export const APP_VERSION = "v.01.24";
 export const VERSION_DATE = "2026-04-01";
 export const VERSION_CHANGELOG = [
+  "v.01.24 - Motor nativo de geração de Termo de Confissão de Dívida (PDF) implementado; novo controle 'Data da Tomada' adicionado",
   "v.01.23 - Add dynamic HR audit constraints (margin & tenure < 6 months) to New Loan creation modal",
   "v.01.22 - Activate PeopleBoard header button and wipe duplicate legacy 'emprestimos.html'",
   "v.01.21 - Integrate legacy orbital landing menu into NextJs root and bundle legacy static files",

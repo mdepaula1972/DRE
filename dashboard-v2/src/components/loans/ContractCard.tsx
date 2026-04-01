@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowUpRight, Clock, CheckCircle, RotateCcw, ChevronDown, ChevronUp, Paperclip, Check, Upload, ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { ArrowUpRight, Clock, CheckCircle, RotateCcw, ChevronDown, ChevronUp, Paperclip, Check, Upload, ExternalLink, Loader2, Trash2, FileText } from "lucide-react";
 import { useDataMode } from "@/contexts/DataModeContext";
 import { LoansService } from "@/services/loans.service";
 
@@ -26,6 +26,7 @@ interface ContractCardProps {
   onEditar?: () => void;
   onReverter?: () => void;
   onDeletar?: () => void;
+  onGerarTermo?: () => void;
   onDataChanged?: () => void;
 }
 
@@ -58,6 +59,7 @@ export function ContractCard({
   onEditar, 
   onReverter,
   onDeletar,
+  onGerarTermo,
   onDataChanged,
 }: ContractCardProps) {
   const status = statusMap[contract.status];
@@ -258,6 +260,14 @@ export function ContractCard({
                   className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition flex items-center gap-1 disabled:opacity-50"
                 >
                   <Upload size={12} /> {contract.contractUrl ? 'Substituir' : 'Enviar Arquivo'}
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); if (onGerarTermo) onGerarTermo(); }}
+                  title="Gerar PDF Pró-forma no formato original"
+                  className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition flex items-center gap-1"
+                >
+                  <FileText size={12} /> 
+                  {contract.contractUrl ? 'Baixar 2ª Via' : 'Gerar Termo'}
                 </button>
               </div>
             </div>

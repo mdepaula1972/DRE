@@ -27,6 +27,7 @@ export interface Contract {
   endDate?: string;
   status: "ATIVO" | "LIQUIDADO" | "ATRASADO";
   startDate: string;
+  requestDate?: string;
   description?: string;
   contractUrl?: string; // NOVO: URL do anexo do contrato
   created_at?: string;

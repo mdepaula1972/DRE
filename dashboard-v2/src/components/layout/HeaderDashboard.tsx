@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { PlusCircle, FileText, Users, Home, CheckCircle2, FlaskConical, UserPlus, Trash2, Download } from "lucide-react";
+import { LoansService, fetchEmployees } from '@/services/loans.service';
 import { useDataMode } from "@/contexts/DataModeContext";
+import { PDFService } from '@/services/pdf.service';
 import { APP_VERSION } from "@/version";
 import { TestEmployeeService } from "@/services/test-employee.service";
 import { ReportExportService } from "@/services/report-export.service";
@@ -78,6 +80,20 @@ export function HeaderDashboard() {
     }
   };
 
+  const handleGenerateTermForLoan = async (loanData: any) => {
+    try {
+      const emps = await fetchEmployees(isTestMode);
+      const empRaw = emps.find(e => e.id === loanData.employee_id) || {};
+      const empDetails = await LoansService.getEmployeeDetails(loanData.employee_id, isTestMode);
+      
+      const fullEmp = { ...empRaw, ...empDetails };
+      await PDFService.generateDebtTermPDF(loanData, fullEmp, isTestMode);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao montar PDF. Verifique o console.");
+    }
+  };
+
   return (
     <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
       {/* Logo Section */}
@@ -129,11 +145,6 @@ export function HeaderDashboard() {
         >
           <PlusCircle size={18} />
           <span>Novo Empréstimo</span>
-        </button>
-        
-        <button className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-slate-200">
-          <FileText size={18} />
-          <span>Gerar Termo</span>
         </button>
 
         <a href="/people.html" className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-slate-200">
@@ -211,7 +222,7 @@ export function HeaderDashboard() {
         isOpen={isNewLoanOpen} 
         onClose={() => setIsNewLoanOpen(false)} 
         onSuccess={() => window.location.reload()} 
-        onGenerateTerm={(loan) => alert('Funcionalidade de PDF nativo em unificação com termplate React. O ID da operação gravada é: ' + loan.id)}
+        onGenerateTerm={handleGenerateTermForLoan}
       />
     </header>
   );

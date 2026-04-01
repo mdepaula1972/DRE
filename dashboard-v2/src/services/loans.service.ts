@@ -368,6 +368,7 @@ export class LoansService {
         endDate: loanEndDate(ln),
         status: loanStatus(ln),
         startDate: ln.start_cycle ? `${ln.start_cycle}-01` : '-',
+        requestDate: ln.request_date,
         description: ln.notes || '',
         contractUrl: ln.contract_url || '',
       };
@@ -426,6 +427,7 @@ export class LoansService {
     amount: number;
     installments: number;
     start_cycle: string;
+    request_date?: string;
     notes?: string;
   }, isTestMode?: boolean): Promise<{id: string, [key: string]: any}> {
     const table = isTestMode ? 'employee_loans_test' : 'employee_loans';
@@ -436,7 +438,7 @@ export class LoansService {
       installments: data.installments,
       start_cycle: data.start_cycle,
       notes: data.notes || '',
-      request_date: new Date().toISOString(),
+      request_date: data.request_date || new Date().toISOString(),
       paid_installments: 0,
       postponed_months: 0,
       amount_paid_extra: 0

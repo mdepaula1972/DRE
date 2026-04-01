@@ -21,6 +21,7 @@ export function NewLoanModal({ isOpen, onClose, onSuccess, onGenerateTerm }: New
     amount: '',
     installments: '',
     start_cycle: new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'),
+    request_date: new Date().toISOString().split('T')[0],
     notes: ''
   });
   
@@ -31,7 +32,14 @@ export function NewLoanModal({ isOpen, onClose, onSuccess, onGenerateTerm }: New
     if (isOpen) {
       loadEmployees();
       setStep('form');
-      setFormData(prev => ({ ...prev, employee_id: '', amount: '', installments: '', notes: '' }));
+      setFormData(prev => ({ 
+        ...prev, 
+        employee_id: '', 
+        amount: '', 
+        installments: '', 
+        request_date: new Date().toISOString().split('T')[0],
+        notes: '' 
+      }));
     }
   }, [isOpen, isTestMode]);
 
@@ -100,6 +108,7 @@ export function NewLoanModal({ isOpen, onClose, onSuccess, onGenerateTerm }: New
         amount: parseFloat(formData.amount.replace(',', '.')),
         installments: parseInt(formData.installments),
         start_cycle: formData.start_cycle,
+        request_date: formData.request_date ? formData.request_date + 'T12:00:00.000Z' : new Date().toISOString(),
         notes: formData.notes
       }, isTestMode);
       
@@ -191,15 +200,27 @@ export function NewLoanModal({ isOpen, onClose, onSuccess, onGenerateTerm }: New
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Ciclo de Início de Desconto</label>
-                <input
-                  type="month"
-                  required
-                  value={formData.start_cycle}
-                  onChange={e => setFormData({...formData, start_cycle: e.target.value})}
-                  className="w-full border-slate-300 rounded-lg shadow-sm focus:border-primary focus:ring-primary px-3 py-2 text-sm bg-slate-50 border"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Data da Tomada (Assinatura)</label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.request_date}
+                    onChange={e => setFormData({...formData, request_date: e.target.value})}
+                    className="w-full border-slate-300 rounded-lg shadow-sm focus:border-primary focus:ring-primary px-3 py-2 text-sm bg-slate-50 border"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Início do Desconto (Ciclo)</label>
+                  <input
+                    type="month"
+                    required
+                    value={formData.start_cycle}
+                    onChange={e => setFormData({...formData, start_cycle: e.target.value})}
+                    className="w-full border-slate-300 rounded-lg shadow-sm focus:border-primary focus:ring-primary px-3 py-2 text-sm bg-slate-50 border"
+                  />
+                </div>
               </div>
 
               <div>

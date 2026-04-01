@@ -5,6 +5,7 @@ import { X, Wallet, ArrowUpRight, History, CreditCard, Clock, CheckCircle, Rotat
 import { motion, AnimatePresence } from "framer-motion";
 import { Employee, Contract } from "@/types/loans";
 import { LoansService, formatCurrency, formatDate } from "@/services/loans.service";
+import { PDFService } from "@/services/pdf.service";
 import { useDataMode } from "@/contexts/DataModeContext";
 import { ContractCard } from "./ContractCard";
 
@@ -111,6 +112,38 @@ export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideD
     }
   };
 
+  const handleGenerateTermForContract = async (contract: any) => {
+    try {
+      if (!employee) return;
+      
+      let finalContract = { ...contract };
+      
+      if (!finalContract.requestDate && !finalContract.request_date) {
+        const todayBR = new Date().toLocaleDateString('pt-BR');
+        const userDate = window.prompt(
+          "⚠️ ATENÇÃO JURÍDICA: Este contrato antigo não possui a 'Data da Tomada' (assinatura) formalizada.\n" +
+          "Evite usar a data de admissão.\n\n" +
+          "Digite a data correta da assinatura deste empréstimo no formato DD/MM/AAAA:", 
+          todayBR
+        );
+        
+        if (!userDate) return; // Cancela se o usuário fechar
+        
+        const parts = userDate.split('/');
+        if (parts.length === 3) {
+            finalContract.requestDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        } else {
+            alert("Formato inválido. Gerando com a data informada ou data atual da máquina.");
+            finalContract.requestDate = new Date().toISOString().split('T')[0];
+        }
+      }
+
+      await PDFService.generateDebtTermPDF(finalContract, employee, isTestMode);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao montar PDF.");
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -238,6 +271,7 @@ export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideD
                       onReverter={() => onReverter(contract.id)}
                       onDeletar={() => onDeletar(contract.id)}
                       onEditar={() => alert('Edição manual desabilitada nesta versão. Favor usar os botões de fluxo primários.')}
+                      onGerarTermo={() => handleGenerateTermForContract(contract)}
                       onDataChanged={() => {
                         if (employeeId) fetchEmployeeData(employeeId);
                         if (onDataChanged) onDataChanged();
