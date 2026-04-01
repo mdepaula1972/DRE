@@ -14,12 +14,15 @@ interface EmployeeTableProps {
 export function EmployeeTable({ employees, onEmployeeClick }: EmployeeTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // Label dinâmico do mês de competência atual
+  // Mês de cobrança ativo: após o dia 10 o ciclo fechou -> exibe próximo mês
   const now = new Date();
-  const currentMonthLabel = now.toLocaleString('pt-BR', { month: 'short', year: '2-digit' })
+  const billingDate = now.getDate() >= 10
+    ? new Date(now.getFullYear(), now.getMonth() + 1, 1)
+    : new Date(now.getFullYear(), now.getMonth(), 1);
+  const currentMonthLabel = billingDate.toLocaleString('pt-BR', { month: 'short', year: '2-digit' })
     .toUpperCase().replace('. ', '/');
-  const currentMonthFull = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonthFull = billingDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+  const currentMonthStr = `${billingDate.getFullYear()}-${String(billingDate.getMonth() + 1).padStart(2, '0')}`;
 
   const handleRowClick = (emp: Employee) => {
     if (onEmployeeClick) {

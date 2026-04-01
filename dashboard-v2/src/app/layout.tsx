@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Empréstimos - Mar Brasil",
-  description: "Consolidação, acompanhamento e histórico gerencial de empréstimos",
+  title: "Mar Brasil | Portal Financeiro",
+  description: "Portal de Gestão Inteligente",
 };
 
 export default function RootLayout({

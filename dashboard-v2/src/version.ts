@@ -1,9 +1,11 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.19";
-export const VERSION_DATE = "2026-03-31";
+export const APP_VERSION = "v.01.21";
+export const VERSION_DATE = "2026-04-01";
 export const VERSION_CHANGELOG = [
+  "v.01.21 - Integrate legacy orbital landing menu into NextJs root and bundle legacy static files",
+  "v.01.20 - Apply real MarBR logo (Mar-Brasil-sem-fundo-preto.png) to loans page header, replacing generic icon",
   "v.01.19 - Fix critical math bug: postponed month now correctly returns R$0 in receivable (position-based hole detection)",
   "v.01.18 - Add dynamic month label to Parcela Mês column and show monthly installment per contract in detail row",
   "v.01.17 - Fix chart tooltip to show BRL 2-decimal format; fix postponed installments not deducted from monthly receivable",

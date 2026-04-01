@@ -174,6 +174,19 @@ async function fetchEmployees(isTestMode: boolean): Promise<RawEmployee[]> {
 
 // ─── LoansService ────────────────────────────────────────────────────────────
 
+/**
+ * Retorna o mês de cobrança ativo:
+ * - Antes do dia 10: mês corrente (parcela ainda não venceu)
+ * - A partir do dia 10: próximo mês (ciclo corrente já fechou)
+ */
+function getBillingMonthStr(): string {
+  const now = new Date();
+  const billingDate = now.getDate() >= 10
+    ? new Date(now.getFullYear(), now.getMonth() + 1, 1)
+    : new Date(now.getFullYear(), now.getMonth(), 1);
+  return `${billingDate.getFullYear()}-${String(billingDate.getMonth() + 1).padStart(2, '0')}`;
+}
+
 export class LoansService {
 
   /** Lista colaboradores que possuem empréstimo */
@@ -191,7 +204,7 @@ export class LoansService {
     });
 
     const now = new Date();
-    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const billingMonthStr = getBillingMonthStr();
 
     const result: Employee[] = [];
     emps.forEach(emp => {
@@ -201,7 +214,7 @@ export class LoansService {
       const totalTaken = empLoans.reduce((a, ln) => a + (parseFloat(String(ln.amount)) || 0), 0);
       const balance = empLoans.reduce((a, ln) => a + calcDebtForLoan(ln), 0);
       const totalReceived = empLoans.reduce((a, ln) => a + calcReceivedForLoan(ln), 0);
-      const monthInstallment = empLoans.reduce((a, ln) => a + calcInstallmentForMonth(ln, currentMonthStr), 0);
+      const monthInstallment = empLoans.reduce((a, ln) => a + calcInstallmentForMonth(ln, billingMonthStr), 0);
 
       result.push({
         id: emp.id,
@@ -229,7 +242,7 @@ export class LoansService {
 
     const empMap = new Map(emps.map(e => [e.id, e]));
     const now = new Date();
-    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const billingMonthStr = getBillingMonthStr();
 
     let totalEmprestado = 0, saldoDevedor = 0, totalRecebido = 0, recebivelMes = 0;
     let contratosAtivos = 0, contratosLiquidados = 0;
@@ -245,7 +258,7 @@ export class LoansService {
       totalEmprestado += amount;
       saldoDevedor += debt;
       totalRecebido += calcReceivedForLoan(ln);
-      recebivelMes += calcInstallmentForMonth(ln, currentMonthStr);
+      recebivelMes += calcInstallmentForMonth(ln, billingMonthStr);
 
       if (status === 'ATIVO') {
         contratosAtivos++;

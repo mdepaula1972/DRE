@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="auth-check.js?v=28.0"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores | Mar Brasil</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="custom-fixes.css?v=28.0">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Favicon.png">
+    <script src="version.js?v=28.0"></script>
+    <style>
+        .indicator-card {
+            transition: transform 0.2s;
+            cursor: default;
+        }
+
+        .indicator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .valuation-options .btn-check:checked+.btn-outline-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" class="img-fluid"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+            <span class="fw-bold fs-4 ms-2" style="display:none; color: #F2911B;">Filtros</span>
+            <button class="sidebar-toggle-btn ms-auto" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="upload-section mb-4">
+                <label for="csvFile" class="form-label text-white mb-2"><i class="bi bi-cloud-upload me-2"></i>Carregar
+                    DRE</label>
+                <input class="form-control form-control-sm" type="file" id="csvFile" accept=".csv">
+                <div id="fileStatus" class="form-text text-white-50 mt-2">Nenhum arquivo carregado</div>
+            </div>
+            <hr class="border-secondary">
+
+            <div class="filters-section">
+                <h6 class="text-uppercase text-white-50 mb-3"><i class="bi bi-funnel me-2"></i>Filtros</h6>
+
+                <div class="mb-3">
+                    <label for="filterPeriodo" class="form-label text-white">Período</label>
+                    <select id="filterPeriodo" class="form-select form-select-sm" multiple size="6"></select>
+                    <small class="text-white-50">Segure Ctrl para múltiplos</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Empresa</label>
+                    <select class="form-select form-select-sm" id="filterEmpresa" multiple></select>
+                </div>
+
+
+
+                <button id="btnClearFilters" class="btn btn-outline-light btn-sm w-100 mt-2">
+                    <i class="bi bi-x-circle me-2"></i>Limpar
+                </button>
+
+                <div class="mt-4 pt-4 border-top border-secondary text-white-50 text-center small">
+                    <small>Versão: <span id="appVersionDisplay">v0.0</span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Header -->
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" style="max-height: 120px;">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-0">Indicadores Estratégicos</h1>
+                    <p class="text-muted mb-0" id="lastUpdate">Aguardando dados...</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-outline-dark" id="btnPrivacyToggle" onclick="togglePrivacyMode()"
+                    title="Ocultar Valores">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <a href="/" class="btn btn-secondary text-white">
+                    <i class="bi bi-house-door me-1"></i>
+                    <span class="d-none d-md-inline">Voltar ao Início</span>
+                </a>
+                <button class="btn btn-outline-danger" id="btnExportPDF" onclick="exportToPDF()">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>
+                    <span class="d-none d-md-inline">Exportar PDF</span>
+                </button>
+                <button class="btn btn-primary d-md-none" id="toggleSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Indicators Container -->
+        <div class="row g-4" id="indicatorsContainer">
+            <!-- Cards will be populated by JS -->
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-cloud-arrow-up display-1 text-muted"></i>
+                <p class="mt-3 text-muted">Carregue um arquivo CSV para visualizar os indicadores.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        class="d-none position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex justify-content-center align-items-center"
+        style="z-index: 2000;">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Reuse the main script -->
+    <script src="script_v2.js?v=28.0"></script>
+
+    <!-- BrisinhAI Scripts -->
+    <script src="ai.service.v2.js?v=28.0"></script>
+    <script src="brisinhai.js?v=28.0"></script>
+    <script>
+        // Version Updater
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,17 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { PlusCircle, FileText, Users, Home, Box, CheckCircle2, FlaskConical, UserPlus, Trash2, Download } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { PlusCircle, FileText, Users, Home, CheckCircle2, FlaskConical, UserPlus, Trash2, Download } from "lucide-react";
 import { useDataMode } from "@/contexts/DataModeContext";
 import { APP_VERSION } from "@/version";
 import { TestEmployeeService } from "@/services/test-employee.service";
 import { ReportExportService } from "@/services/report-export.service";
 
 export function HeaderDashboard() {
+  const router = useRouter();
   const { dataMode, setDataMode, isTestMode } = useDataMode();
   const [hasTestEmployee, setHasTestEmployee] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  const handleGoHome = () => {
+    router.push("/");
+  };
 
   useEffect(() => {
     checkTestEmployee();
@@ -74,22 +81,20 @@ export function HeaderDashboard() {
       {/* Logo Section */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3">
-          {/* Logo Cube Icon */}
-          <div className="relative">
-            <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-lg shadow-lg flex items-center justify-center">
-              <Box className="w-7 h-7 text-white" strokeWidth={2} />
-            </div>
-            {/* Decorative shadow element */}
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-amber-600/20 rounded-lg -z-10" />
-          </div>
-          
-          {/* Brand Text */}
+          {/* Logo MarBR */}
           <div className="flex flex-col">
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-black text-slate-900 tracking-tight">MAR BRASIL</span>
-              <span className="text-[10px] font-mono bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">{APP_VERSION}</span>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/mar-brasil-logo.png"
+                alt="Mar Brasil"
+                width={140}
+                height={48}
+                className="object-contain h-12 w-auto"
+                priority
+              />
+              <span className="text-[10px] font-mono bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded self-start mt-1">{APP_VERSION}</span>
             </div>
-            <span className="text-xs font-medium text-slate-500">Serviços e Locações</span>
+            <span className="text-xs font-medium text-slate-500 ml-0.5">Serviços e Locações</span>
           </div>
         </div>
 
@@ -131,7 +136,11 @@ export function HeaderDashboard() {
           <span>PeopleBoard</span>
         </button>
 
-        <button className="flex items-center gap-2 bg-slate-700 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm">
+        <button
+          onClick={handleGoHome}
+          className="flex items-center gap-2 bg-slate-700 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm"
+          title="Voltar à página inicial do sistema"
+        >
           <Home size={18} />
           <span>Voltar ao Início</span>
         </button>
