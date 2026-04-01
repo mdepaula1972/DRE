@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.21";
+export const APP_VERSION = "v.01.22";
 export const VERSION_DATE = "2026-04-01";
 export const VERSION_CHANGELOG = [
+  "v.01.22 - Activate PeopleBoard header button and wipe duplicate legacy 'emprestimos.html'",
   "v.01.21 - Integrate legacy orbital landing menu into NextJs root and bundle legacy static files",
   "v.01.20 - Apply real MarBR logo (Mar-Brasil-sem-fundo-preto.png) to loans page header, replacing generic icon",
   "v.01.19 - Fix critical math bug: postponed month now correctly returns R$0 in receivable (position-based hole detection)",

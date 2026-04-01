@@ -131,10 +131,10 @@ export function HeaderDashboard() {
           <span>Gerar Termo</span>
         </button>
 
-        <button className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-slate-200">
+        <a href="/people.html" className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-slate-200">
           <Users size={18} />
           <span>PeopleBoard</span>
-        </button>
+        </a>
 
         <button
           onClick={handleGoHome}
