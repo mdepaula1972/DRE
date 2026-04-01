@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowUpRight, Clock, CheckCircle, RotateCcw, ChevronDown, ChevronUp, Paperclip, Check, Upload, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowUpRight, Clock, CheckCircle, RotateCcw, ChevronDown, ChevronUp, Paperclip, Check, Upload, ExternalLink, Loader2, Trash2 } from "lucide-react";
 import { useDataMode } from "@/contexts/DataModeContext";
 import { LoansService } from "@/services/loans.service";
 
@@ -25,6 +25,7 @@ interface ContractCardProps {
   onLiquidar?: () => void;
   onEditar?: () => void;
   onReverter?: () => void;
+  onDeletar?: () => void;
   onDataChanged?: () => void;
 }
 
@@ -56,6 +57,7 @@ export function ContractCard({
   onLiquidar, 
   onEditar, 
   onReverter,
+  onDeletar,
   onDataChanged,
 }: ContractCardProps) {
   const status = statusMap[contract.status];
@@ -196,11 +198,19 @@ export function ContractCard({
               <span className="text-[9px] font-bold uppercase">Liquidar</span>
             </button>
             <button 
+              onClick={(e) => { e.stopPropagation(); onDeletar?.(); }}
+              className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-600 hover:text-red-700 transition-all border border-slate-200 hover:border-red-200 col-span-1 shadow-sm"
+              title="Apagar contrato permanentemente"
+            >
+              <Trash2 size={16} />
+              <span className="text-[9px] font-bold uppercase transition-colors">Zerar/Excluir</span>
+            </button>
+            <button 
               onClick={(e) => { e.stopPropagation(); onReverter?.(); }}
-              className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 transition-all border border-slate-200 hover:border-red-200 col-span-3"
+              className="flex flex-col items-center gap-1 p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-600 hover:text-amber-600 transition-all border border-slate-200 hover:border-amber-200 col-span-2 shadow-sm"
             >
               <RotateCcw size={16} />
-              <span className="text-[9px] font-bold uppercase">Reverter Todas Transações Deste Contrato</span>
+              <span className="text-[9px] font-bold uppercase transition-colors">Reverter Transações Feitas</span>
             </button>
           </div>
 

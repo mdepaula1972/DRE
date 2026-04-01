@@ -10,6 +10,7 @@ interface RawEmployee {
   employment_type: string;
   remuneration: number | string;
   status: string;
+  start_date?: string;
 }
 
 interface RawLoan {
@@ -157,11 +158,11 @@ async function fetchLoans(isTestMode: boolean): Promise<RawLoan[]> {
   return (data || []) as RawLoan[];
 }
 
-async function fetchEmployees(isTestMode: boolean): Promise<RawEmployee[]> {
+export async function fetchEmployees(isTestMode: boolean): Promise<RawEmployee[]> {
   const table = isTestMode ? 'employees_test' : 'employees';
   const { data, error } = await supabase
     .from(table)
-    .select('id,full_name,company,employment_type,remuneration,status')
+    .select('id,full_name,company,employment_type,remuneration,status,start_date')
     .order('full_name');
 
   if (error) {
@@ -380,7 +381,7 @@ export class LoansService {
     
     const [empRes, loansRes] = await Promise.all([
       supabase.from(empsTable)
-        .select('id,full_name,company,employment_type,remuneration,status')
+        .select('id,full_name,company,employment_type,remuneration,status,start_date')
         .eq('id', employeeId)
         .single(),
       supabase.from(loansTable)
@@ -418,7 +419,48 @@ export class LoansService {
     };
   }
 
-  // ─── Ações de Painel Lateral ────────────────────────────────────────────────
+  // ─── Ações de Painel Lateral & Criação ───────────────────────────────────────
+
+  static async createLoan(data: {
+    employee_id: string;
+    amount: number;
+    installments: number;
+    start_cycle: string;
+    notes?: string;
+  }, isTestMode?: boolean): Promise<{id: string, [key: string]: any}> {
+    const table = isTestMode ? 'employee_loans_test' : 'employee_loans';
+    
+    const payload = {
+      employee_id: data.employee_id,
+      amount: data.amount,
+      installments: data.installments,
+      start_cycle: data.start_cycle,
+      notes: data.notes || '',
+      request_date: new Date().toISOString(),
+      paid_installments: 0,
+      postponed_months: 0,
+      amount_paid_extra: 0
+    };
+
+    const { data: result, error } = await supabase
+      .from(table)
+      .insert([payload])
+      .select()
+      .single();
+
+    if (error) {
+      console.error(`[LoansService] Erro ao criar formulário (${table}):`, error);
+      throw new Error(`Falha ao registrar empréstimo: ${error.message}`);
+    }
+
+    return result;
+  }
+
+  static async deleteContract(contractId: string, isTestMode?: boolean): Promise<void> {
+    const table = isTestMode ? 'employee_loans_test' : 'employee_loans';
+    const { error } = await supabase.from(table).delete().eq('id', contractId);
+    if (error) throw new Error(`Falha ao excluir contrato: ${error.message}`);
+  }
 
   static async liquidateContract(contractId: string, isTestMode?: boolean): Promise<void> {
     const table = isTestMode ? 'employee_loans_test' : 'employee_loans';

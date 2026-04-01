@@ -105,6 +105,12 @@ export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideD
     handleAction('reverter', LoansService.revertContractOffsets(contractId, isTestMode));
   };
 
+  const onDeletar = (contractId: string) => {
+    if (window.confirm('Tem certeza que deseja APAGAR este contrato? Todas as transações serão perdidas permanentemente.')) {
+      handleAction('excluir', LoansService.deleteContract(contractId, isTestMode));
+    }
+  };
+
 
   return (
     <AnimatePresence>
@@ -230,6 +236,7 @@ export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideD
                       onPostergar={() => onPostergar(contract.id)}
                       onAntecipar={() => onAntecipar(contract.id)}
                       onReverter={() => onReverter(contract.id)}
+                      onDeletar={() => onDeletar(contract.id)}
                       onEditar={() => alert('Edição manual desabilitada nesta versão. Favor usar os botões de fluxo primários.')}
                       onDataChanged={() => {
                         if (employeeId) fetchEmployeeData(employeeId);

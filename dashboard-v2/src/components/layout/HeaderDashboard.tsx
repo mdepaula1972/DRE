@@ -8,6 +8,7 @@ import { useDataMode } from "@/contexts/DataModeContext";
 import { APP_VERSION } from "@/version";
 import { TestEmployeeService } from "@/services/test-employee.service";
 import { ReportExportService } from "@/services/report-export.service";
+import { NewLoanModal } from "@/components/loans/NewLoanModal";
 
 export function HeaderDashboard() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export function HeaderDashboard() {
   const [hasTestEmployee, setHasTestEmployee] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isNewLoanOpen, setIsNewLoanOpen] = useState(false);
 
   const handleGoHome = () => {
     router.push("/");
@@ -121,7 +123,10 @@ export function HeaderDashboard() {
           <span>Exportar</span>
         </button>
 
-        <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm">
+        <button 
+          onClick={() => setIsNewLoanOpen(true)}
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm"
+        >
           <PlusCircle size={18} />
           <span>Novo Empréstimo</span>
         </button>
@@ -201,6 +206,13 @@ export function HeaderDashboard() {
           </div>
         )}
       </div>
+
+      <NewLoanModal 
+        isOpen={isNewLoanOpen} 
+        onClose={() => setIsNewLoanOpen(false)} 
+        onSuccess={() => window.location.reload()} 
+        onGenerateTerm={(loan) => alert('Funcionalidade de PDF nativo em unificação com termplate React. O ID da operação gravada é: ' + loan.id)}
+      />
     </header>
   );
 }
