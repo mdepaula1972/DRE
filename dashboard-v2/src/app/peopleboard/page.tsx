@@ -9,7 +9,7 @@ import { EmployeeTable } from "@/components/loans/EmployeeTable";
 import { SideDrawer } from "@/components/loans/SideDrawer";
 import { ProfileDrawer } from "@/components/people/ProfileDrawer";
 import { PaymentProcessingModal } from "@/components/loans/PaymentProcessingModal";
-import { LoansService, formatCurrency } from "@/services/loans.service";
+import { LoansService, formatCurrency, getBillingMonthStr } from "@/services/loans.service";
 import { Employee, LoanStats, ProjectionData } from "@/types/loans";
 import { useDataMode } from "@/contexts/DataModeContext";
 import { APP_VERSION } from "@/version";
@@ -27,7 +27,7 @@ import {
   CreditCard
 } from "lucide-react";
 
-export default function LoansPage() {
+export default function PeopleboardPage() {
   const { isTestMode } = useDataMode();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
@@ -49,11 +49,11 @@ export default function LoansPage() {
     if (!base) return null;
     if (list.length === 0) return { ...base, totalEmprestado: 0, saldoDevedor: 0, totalRecebido: 0, recebivelMes: 0, contratosAtivos: 0, contratosLiquidados: 0 };
     return {
-      ...base, // Mantém maiorEmprestimo, proximoEncerrar etc do global
-      totalEmprestado: list.reduce((s, e) => s + e.totalTaken, 0),
-      saldoDevedor: list.reduce((s, e) => s + e.balance, 0),
-      totalRecebido: list.reduce((s, e) => s + e.totalReceived, 0),
-      recebivelMes: list.reduce((s, e) => s + e.monthInstallment, 0),
+      ...base,
+      totalEmprestado: list.reduce((s, e) => s + (e.totalTaken || 0), 0),
+      saldoDevedor: list.reduce((s, e) => s + (e.balance || 0), 0),
+      totalRecebido: list.reduce((s, e) => s + (e.totalReceived || 0), 0),
+      recebivelMes: list.reduce((s, e) => s + (e.monthInstallment || 0), 0),
       contratosAtivos: list.filter(e => e.status === 'Ativo').length,
       contratosLiquidados: list.filter(e => e.status === 'Quitado').length,
     };
@@ -95,7 +95,6 @@ export default function LoansPage() {
       const employeesData = await LoansService.getEmployees(filters, isTestMode);
       setEmployees(employeesData);
       
-      // Se não houver filtros extras (busca, empresa, etc), o filtered é o mesmo
       if (filters) {
         applyLocalFilters(employeesData, filters);
       } else {
@@ -117,7 +116,7 @@ export default function LoansPage() {
 
       const expiring = allEmps.filter(e => {
         if (!e.contract_expiry_date) return false;
-        const expiry = new Date(e.contract_expiry_date + 'T12:00:00'); // evita problemas de timezone
+        const expiry = new Date(e.contract_expiry_date + 'T12:00:00');
         return expiry >= now && expiry <= warningThreshold;
       });
       setExpiringEmployees(expiring);
@@ -139,14 +138,12 @@ export default function LoansPage() {
 
   const handleEmployeeClick = (employeeId: string) => {
     setSelectedEmployee(employeeId);
-    // Abre AMBOS os Drawers no Modo Cockpit
     setIsDrawerOpen(true);
     setIsProfileDrawerOpen(true);
   };
 
   const handleCreateEmployeeClick = () => {
     setSelectedEmployee(undefined);
-    // Abre APENAS o Drawer de Profile para criar
     setIsProfileDrawerOpen(true);
   };
 
@@ -158,11 +155,7 @@ export default function LoansPage() {
   const applyLocalFilters = (baseList: Employee[], filters: FilterValues) => {
     let result = [...baseList];
 
-    // Se incluirQuitados for falso, filtramos quem tem status 'Quitado'
-    // Não, EmployeesService.getEmployees coloca status 'Quitado' se balance <= 0.
-    
     if (!filters.incluirQuitados) {
-      // Filtra quem tem balance <= 0 MAS que JÁ TEVE empréstimo (totalTaken > 0)
       result = result.filter(e => {
         if (e.totalTaken > 0 && e.balance <= 0) return false;
         return true;
@@ -179,11 +172,41 @@ export default function LoansPage() {
     if (filters.vinculo) {
       result = result.filter(e => e.linkType === filters.vinculo);
     }
+    
+    // Novos Filtros
+    if (filters.status) {
+      result = result.filter(e => e.status === filters.status);
+    }
+    
+    if (filters.cargo) {
+      const cargoTerm = filters.cargo.toLowerCase();
+      result = result.filter(e => (e.job_role || '').toLowerCase().includes(cargoTerm));
+    }
+    
+    if (filters.remuneracaoRange) {
+      result = result.filter(e => {
+        const salary = e.remuneration || 0;
+        switch (filters.remuneracaoRange) {
+          case 'ate2k': return salary < 2000;
+          case '2k-3.5k': return salary >= 2000 && salary < 3500;
+          case '3.5k-5k': return salary >= 3500 && salary <= 5000;
+          case 'acima5k': return salary > 5000;
+          default: return true;
+        }
+      });
+    }
+    
+    if (filters.temAditivo !== '') {
+      const wantAditive = filters.temAditivo === 'sim';
+      result = result.filter(e => {
+        const count = e.aditivoCount || 0;
+        return wantAditive ? count > 0 : count === 0;
+      });
+    }
 
     setFilteredEmployees(result);
   };
 
-  // Loading placeholder for stat cards
   const StatCardSkeleton = () => (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 animate-pulse">
       <div className="flex items-center gap-4">
@@ -208,7 +231,6 @@ export default function LoansPage() {
         
         <FilterBar onFilterChange={handleFilterChange} />
 
-        {/* Error message */}
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700">
             <AlertCircle size={20} />
@@ -222,7 +244,6 @@ export default function LoansPage() {
           </div>
         )}
 
-        {/* Alerta de Contratos Vencendo */}
         {expiringEmployees.length > 0 && (
           <div className="mb-6 p-1 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent rounded-2xl border border-amber-200/50 shadow-sm animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="bg-white/80 backdrop-blur-sm p-4 rounded-[14px] flex items-start gap-4">
@@ -273,7 +294,6 @@ export default function LoansPage() {
           </div>
         )}
 
-        {/* Botão Processar Parcelas */}
         <div className="mb-4 flex justify-end">
           <button
             onClick={() => setIsPaymentModalOpen(true)}
@@ -284,7 +304,6 @@ export default function LoansPage() {
           </button>
         </div>
 
-        {/* Primeiro Grid - Cards Principais Financeiros */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {isLoadingStats ? (
             <>
@@ -314,7 +333,7 @@ export default function LoansPage() {
                 color="green"
               />
               <StatCard 
-                title="Recebível no Mês"
+                title="Total Mês"
                 value={formatCurrency(filteredStats.recebivelMes)}
                 icon={<CalendarClock size={22} />}
                 color="emerald"
@@ -323,7 +342,6 @@ export default function LoansPage() {
           )}
         </div>
 
-        {/* Segundo Grid - Cards de Informações */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {isLoadingStats ? (
             <>
@@ -366,7 +384,6 @@ export default function LoansPage() {
           )}
         </div>
 
-        {/* Seção de Gráfico */}
         <div className="mb-6">
           {isLoadingProjections ? (
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 h-[400px] flex items-center justify-center">
@@ -377,44 +394,20 @@ export default function LoansPage() {
           )}
         </div>
 
-        {/* Seção de Tabela */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-              Detalhamento por Colaborador
-              <span className="bg-white px-2 py-0.5 rounded border border-slate-200 text-[10px] text-slate-500">
-                {isLoadingEmployees ? '...' : `${filteredEmployees.length} de ${employees.length} registros`}
-              </span>
-            </h3>
-            
-            <div className="flex items-center gap-2 text-[11px] font-medium text-slate-500">
-              <span className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-emerald-500" />
-                Total
-              </span>
-              <span className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-slate-300" />
-                Previsto
-              </span>
-            </div>
+        {isLoadingEmployees ? (
+          <div className="p-8 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
           </div>
-          
-          {isLoadingEmployees ? (
-            <div className="p-8 flex items-center justify-center">
-              <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
-            </div>
-          ) : (
-            <EmployeeTable 
-              employees={filteredEmployees}
-              onEmployeeClick={handleEmployeeClick} 
-            />
-          )}
-        </div>
+        ) : (
+          <EmployeeTable 
+            employees={filteredEmployees}
+            onEmployeeClick={handleEmployeeClick} 
+          />
+        )}
 
-        {/* Rodapé */}
         <footer className="mt-12 pt-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-slate-400">
-            © 2026 Mar Brasil - Sistema de Gestão Financeira
+            © 2026 Mar Brasil - Peopleboard Cockpit
           </p>
           <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 px-3 py-1 rounded-full text-slate-500">
             Versão {APP_VERSION}
@@ -422,7 +415,6 @@ export default function LoansPage() {
         </footer>
       </div>
 
-      {/* Painel Lateral Direito: FINANCEIRO / EMPRÉSTIMOS */}
       <SideDrawer 
         isOpen={isDrawerOpen} 
         onClose={() => {
@@ -434,7 +426,6 @@ export default function LoansPage() {
         onDataChanged={fetchData}
       />
 
-      {/* Painel Lateral Esquerdo: FICHA RH / PEOPLEBOARD */}
       <ProfileDrawer 
         isOpen={isProfileDrawerOpen} 
         onClose={() => {
@@ -446,7 +437,6 @@ export default function LoansPage() {
         onDataChanged={fetchData}
       />
 
-      {/* Modal de Processamento de Parcelas */}
       <PaymentProcessingModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}

@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mar Brasil | Portal Financeiro",
-  description: "Portal de Gestão Inteligente",
+  title: "Mar Brasil | Peopleboard",
+  description: "Gestão Integrada de Pessoal e Empréstimos",
+  icons: {
+    icon: "/Favicon.png",
+  }
 };
 
 export default function RootLayout({

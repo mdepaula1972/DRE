@@ -1,9 +1,22 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.29";
+export const APP_VERSION = "v.01.47";
 export const VERSION_DATE = "2026-04-02";
 export const VERSION_CHANGELOG = [
+  "v.01.47 - Correção: Sincronização de Saldo Devedor (fix em postponed_months nos painéis detalhados).",
+  "v.01.46 - Inteligência: Deduplicação de Aditivos por URL (Histórico + Ficha). Habilitada exclusão de itens de histórico.",
+  "v.01.43 - REVERSÃO DE EMERGÊNCIA: Restaurada lógica automática corporativa.",
+  "v.01.42 - Hotfix: Tentativa de transição inteligente (revertida).",
+  "v.01.41 - Refinamento: Baixas Manuais (paid_installments), Tabela Ampla e Filtros Corrigidos.",
+  "v.01.40 - Migração Oficial: Peopleboard Cockpit ativo; Órbita 'Empréstimos' removida; Filtros avançados.",
+  "v.01.36 - Correção: contract_expiry_date agora é retornado em fetchEmployees (corrigido alerta invisível).",
+  "v.01.35 - Estrutura de Banco Atualizada: Ativado salvamento direto em colunas contract_expiry_date e document_rg.",
+  "v.01.34 - Correção Definitiva: Whitelist de colunas para compatibilidade com DB legado (Substituída pela v.01.35).",
+  "v.01.33 - Correção: Smart Tagging para Data de Vencimento (contorna erro de coluna inexistente no banco legado).",
+  "v.01.32 - Sincronização Recebível Card/Tabela; Campo Vencimento Contrato e Alerta de 10 dias; Filtro de Histórico de Aditivos; Anexos Clicáveis com Lixeira.",
+  "v.01.31 - Inversão da tendência do gráfico (decrescente); Limpeza final do label de meses (DE/Ponto); Integração com Histórico de Aditivos (Legacy).",
+  "v.01.30 - Formatação de meses no gráfico sem prepósito 'de'. Sync fechar drawers. Fake data para o gráfico limpo restaurado. Add suporte upload aditivos (links_aditivos).",
   "v.01.29 - Correção nos botões Criar/Remover Teste (apontamento para tabelas independentes)",
   "v.01.28 - Alterado rótulo de colaboradores sem histórico para 'Sem Empréstimo' e ajuste fino nos selos de status",
   "v.01.27 - Correção de contratos fantasmas no PDF (lógica Dashboard sincronizada); Vertical Lift (2mm topo); Filtros e Modo de Dados sincronizados",
@@ -27,7 +40,7 @@ export const VERSION_CHANGELOG = [
   "v.01.08 - Fix empty employee_name by using full_name as fallback",
   "v.01.07 - Add test employee management buttons in UI",
   "v.01.06 - Generate installments directly without view dependency",
-  "v.01.05 - Fix generate_installments to use contract_id",
+  "v.01.05 - FixSlot: generate_installments to use contract_id",
   "v.01.04 - Add full_name column to test employee",
   "v.01.03 - Remove updated_at from test employee function",
   "v.01.02 - Add simplified test employee system with revert capability",

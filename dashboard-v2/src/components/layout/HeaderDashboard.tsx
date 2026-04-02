@@ -16,9 +16,10 @@ import { FilterValues } from "@/components/loans/FilterBar";
 interface HeaderDashboardProps {
   activeFilters?: FilterValues;
   isTestMode?: boolean;
+  onCreateEmployee?: () => void; // NOVO: handler para acionar o ProfileDrawer no modo Create
 }
 
-export function HeaderDashboard({ activeFilters, isTestMode }: HeaderDashboardProps) {
+export function HeaderDashboard({ activeFilters, isTestMode, onCreateEmployee }: HeaderDashboardProps) {
   const router = useRouter();
   const { dataMode, setDataMode } = useDataMode();
   const [hasTestEmployee, setHasTestEmployee] = useState(false);
@@ -140,10 +141,10 @@ export function HeaderDashboard({ activeFilters, isTestMode }: HeaderDashboardPr
         {/* Title */}
         <div className="hidden md:block ml-4 pl-4 border-l border-slate-200">
           <h1 className="text-xl font-bold text-slate-800 leading-tight">
-            Empréstimos
+            Peopleboard
           </h1>
           <p className="text-xs text-slate-500">
-            Consolidação, acompanhamento e histórico gerencial
+            Gestão Integrada de Pessoal e Empréstimos
           </p>
         </div>
       </div>
@@ -170,6 +171,16 @@ export function HeaderDashboard({ activeFilters, isTestMode }: HeaderDashboardPr
           <span>PDF</span>
         </button>
 
+        {onCreateEmployee && (
+          <button 
+            onClick={onCreateEmployee}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm"
+          >
+            <UserPlus size={18} />
+            <span>Registrar Pessoal</span>
+          </button>
+        )}
+
         <button 
           onClick={() => setIsNewLoanOpen(true)}
           className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm"
@@ -177,11 +188,6 @@ export function HeaderDashboard({ activeFilters, isTestMode }: HeaderDashboardPr
           <PlusCircle size={18} />
           <span>Novo Empréstimo</span>
         </button>
-
-        <a href="/people.html" className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-slate-200">
-          <Users size={18} />
-          <span>PeopleBoard</span>
-        </a>
 
         <button
           onClick={handleGoHome}

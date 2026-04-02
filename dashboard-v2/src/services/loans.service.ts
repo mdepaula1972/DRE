@@ -12,6 +12,9 @@ interface RawEmployee {
   remuneration: number | string;
   status: string;
   start_date?: string;
+  contract_expiry_date?: string;
+  job_role?: string;
+  links_aditivos?: string;
 }
 
 interface RawLoan {
@@ -58,6 +61,7 @@ function calcDebtForLoan(ln: RawLoan): number {
   const inst = parseInt(String(ln.installments)) || 0;
   if (!amount || !inst) return 0;
 
+  // REVERSÃO: Voltando ao cálculo AUTOMÁTICO por tempo decorrido
   const elapsed = getElapsedMonths(ln);
   const standardPaid = elapsed * (amount / inst);
   const extraPaid = parseFloat(String(ln.amount_paid_extra)) || 0;
@@ -77,7 +81,7 @@ function calcReceivedForLoan(ln: RawLoan): number {
   return standardPaid + extraPaid;
 }
 
-function calcInstallmentForMonth(ln: RawLoan, monthStr: string): number {
+export function calcInstallmentForMonth(ln: RawLoan, monthStr: string): number {
   const [ty, tm] = monthStr.split('-').map(Number);
   const targetAbs = ty * 12 + tm;
   const amount = parseFloat(String(ln.amount)) || 0;
@@ -149,7 +153,7 @@ async function fetchLoans(isTestMode: boolean): Promise<RawLoan[]> {
   const table = isTestMode ? 'employee_loans_test' : 'employee_loans';
   const { data, error } = await supabase
     .from(table)
-    .select('id,employee_id,amount,installments,start_cycle,amount_paid_extra,notes,request_date,paid_installments,postponed_months,contract_url');
+    .select('id,employee_id,amount,installments,start_cycle,amount_paid_extra,notes,request_date,postponed_months,contract_url');
 
   if (error) {
     // Caso a tabela teste ainda não exista, retorna vazio sem quebrar
@@ -163,7 +167,7 @@ export async function fetchEmployees(isTestMode: boolean): Promise<RawEmployee[]
   const table = isTestMode ? 'employees_test' : 'employees';
   const { data, error } = await supabase
     .from(table)
-    .select('id,full_name,company,employment_type,remuneration,status,start_date')
+    .select('id,full_name,company,employment_type,remuneration,status,start_date,contract_expiry_date,job_role,links_aditivos')
     .order('full_name');
 
   if (error) {
@@ -181,7 +185,7 @@ export async function fetchEmployees(isTestMode: boolean): Promise<RawEmployee[]
  * - Antes do dia 10: mês corrente (parcela ainda não venceu)
  * - A partir do dia 10: próximo mês (ciclo corrente já fechou)
  */
-function getBillingMonthStr(): string {
+export function getBillingMonthStr(): string {
   const now = new Date();
   const billingDate = now.getDate() >= 10
     ? new Date(now.getFullYear(), now.getMonth() + 1, 1)
@@ -207,6 +211,20 @@ export class LoansService {
 
     const now = new Date();
     const billingMonthStr = getBillingMonthStr();
+    
+    // Busca contagem de aditivos via Histórico (Deduplicação)
+    const historyTable = safeTestMode ? 'employee_history_test' : 'employee_history';
+    const { data: histAditivos } = await supabase
+      .from(historyTable)
+      .select('employee_id, observations')
+      .ilike('event_type', '%aditivo%');
+
+    const historyAditivosByEmp = new Map<string, string[]>();
+    histAditivos?.forEach(h => {
+      const arr = historyAditivosByEmp.get(h.employee_id) || [];
+      arr.push(h.observations || '');
+      historyAditivosByEmp.set(h.employee_id, arr);
+    });
 
     const result: Employee[] = [];
     emps.forEach(emp => {
@@ -222,6 +240,33 @@ export class LoansService {
       const totalReceived = empLoans.reduce((a, ln) => a + calcReceivedForLoan(ln), 0);
       const monthInstallment = empLoans.reduce((a, ln) => a + calcInstallmentForMonth(ln, billingMonthStr), 0);
 
+      // --- Lógica de Deduplicação de Aditivos ---
+      const aditivoUrls = new Set<string>();
+      let textOnlyCount = 0;
+
+      const extractUrls = (text: string) => {
+        const matches = text.match(/\((https?:\/\/.*?)\)/g);
+        if (matches) {
+          matches.forEach(m => aditivoUrls.add(m.slice(1, -1)));
+          return true;
+        }
+        return false;
+      };
+
+      // 1. Processa links_aditivos da ficha
+      const lines = (emp.links_aditivos || '').split('\n').filter(l => l.trim() !== '');
+      lines.forEach(line => {
+        if (!extractUrls(line)) textOnlyCount++;
+      });
+
+      // 2. Processa histórico
+      const histObs = historyAditivosByEmp.get(emp.id) || [];
+      histObs.forEach(obs => {
+        if (!extractUrls(obs)) textOnlyCount++;
+      });
+      
+      const aditivoCount = aditivoUrls.size + textOnlyCount;
+
       result.push({
         id: emp.id,
         name: emp.full_name,
@@ -233,7 +278,12 @@ export class LoansService {
         balance,
         monthInstallment,
         contractsCount: empLoans.length,
-        status: balance > 0 ? 'Ativo' : (totalTaken > 0 ? 'Quitado' : 'Sem Empréstimo'),
+        status: (emp.status || 'Ativo') as any, // Status de RH (Ativo/Inativo/Férias)
+        loanStatus: balance > 0 ? 'Ativo' : (totalTaken > 0 ? 'Quitado' : 'Sem Empréstimo'),
+        contract_expiry_date: emp.contract_expiry_date,
+        job_role: emp.job_role,
+        links_aditivos: emp.links_aditivos,
+        aditivoCount // Passamos a contagem final inteligente
       });
     });
 
@@ -257,6 +307,9 @@ export class LoansService {
     let proximoEncerrarLoan: RawLoan | null = null;
 
     loans.forEach(ln => {
+      const emp = empMap.get(ln.employee_id);
+      if (!emp) return; // Pula empréstimos de funcionários que não existem (fantasmas)
+
       const amount = parseFloat(String(ln.amount)) || 0;
       const debt = calcDebtForLoan(ln);
       const status = loanStatus(ln);
@@ -270,7 +323,8 @@ export class LoansService {
         contratosAtivos++;
           const [sy, sm] = (ln.start_cycle || "").split("-").map(Number);
           if (!isNaN(sy) && !isNaN(sm)) {
-            const endAbs = sy * 12 + sm + (parseInt(String(ln.installments)) || 0) - 1;
+            const postponed = parseInt(String(ln.postponed_months)) || 0;
+            const endAbs = sy * 12 + sm + (parseInt(String(ln.installments)) || 0) - 1 + postponed;
             if (endAbs < menorEndAbs) {
               menorEndAbs = endAbs;
               proximoEncerrarLoan = ln;
@@ -292,10 +346,10 @@ export class LoansService {
       const pl = proximoEncerrarLoan as RawLoan;
       const emp = empMap.get(pl.employee_id);
       proximoEncerrar = emp?.full_name?.split(' ')[0] || '-';
-      const [sy, sm] = pl.start_cycle.split('-').map(Number);
-      const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
-      const elapsed = Math.max(0, currentAbs - (sy * 12 + sm));
-      parcelasRestantes = Math.max(0, pl.installments - elapsed);
+      
+      const installments = parseInt(String(pl.installments)) || 0;
+      const elapsed = getElapsedMonths(pl);
+      parcelasRestantes = Math.max(0, installments - elapsed);
     }
 
     return {
@@ -323,11 +377,11 @@ export class LoansService {
       if (endAbs > maxMonthAbs) maxMonthAbs = endAbs;
     });
 
+    const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
+    
     // Safety limit: 60 meses (5 anos) para evitar travamento da UI em caso de dados excessivos
     const safetyLimit = currentAbs + 60;
     if (maxMonthAbs > safetyLimit) maxMonthAbs = safetyLimit;
-
-    const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
     const result: ProjectionData[] = [];
 
     for (let abs = currentAbs; abs <= maxMonthAbs; abs++) {
@@ -337,7 +391,9 @@ export class LoansService {
       const label = new Date(y, m - 1, 1)
         .toLocaleString('pt-BR', { month: 'short', year: '2-digit' })
         .toUpperCase()
-        .replace('. ', '/');
+        .replace(' DE ', '/')
+        .replace(/\. /g, '/')
+        .replace(/\./g, '');
 
       const total = loans.reduce((a, ln) => a + calcInstallmentForMonth(ln, monthStr), 0);
       result.push({ month: label, total, previsto: total });
@@ -398,7 +454,7 @@ export class LoansService {
         .eq('id', employeeId)
         .single(),
       supabase.from(loansTable)
-        .select('id,employee_id,amount,installments,start_cycle,amount_paid_extra,paid_installments')
+        .select('id,employee_id,amount,installments,start_cycle,amount_paid_extra,paid_installments,postponed_months')
         .eq('employee_id', employeeId),
     ]);
 

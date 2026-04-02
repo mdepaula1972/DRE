@@ -35,23 +35,34 @@ interface ProjectionChartProps {
   data?: ProjectionData[];
 }
 
-const defaultData = [
-  { month: 'Mar/25', total: 4200, previsto: 3800 },
-  { month: 'Abr/25', total: 4800, previsto: 4500 },
-  { month: 'Mai/25', total: 5100, previsto: 4900 },
-  { month: 'Jun/25', total: 5800, previsto: 5200 },
-  { month: 'Jul/25', total: 6200, previsto: 5800 },
-  { month: 'Ago/25', total: 6900, previsto: 6200 },
-  { month: 'Set/25', total: 7200, previsto: 6800 },
-  { month: 'Out/25', total: 8100, previsto: 7200 },
-  { month: 'Nov/25', total: 8500, previsto: 7800 },
-  { month: 'Dez/25', total: 9200, previsto: 8500 },
-  { month: 'Jan/26', total: 9800, previsto: 9100 },
-  { month: 'Fev/26', total: 10500, previsto: 9800 },
-];
-
 export function ProjectionChart({ data }: ProjectionChartProps) {
-  const chartData = (data?.length ? data : defaultData).map(d => ({
+  // Se não houver dados reais, gera um mock dinâmico preenchido começando do mês atual 
+  // para que as barras não "sumam" misteriosamente no modo teste.
+  const getDynamicDefaultData = () => {
+    const defaultArr = [];
+    const now = new Date();
+    let currentAbs = now.getFullYear() * 12 + now.getMonth();
+    
+    // Tendência decrescente (mais realista para amortização de empréstimos)
+    const fakeValues = [10500, 9800, 9100, 8200, 7500, 6800, 6100, 5400, 4800, 4100, 3500, 2900];
+
+    for(let i = 0; i < 12; i++) {
+        const y = Math.floor(currentAbs / 12);
+        const m = (currentAbs % 12);
+        const label = new Date(y, m, 1)
+          .toLocaleString('pt-BR', { month: 'short', year: '2-digit' })
+          .toUpperCase()
+          .replace(' DE ', '/')
+          .replace(/\. /g, '/')
+          .replace(/\./g, '');
+
+        defaultArr.push({ month: label, total: fakeValues[i] || 4000, previsto: (fakeValues[i] || 4000) * 0.95 });
+        currentAbs++;
+    }
+    return defaultArr;
+  };
+
+  const chartData = (data && data.length > 0 ? data : getDynamicDefaultData()).map(d => ({
     month: 'month' in d ? d.month : (d as any).name,
     total: Number(d.total.toFixed(2)),
     previsto: Number(d.previsto.toFixed(2)),

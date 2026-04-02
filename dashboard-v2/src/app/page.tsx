@@ -27,12 +27,11 @@ export default function LandingPage() {
     { href: "/dre.html", icon: TrendingUp, title: "DRE Gerencial", sub: "Visão Financeira" },
     { href: "/analise-setorial.html", icon: PieChart, title: "Análise Setorial", sub: "Custos por Área" },
     { href: "/parcelamentos.html", icon: CreditCard, title: "Parcelamentos", sub: "Controle de Dívidas" },
-    { href: "/loans", icon: HandCoins, title: "Empréstimos", sub: "Acompanhamento" },
+    { href: "/peopleboard", icon: Users, title: "PeopleBoard", sub: "Gestão Cockpit RH" },
     { href: "/seguros.html", icon: ShieldCheck, title: "Seguros", sub: "Gestão de Apólices" },
     { href: "/indicadores_v2.html", icon: Gauge, title: "Indicadores", sub: "KPIs Estratégicos" },
     { href: "/contratos.html", icon: FileText, title: "Contratos", sub: "Vínculo Faturamento" },
     { href: "/comissoes.html", icon: BadgeDollarSign, title: "Comissões", sub: "Divisão Equipe" },
-    { href: "/people.html", icon: Users, title: "PeopleBoard", sub: "Gestão de RH" },
     { href: "/mutuos.html", icon: Landmark, title: "Mútuos & Dividendos", sub: "Transferências" },
   ];
 
