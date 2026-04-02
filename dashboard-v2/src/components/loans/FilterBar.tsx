@@ -7,7 +7,8 @@ export interface FilterValues {
   search: string;
   empresa: string;
   vinculo: string;
-  incluirQuitados: boolean;   // Funcionários SEM nenhuma dívida ativa
+  incluirQuitados: boolean;   // Funcionários que JÁ tiveram empréstimo mas pararam
+  mostrarTodos: boolean;      // Incluir quem NUNCA teve empréstimo
 }
 
 interface FilterBarProps {
@@ -19,6 +20,7 @@ const DEFAULT_FILTERS: FilterValues = {
   empresa: "",
   vinculo: "",
   incluirQuitados: false,
+  mostrarTodos: false,
 };
 
 export function FilterBar({ onFilterChange }: FilterBarProps) {
@@ -40,7 +42,7 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
   };
 
   const hasActive =
-    active.search !== "" || active.empresa !== "" || active.vinculo !== "" || active.incluirQuitados;
+    active.search !== "" || active.empresa !== "" || active.vinculo !== "" || active.incluirQuitados || active.mostrarTodos;
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-6">
@@ -118,7 +120,21 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
               </div>
               <div>
                 <span className="text-xs font-medium text-slate-600 select-none">Incluir colaboradores quitados</span>
-                <p className="text-[10px] text-slate-400 select-none">Sem nenhuma dívida ativa</p>
+                <p className="text-[10px] text-slate-400 select-none">Já tiveram dívida e liquidaram</p>
+              </div>
+            </label>
+
+            {/* Mostrar todos os colaboradores */}
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <div
+                className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${pending.mostrarTodos ? "bg-blue-600 border-blue-600" : "bg-slate-50 border-slate-300 group-hover:border-blue-500"}`}
+                onClick={() => set("mostrarTodos", !pending.mostrarTodos)}
+              >
+                {pending.mostrarTodos && <Check size={12} className="text-white" />}
+              </div>
+              <div>
+                <span className="text-xs font-medium text-slate-600 select-none">Mostrar todos os colaboradores</span>
+                <p className="text-[10px] text-slate-400 select-none">Incluir quem nunca teve empréstimo</p>
               </div>
             </label>
           </div>
@@ -165,6 +181,11 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
           {active.incluirQuitados && (
             <span className="flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-600 text-[11px] font-semibold rounded-full border border-slate-200">
               + Colaboradores quitados
+            </span>
+          )}
+          {active.mostrarTodos && (
+            <span className="flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 text-[11px] font-semibold rounded-full border border-blue-200">
+              Listando todos os colaboradores
             </span>
           )}
         </div>

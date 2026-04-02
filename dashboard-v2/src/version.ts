@@ -1,9 +1,11 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.24";
-export const VERSION_DATE = "2026-04-01";
+export const APP_VERSION = "v.01.27";
+export const VERSION_DATE = "2026-04-02";
 export const VERSION_CHANGELOG = [
+  "v.01.27 - Implement PDF Report Export (Landscape) with background branding (willDrawPage) and local 8mm margin; Add 'Show All' dashboard filter",
+  "v.01.26 - Add console logs to PDFService for debugging; ensure refMonthName and refYear are correctly fallback",
   "v.01.24 - Motor nativo de geração de Termo de Confissão de Dívida (PDF) implementado; novo controle 'Data da Tomada' adicionado",
   "v.01.23 - Add dynamic HR audit constraints (margin & tenure < 6 months) to New Loan creation modal",
   "v.01.22 - Activate PeopleBoard header button and wipe duplicate legacy 'emprestimos.html'",

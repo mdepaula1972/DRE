@@ -1,7 +1,9 @@
-// v.01.11 - Exportar relatório para CSV
-// Serviço para exportar dados de empréstimos
-
 import { supabase } from '@/lib/supabase';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { TIMBRADO_B64 } from '@/lib/timbrado_base64';
+import { FilterValues } from '@/components/loans/FilterBar';
+import { LoansService } from './loans.service';
 
 export interface LoansReportData {
   colaborador: string;
@@ -43,58 +45,50 @@ export interface PaymentReportData {
 }
 
 export class ReportExportService {
-  // Buscar dados para relatório de colaboradores
-  static async getEmployeeReport(): Promise<LoansReportData[]> {
-    const { data, error } = await supabase
-      .from('employee_loans_summary')
-      .select('*')
-      .order('total_loaned', { ascending: false });
+  // Buscar dados para relatório de colaboradores (usando lógica real do LoansService)
+  static async getEmployeeReport(isTestMode?: boolean): Promise<LoansReportData[]> {
+    const emps = await LoansService.getEmployees({ mostrarTodos: true }, isTestMode);
     
-    if (error) {
-      console.error('Erro ao buscar relatório:', error);
-      throw new Error('Falha ao carregar dados');
-    }
-    
-    return (data || []).map(item => ({
-      colaborador: item.employee_name,
+    return emps.map(item => ({
+      colaborador: item.name,
       empresa: item.company,
-      vinculo: item.link_type,
+      vinculo: item.linkType,
       status: item.status,
-      totalEmprestado: item.total_loaned || 0,
-      totalRecebido: item.total_received || 0,
-      saldoDevedor: item.total_balance || 0,
-      parcelaMensal: item.monthly_installment || 0,
-      contratosAtivos: item.active_contracts || 0
+      totalEmprestado: item.totalTaken || 0,
+      totalRecebido: item.totalReceived || 0,
+      saldoDevedor: item.balance || 0,
+      parcelaMensal: item.monthInstallment || 0,
+      contratosAtivos: item.contractsCount || 0
     }));
   }
 
-  // Buscar dados para relatório de contratos
-  static async getContractReport(): Promise<ContractReportData[]> {
-    const { data, error } = await supabase
-      .from('contracts_expanded')
-      .select('*')
-      .order('employee_name');
-    
-    if (error) {
-      console.error('Erro ao buscar contratos:', error);
-      throw new Error('Falha ao carregar dados');
+  // Buscar dados para relatório de contratos (usando a lógica que já funciona no Dash)
+  static async getContractReport(isTestMode?: boolean): Promise<ContractReportData[]> {
+    const emps = await LoansService.getEmployees({ mostrarTodos: false }, isTestMode);
+    let allContracts: ContractReportData[] = [];
+
+    for (const emp of emps) {
+      const contracts = await LoansService.getEmployeeContracts(emp.id, isTestMode);
+      contracts.forEach(c => {
+        allContracts.push({
+          colaborador: emp.name,
+          empresa: emp.company,
+          contrato: c.operationNumber,
+          valorTotal: c.value || 0,
+          qtdParcelas: c.installments || 0,
+          valorParcela: c.installmentValue || 0,
+          recebido: c.value - c.balance,
+          saldo: c.balance || 0,
+          parcelasPagas: c.installmentsPaid || 0,
+          parcelasRestantes: (c.installments || 0) - (c.installmentsPaid || 0),
+          status: c.status,
+          dataInicio: c.startDate || '',
+          dataTermino: c.endDate || ''
+        });
+      });
     }
     
-    return (data || []).map(item => ({
-      colaborador: item.employee_name,
-      empresa: item.company,
-      contrato: item.operation_number,
-      valorTotal: item.value || 0,
-      qtdParcelas: item.total_installments || 0,
-      valorParcela: item.installment_value || 0,
-      recebido: item.total_received || 0,
-      saldo: item.balance || 0,
-      parcelasPagas: item.installments_paid || 0,
-      parcelasRestantes: item.remaining_installments || 0,
-      status: item.status,
-      dataInicio: item.start_date,
-      dataTermino: item.end_date
-    }));
+    return allContracts.sort((a, b) => a.colaborador.localeCompare(b.colaborador));
   }
 
   // Buscar dados para relatório de parcelas
@@ -180,13 +174,40 @@ export class ReportExportService {
   }
 
   // Exportar relatório completo
-  static async exportFullReport(): Promise<void> {
+  static async exportFullReport(filters?: FilterValues, isTestMode?: boolean): Promise<void> {
     try {
-      const [employees, contracts, payments] = await Promise.all([
-        this.getEmployeeReport(),
-        this.getContractReport(),
-        this.getPaymentReport()
+      let [employees, contracts, payments] = await Promise.all([
+        this.getEmployeeReport(isTestMode),
+        this.getContractReport(isTestMode),
+        this.getPaymentReport() // Ainda usa Supabase mas para pagamentos o view costuma ser seguro
       ]);
+
+      // Aplicar filtros se existirem
+      if (filters) {
+        if (filters.empresa) {
+          employees = employees.filter(e => e.empresa === filters.empresa);
+          contracts = contracts.filter(c => c.empresa === filters.empresa);
+          payments = payments.filter(p => p.empresa === filters.empresa);
+        }
+        if (filters.vinculo) {
+          employees = employees.filter(e => e.vinculo === filters.vinculo);
+        }
+        if (filters.search) {
+          const term = filters.search.toLowerCase();
+          employees = employees.filter(e => e.colaborador.toLowerCase().includes(term));
+          contracts = contracts.filter(c => c.colaborador.toLowerCase().includes(term));
+          payments = payments.filter(p => p.colaborador.toLowerCase().includes(term));
+        }
+        // mostrarTodos e incluirQuitados já são tratados no componente base para os dados de entrada
+        // mas aqui como buscamos do banco novamente, precisamos garantir a lógica
+        if (!filters.mostrarTodos) {
+          employees = employees.filter(e => e.totalEmprestado > 0 || e.saldoDevedor > 0);
+        }
+        if (!filters.incluirQuitados) {
+          employees = employees.filter(e => e.status !== 'Quitado');
+          contracts = contracts.filter(c => c.status !== 'Liquidado' && c.status !== 'Quitado' && c.status !== 'Finalizado');
+        }
+      }
 
       // Criar CSV com múltiplas abas (separadas por linha em branco)
       let fullCSV = '';
@@ -245,5 +266,174 @@ export class ReportExportService {
     
     const filename = `Relatorio_Contratos_${new Date().toISOString().split('T')[0]}.csv`;
     this.downloadCSV(csv, filename);
+  }
+
+  /**
+   * EXPORTAR RELATÓRIO COMPLETO EM PDF (PAISAGEM + LOGO)
+   */
+  static async exportFullReportPDF(filters?: FilterValues, isTestMode?: boolean): Promise<void> {
+    try {
+      let [employees, contracts, payments] = await Promise.all([
+        this.getEmployeeReport(isTestMode),
+        this.getContractReport(isTestMode),
+        this.getPaymentReport()
+      ]);
+
+      // Aplicar filtros para sincronizar com o que o usuário vê no Dashboard
+      if (filters) {
+        if (filters.empresa) {
+          employees = employees.filter(e => e.empresa === filters.empresa);
+          contracts = contracts.filter(c => c.empresa === filters.empresa);
+          payments = payments.filter(p => p.empresa === filters.empresa);
+        }
+        if (filters.vinculo) {
+          employees = employees.filter(e => e.vinculo === filters.vinculo);
+        }
+        if (filters.search) {
+          const term = filters.search.toLowerCase();
+          employees = employees.filter(e => e.colaborador.toLowerCase().includes(term));
+          contracts = contracts.filter(c => c.colaborador.toLowerCase().includes(term));
+          payments = payments.filter(p => p.colaborador.toLowerCase().includes(term));
+        }
+        
+        // Regra de negócio: se não "mostrar todos", remove quem nunca teve nada
+        if (!filters.mostrarTodos) {
+          employees = employees.filter(e => e.totalEmprestado > 0 || e.saldoDevedor > 0);
+        }
+        
+        // Se não "incluir quitados", remove colaboradores e contratos liquidados
+        if (!filters.incluirQuitados) {
+          employees = employees.filter(e => e.status !== 'Quitado');
+          contracts = contracts.filter(c => !['Liquidado', 'Quitado', 'Finalizado'].includes(c.status));
+        }
+      }
+
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // Função para adicionar o fundo (timbrado) em todas as páginas
+      const addBackground = (data?: any) => {
+        try {
+          doc.addImage(TIMBRADO_B64, 'JPEG', 0, 0, pageWidth, pageHeight);
+        } catch (e) {
+          console.warn('Erro ao carregar imagem do timbrado:', e);
+        }
+      };
+
+      const formatCurrency = (val: number) => 
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+      const formatDate = (dateStr: string | null) => {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('pt-BR');
+      };
+
+      // --- PÁGINA 1: RESUMO POR COLABORADOR ---
+      addBackground();
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(5, 150, 105); // Verde Emerald 600
+      doc.text('RELATÓRIO DE EMPRÉSTIMOS - RESUMO POR COLABORADOR', 5, 2);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139); // Slate 500
+      doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, 5, 7);
+ 
+      autoTable(doc, {
+        startY: 10,
+        head: [['Colaborador', 'Empresa', 'Vínculo', 'Status', 'Total (R$)', 'Recebido (R$)', 'Saldo (R$)', 'Parcela (R$)']],
+        body: employees.map(emp => [
+          emp.colaborador,
+          emp.empresa,
+          emp.vinculo,
+          emp.status,
+          formatCurrency(emp.totalEmprestado),
+          formatCurrency(emp.totalRecebido),
+          formatCurrency(emp.saldoDevedor),
+          formatCurrency(emp.parcelaMensal)
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
+        styles: { fontSize: 8, cellPadding: 2 },
+        margin: { top: 10, left: 5, right: 60 },
+        willDrawPage: addBackground
+      });
+
+      // --- PÁGINA 2: DETALHE POR CONTRATO ---
+      doc.addPage();
+      addBackground();
+      doc.setFontSize(16);
+      doc.setTextColor(5, 150, 105);
+      doc.text('DETALHAMENTO POR CONTRATO', 5, 2);
+
+      autoTable(doc, {
+        startY: 8,
+        head: [['Colaborador', 'Contrato', 'Total', 'Pelas', 'V. Parcela', 'Recebido', 'Saldo', 'Pagas', 'Faltam', 'Status', 'Início']],
+        body: contracts.map(c => [
+          c.colaborador,
+          c.contrato,
+          formatCurrency(c.valorTotal),
+          c.qtdParcelas,
+          formatCurrency(c.valorParcela),
+          formatCurrency(c.recebido),
+          formatCurrency(c.saldo),
+          c.parcelasPagas,
+          c.parcelasRestantes,
+          c.status,
+          formatDate(c.dataInicio)
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [16, 185, 129] },
+        styles: { fontSize: 7, cellPadding: 1.5 },
+        margin: { top: 8, left: 5, right: 60 },
+        willDrawPage: addBackground
+      });
+
+      // --- PÁGINA 3: HISTÓRICO DE PARCELAS ---
+      doc.addPage();
+      addBackground();
+      doc.setFontSize(16);
+      doc.setTextColor(5, 150, 105);
+      doc.text('HISTÓRICO DE PARCELAS / CICLOS', 5, 2);
+
+      autoTable(doc, {
+        startY: 8,
+        head: [['Colaborador', 'Empresa', 'Ciclo', 'Vencimento', 'Valor', 'Status', 'Pagamento', 'Forma']],
+        body: payments.map(p => [
+          p.colaborador,
+          p.empresa,
+          p.ciclo,
+          formatDate(p.vencimento),
+          formatCurrency(p.valor),
+          p.status,
+          formatDate(p.dataPagamento),
+          p.formaPagamento || '-'
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [16, 185, 129] },
+        styles: { fontSize: 8, cellPadding: 2 },
+        margin: { top: 8, left: 5, right: 60 },
+        willDrawPage: addBackground,
+        didDrawPage: (data) => {
+          // Rodapé simples
+          const str = "Página " + doc.getNumberOfPages();
+          doc.setFontSize(8);
+          doc.setTextColor(150);
+          doc.text(str, pageWidth - 20, pageHeight - 8);
+        }
+      });
+
+      doc.save(`Relatorio_Financeiro_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      throw error;
+    }
   }
 }

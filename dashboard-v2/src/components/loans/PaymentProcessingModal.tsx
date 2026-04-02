@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, CheckCircle, Clock, Calendar, CreditCard, Loader2, AlertCircle, CheckSquare, Square } from "lucide-react";
+import { X, CheckCircle, Clock, Calendar, CreditCard, Loader2, AlertCircle, CheckSquare, Square, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatCurrency, formatDate } from "@/services/loans.service";
 import { PaymentsService, LoanPayment } from "@/services/payments.service";
+import { useDataMode } from "@/contexts/DataModeContext";
 
 interface PaymentProcessingModalProps {
   isOpen: boolean;
@@ -25,15 +26,16 @@ export function PaymentProcessingModal({ isOpen, onClose, monthCycle }: PaymentP
   const [postponedDate, setPostponedDate] = useState("");
   const [showPostponeInput, setShowPostponeInput] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  // Determinar mês atual se não fornecido
-  const currentMonth = monthCycle || new Date().toISOString().slice(0, 7);
+  const { isTestMode } = useDataMode();
+  
+  // Estado para o Mês Selecionado (Ex: '2026-04')
+  const [selectedMonth, setSelectedMonth] = useState(monthCycle || new Date().toISOString().slice(0, 7));
 
   useEffect(() => {
     if (isOpen) {
       loadPayments();
     }
-  }, [isOpen, currentMonth]);
+  }, [isOpen, selectedMonth, isTestMode]);
 
   const loadPayments = async () => {
     setIsLoading(true);
@@ -42,8 +44,8 @@ export function PaymentProcessingModal({ isOpen, onClose, monthCycle }: PaymentP
     
     try {
       const [paymentsData, statsData] = await Promise.all([
-        PaymentsService.getPaymentsByMonth(currentMonth),
-        PaymentsService.getMonthStats(currentMonth)
+        PaymentsService.getPaymentsByMonth(selectedMonth, isTestMode),
+        PaymentsService.getMonthStats(selectedMonth, isTestMode)
       ]);
       
       setPayments(paymentsData);
@@ -54,6 +56,12 @@ export function PaymentProcessingModal({ isOpen, onClose, monthCycle }: PaymentP
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const changeMonth = (offset: number) => {
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const date = new Date(year, month - 1 + offset, 1);
+    setSelectedMonth(date.toISOString().slice(0, 7));
   };
 
   const toggleSelection = (id: string) => {
@@ -85,7 +93,7 @@ export function PaymentProcessingModal({ isOpen, onClose, monthCycle }: PaymentP
       await PaymentsService.processBatch({
         payment_ids: selectedIds,
         action: 'PAGO'
-      });
+      }, isTestMode);
       
       setSuccessMessage(`${selectedIds.length} parcela(s) marcada(s) como PAGO`);
       await loadPayments();
@@ -107,7 +115,7 @@ export function PaymentProcessingModal({ isOpen, onClose, monthCycle }: PaymentP
         payment_ids: selectedIds,
         action: 'POSTERGADO',
         postponed_date: postponedDate
-      });
+      }, isTestMode);
       
       setSuccessMessage(`${selectedIds.length} parcela(s) postergada(s) para ${postponedDate}`);
       setShowPostponeInput(false);
@@ -159,7 +167,25 @@ export function PaymentProcessingModal({ isOpen, onClose, monthCycle }: PaymentP
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-slate-900">Processar Parcelas</h2>
-                  <p className="text-sm text-slate-500">Mês: {currentMonth}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <button 
+                      onClick={() => changeMonth(-1)}
+                      className="p-1 hover:bg-slate-100 rounded-md transition-colors text-slate-400 hover:text-emerald-600"
+                      title="Mês Anterior"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <span className="text-sm font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                      Mês: {selectedMonth.split('-')[1]}/{selectedMonth.split('-')[0]}
+                    </span>
+                    <button 
+                      onClick={() => changeMonth(1)}
+                      className="p-1 hover:bg-slate-100 rounded-md transition-colors text-slate-400 hover:text-emerald-600"
+                      title="Próximo Mês"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
               <button

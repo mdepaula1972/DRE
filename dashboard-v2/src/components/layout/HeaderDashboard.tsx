@@ -11,14 +11,21 @@ import { APP_VERSION } from "@/version";
 import { TestEmployeeService } from "@/services/test-employee.service";
 import { ReportExportService } from "@/services/report-export.service";
 import { NewLoanModal } from "@/components/loans/NewLoanModal";
+import { FilterValues } from "@/components/loans/FilterBar";
 
-export function HeaderDashboard() {
+interface HeaderDashboardProps {
+  activeFilters?: FilterValues;
+  isTestMode?: boolean;
+}
+
+export function HeaderDashboard({ activeFilters, isTestMode }: HeaderDashboardProps) {
   const router = useRouter();
-  const { dataMode, setDataMode, isTestMode } = useDataMode();
+  const { dataMode, setDataMode } = useDataMode();
   const [hasTestEmployee, setHasTestEmployee] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isNewLoanOpen, setIsNewLoanOpen] = useState(false);
+  const [hasSuccess, setHasSuccess] = useState(false);
 
   const handleGoHome = () => {
     router.push("/");
@@ -71,8 +78,9 @@ export function HeaderDashboard() {
     setIsLoading(true);
     setMessage(null);
     try {
-      await ReportExportService.exportFullReport();
-      setMessage('Relatório exportado com sucesso!');
+      await ReportExportService.exportFullReport(activeFilters, isTestMode);
+      setMessage('Relatório CSV exportado!');
+      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       setMessage('Erro ao exportar: ' + (error as Error).message);
     } finally {
@@ -80,14 +88,27 @@ export function HeaderDashboard() {
     }
   };
 
+  const handleExportPDF = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      // Passa os filtros ativos e o modo de teste para o serviço de exportação
+      await ReportExportService.exportFullReportPDF(activeFilters, isTestMode);
+      setMessage('Relatório PDF exportado!');
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      setMessage('Erro ao gerar PDF: ' + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleGenerateTermForLoan = async (loanData: any) => {
     try {
-      const emps = await fetchEmployees(isTestMode);
-      const empRaw = emps.find(e => e.id === loanData.employee_id) || {};
-      const empDetails = await LoansService.getEmployeeDetails(loanData.employee_id, isTestMode);
-      
-      const fullEmp = { ...empRaw, ...empDetails };
-      await PDFService.generateDebtTermPDF(loanData, fullEmp, isTestMode);
+      setIsLoading(true);
+      // O segundo parâmetro é o objeto emp (opcional aqui pois o serviço busca no banco)
+      await PDFService.generateDebtTermPDF(loanData, {}, isTestMode);
+      setMessage('Termo gerado com sucesso!');
     } catch (err) {
       console.error(err);
       alert("Erro ao montar PDF. Verifique o console.");
@@ -132,11 +153,21 @@ export function HeaderDashboard() {
         <button 
           onClick={handleExportReport}
           disabled={isLoading}
-          className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-blue-200 disabled:opacity-50"
+          className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-blue-200 disabled:opacity-50"
           title="Exportar relatório completo para CSV"
         >
           <Download size={18} />
-          <span>Exportar</span>
+          <span>CSV</span>
+        </button>
+
+        <button 
+          onClick={handleExportPDF}
+          disabled={isLoading}
+          className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border border-red-200 disabled:opacity-50"
+          title="Exportar relatório completo para PDF (Paisagem)"
+        >
+          <FileText size={18} />
+          <span>PDF</span>
         </button>
 
         <button 
@@ -220,8 +251,14 @@ export function HeaderDashboard() {
 
       <NewLoanModal 
         isOpen={isNewLoanOpen} 
-        onClose={() => setIsNewLoanOpen(false)} 
-        onSuccess={() => window.location.reload()} 
+        onClose={() => {
+          setIsNewLoanOpen(false);
+          if (hasSuccess) {
+            setHasSuccess(false);
+            window.location.reload();
+          }
+        }} 
+        onSuccess={() => setHasSuccess(true)} 
         onGenerateTerm={handleGenerateTermForLoan}
       />
     </header>

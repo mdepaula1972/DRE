@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { Employee, Contract, LoanStats, ProjectionData } from '@/types/loans';
+import { PaymentsService } from './payments.service';
 
 // ─── Raw types from Supabase tables ─────────────────────────────────────────
 
@@ -210,7 +211,11 @@ export class LoansService {
     const result: Employee[] = [];
     emps.forEach(emp => {
       const empLoans = loansByEmp.get(emp.id) || [];
-      if (empLoans.length === 0) return;
+      const filters = _filters as any;
+      const showAll = filters?.mostrarTodos;
+      
+      // Se não for "mostrar todos" e não tiver empréstimo, pula
+      if (!showAll && empLoans.length === 0) return;
 
       const totalTaken = empLoans.reduce((a, ln) => a + (parseFloat(String(ln.amount)) || 0), 0);
       const balance = empLoans.reduce((a, ln) => a + calcDebtForLoan(ln), 0);
@@ -453,6 +458,10 @@ export class LoansService {
     if (error) {
       console.error(`[LoansService] Erro ao criar formulário (${table}):`, error);
       throw new Error(`Falha ao registrar empréstimo: ${error.message}`);
+    }
+
+    if (result && result.id) {
+      await PaymentsService.generateInstallments(result.id, isTestMode);
     }
 
     return result;

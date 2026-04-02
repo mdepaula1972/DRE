@@ -90,11 +90,37 @@ export class PDFService {
         }
       };
 
-      const rawCycle = loanData.start_cycle || loanData.startDate || today.toISOString();
-      const startCycleMonth = rawCycle.length <= 7 ? rawCycle + '-10' : rawCycle;
-      const reqDate = loanData.request_date || loanData.requestDate || loanData.created_at || today.toISOString();
-      
+      // Lógica Robusta de Datas
+      const rawCycle = loanData.start_cycle || loanData.startDate || "";
       const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+      let refMonthName = "---";
+      let refYear = today.getFullYear();
+      let firstPaymentFormatted = "10/--/----";
+
+      console.log("[PDFService] Dados Recebidos:", { loanData, rawCycle });
+
+      if (rawCycle) {
+        try {
+          const parts = rawCycle.split('T')[0].split('-');
+          const y = parseInt(parts[0]);
+          const m = parseInt(parts[1]);
+          
+          if (!isNaN(y) && !isNaN(m)) {
+            refYear = y;
+            refMonthName = monthNames[m - 1] || "---";
+
+            // Primeira Parcela = Ciclo + 1 Mês (Sempre dia 10)
+            const nextM = m === 12 ? 1 : m + 1;
+            const nextY = m === 12 ? y + 1 : y;
+            firstPaymentFormatted = `10/${String(nextM).padStart(2, '0')}/${nextY}`;
+          }
+        } catch (e) {
+          console.error("Erro no parse da data do ciclo", e);
+        }
+      }
+
+      const reqDate = loanData.request_date || loanData.requestDate || loanData.created_at || today.toISOString();
       
       const corpoTexto = `DEVEDOR: ${fullEmpDetails.employment_type === 'PJ' ? fullEmpDetails.corporate_name : fullEmpDetails.full_name}, ${fullEmpDetails.employment_type === 'PJ' ? 'pessoa jurídica de direito privado' : 'pessoa física'}, inscrito no ${fullEmpDetails.pj_type || 'CPF'} sob o n.º ${fullEmpDetails.document_id || ''}, estabelecido na ${fullAddress}, neste ato representada por ${fullEmpDetails.responsible_name || fullEmpDetails.full_name}, inscrito no CPF sob o n.º ${fullEmpDetails.responsible_cpf || fullEmpDetails.document_id || ''} e RG n.º ${fullEmpDetails.responsible_rg || fullEmpDetails.document_rg || '---'}.
 
@@ -106,9 +132,9 @@ CLÁUSULA PRIMEIRA – DO OBJETO DA DÍVIDA
 1.1. O(A) DEVEDOR(A) confessa e declara dever ao(à) CREDOR(A) a importância líquida, certa e exigível de ${fmt(reqAmount)}, referente ao empréstimo concedido pela MAR BRASIL SERVIÇOS E LOCAÇÕES LTDA. ao(à) DEVEDOR(A) em ${formatDate(reqDate)}.
 
 CLÁUSULA SEGUNDA – DA FORMA DE PAGAMENTO
-2.1. O valor confessado na Cláusula Primeira será quitado pelo(a) DEVEDOR(A) por meio de descontos nas futuras notas fiscais de prestação de serviços emitidas à MAR BRASIL SERVIÇOS E LOCAÇÕES LTDA., em ${reqInstallments} parcelas mensais e sucessivas, no valor de ${fmt(installmentValue)} cada uma, no dia 10 de cada mês, a partir de ${formatDate(startCycleMonth)}.
+2.1. O valor confessado na Cláusula Primeira será quitado pelo(a) DEVEDOR(A) por meio de descontos nas futuras notas fiscais de prestação de serviços emitidas à MAR BRASIL SERVIÇOS E LOCAÇÕES LTDA., em ${reqInstallments} parcelas mensais e sucessivas, no valor de ${fmt(installmentValue)} cada uma, no dia 10 de cada mês, a partir de ${firstPaymentFormatted}.
 
-2.2. O ciclo de referência desta confissão é ${monthNames[today.getMonth()]} de ${today.getFullYear()}. Os descontos serão aplicados automaticamente pela CREDORA no momento do processamento das notas fiscais, e o valor líquido a ser pago ao(à) DEVEDOR(A) será o resultado da nota fiscal menos o valor da parcela do empréstimo.
+2.2. O ciclo de referência desta confissão é ${refMonthName} de ${refYear}. Os descontos serão aplicados automaticamente pela CREDORA no momento do processamento das notas fiscais, e o valor líquido a ser pago ao(à) DEVEDOR(A) será o resultado da nota fiscal menos o valor da parcela do empréstimo.
 
 CLÁUSULA TERCEIRA – DA INADIMPLÊNCIA
 3.1. O não pagamento de qualquer parcela na data estipulada, implicará no vencimento antecipado de todo o saldo devedor, que se tornará imediatamente exigível pela CREDORA.

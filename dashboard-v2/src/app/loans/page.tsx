@@ -11,6 +11,7 @@ import { PaymentProcessingModal } from "@/components/loans/PaymentProcessingModa
 import { LoansService, formatCurrency } from "@/services/loans.service";
 import { Employee, LoanStats, ProjectionData } from "@/types/loans";
 import { useDataMode } from "@/contexts/DataModeContext";
+import { APP_VERSION } from "@/version";
 import { 
   Receipt, 
   PiggyBank, 
@@ -36,6 +37,7 @@ export default function LoansPage() {
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [stats, setStats] = useState<LoanStats | null>(null);
   const [projections, setProjections] = useState<ProjectionData[]>([]);
+  const [activeFilters, setActiveFilters] = useState<FilterValues | undefined>(undefined);
 
   // Calcula os totais dos cards dinamicamente a partir do array filtrado
   const computeStats = (list: Employee[], base: LoanStats | null): LoanStats | null => {
@@ -62,12 +64,12 @@ export default function LoansPage() {
   // Error states
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch data on mount and when test mode changes
+  // Fetch data on mount and when test mode or active filters change
   useEffect(() => {
-    fetchData();
-  }, [isTestMode]);
+    fetchData(activeFilters);
+  }, [isTestMode, activeFilters?.mostrarTodos]);
 
-  const fetchData = async () => {
+  const fetchData = async (filters?: FilterValues) => {
     setError(null);
     
     try {
@@ -85,9 +87,15 @@ export default function LoansPage() {
     try {
       // Fetch employees
       setIsLoadingEmployees(true);
-      const employeesData = await LoansService.getEmployees(undefined, isTestMode);
+      const employeesData = await LoansService.getEmployees(filters, isTestMode);
       setEmployees(employeesData);
-      setFilteredEmployees(employeesData); // Reset filters on data refresh
+      
+      // Se não houver filtros extras (busca, empresa, etc), o filtered é o mesmo
+      if (filters) {
+        applyLocalFilters(employeesData, filters);
+      } else {
+        setFilteredEmployees(employeesData);
+      }
     } catch (err) {
       console.error('Erro ao carregar colaboradores:', err);
       setError('Falha ao carregar colaboradores');
@@ -113,12 +121,26 @@ export default function LoansPage() {
   };
 
   const handleFilterChange = (filters: FilterValues) => {
-    let result = [...employees];
+    setActiveFilters(filters);
+    applyLocalFilters(employees, filters);
+  };
 
-    // Por padrão, oculta colaboradores totalmente quitados
+  const applyLocalFilters = (baseList: Employee[], filters: FilterValues) => {
+    let result = [...baseList];
+
+    // Se incluirQuitados for falso, filtramos quem tem status 'Quitado'
+    // Mas ATENÇÃO: se o saldo é 0 e o cara NUNCA teve empréstimo, ele também é 'Quitado' pelo logic atual?
+    // Não, EmployeesService.getEmployees coloca status 'Quitado' se balance <= 0.
+    
     if (!filters.incluirQuitados) {
-      result = result.filter(e => e.status !== 'Quitado');
+      // Filtra quem tem balance <= 0 MAS que JÁ TEVE empréstimo (totalTaken > 0)
+      // Se o cara NUNCA teve empréstimo (totalTaken == 0), ele só aparece se mostrarTodos for true
+      result = result.filter(e => {
+        if (e.totalTaken > 0 && e.balance <= 0) return false;
+        return true;
+      });
     }
+
     if (filters.search) {
       const term = filters.search.toLowerCase();
       result = result.filter(e => e.name.toLowerCase().includes(term));
@@ -150,7 +172,7 @@ export default function LoansPage() {
     <main className="min-h-screen bg-slate-50 pb-12">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
-        <HeaderDashboard />
+        <HeaderDashboard activeFilters={activeFilters} isTestMode={isTestMode} />
         
         <FilterBar onFilterChange={handleFilterChange} />
 
@@ -160,7 +182,7 @@ export default function LoansPage() {
             <AlertCircle size={20} />
             <span className="text-sm font-medium">{error}</span>
             <button 
-              onClick={fetchData}
+              onClick={() => fetchData(activeFilters)}
               className="ml-auto text-xs font-semibold underline hover:no-underline"
             >
               Tentar novamente
@@ -312,7 +334,7 @@ export default function LoansPage() {
             © 2026 Mar Brasil - Sistema de Gestão Financeira
           </p>
           <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 px-3 py-1 rounded-full text-slate-500">
-            Versão v1.0
+            Versão {APP_VERSION}
           </span>
         </footer>
       </div>
