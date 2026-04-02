@@ -268,14 +268,14 @@ export class LoansService {
 
       if (status === 'ATIVO') {
         contratosAtivos++;
-        if (ln.start_cycle && ln.installments) {
-          const [sy, sm] = ln.start_cycle.split('-').map(Number);
-          const endAbs = sy * 12 + sm + ln.installments - 1;
-          if (endAbs < menorEndAbs) {
-            menorEndAbs = endAbs;
-            proximoEncerrarLoan = ln;
+          const [sy, sm] = (ln.start_cycle || "").split("-").map(Number);
+          if (!isNaN(sy) && !isNaN(sm)) {
+            const endAbs = sy * 12 + sm + (parseInt(String(ln.installments)) || 0) - 1;
+            if (endAbs < menorEndAbs) {
+              menorEndAbs = endAbs;
+              proximoEncerrarLoan = ln;
+            }
           }
-        }
       } else {
         contratosLiquidados++;
       }
@@ -315,10 +315,17 @@ export class LoansService {
     let maxMonthAbs = now.getFullYear() * 12 + (now.getMonth() + 1) + 11;
     loans.forEach(ln => {
       if (!ln.start_cycle || !ln.installments) return;
-      const [sy, sm] = ln.start_cycle.split('-').map(Number);
-      const endAbs = sy * 12 + sm + ln.installments - 1;
+      const [sy, sm] = ln.start_cycle.split("-").map(Number);
+      if (isNaN(sy) || isNaN(sm)) return;
+      
+      const installments = parseInt(String(ln.installments)) || 0;
+      const endAbs = sy * 12 + sm + installments - 1;
       if (endAbs > maxMonthAbs) maxMonthAbs = endAbs;
     });
+
+    // Safety limit: 60 meses (5 anos) para evitar travamento da UI em caso de dados excessivos
+    const safetyLimit = currentAbs + 60;
+    if (maxMonthAbs > safetyLimit) maxMonthAbs = safetyLimit;
 
     const currentAbs = now.getFullYear() * 12 + (now.getMonth() + 1);
     const result: ProjectionData[] = [];

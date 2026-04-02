@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.28";
+export const APP_VERSION = "v.01.29";
 export const VERSION_DATE = "2026-04-02";
 export const VERSION_CHANGELOG = [
+  "v.01.29 - Correção nos botões Criar/Remover Teste (apontamento para tabelas independentes)",
   "v.01.28 - Alterado rótulo de colaboradores sem histórico para 'Sem Empréstimo' e ajuste fino nos selos de status",
   "v.01.27 - Correção de contratos fantasmas no PDF (lógica Dashboard sincronizada); Vertical Lift (2mm topo); Filtros e Modo de Dados sincronizados",
   "v.01.26 - Add console logs to PDFService for debugging; ensure refMonthName and refYear are correctly fallback",

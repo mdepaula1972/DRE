@@ -1,60 +1,45 @@
 import { supabase } from '@/lib/supabase';
 
 export class TestEmployeeService {
-  // Criar colaborador teste (versão melhorada)
+  // Criar colaborador teste (versão para tabelas de teste independentes)
   static async createTestEmployee(): Promise<string | null> {
     try {
-      // Criar employee básico primeiro
+      // 1. Criar employee básico na tabela de TESTE
       const { data: employee, error: empError } = await supabase
-        .from('employees')
+        .from('employees_test')
         .insert([{
-          name: 'USUÁRIO TESTE DASHBOARD',
+          full_name: 'USUÁRIO TESTE DASHBOARD',
           company: 'MarBR',
-          link_type: 'CLT',
+          employment_type: 'CLT',
           remuneration: 5000,
-          is_test: true,
-          created_at: new Date().toISOString()
+          status: 'Ativo',
+          start_date: new Date().toISOString()
         }])
         .select()
         .single();
 
       if (empError) {
-        console.error('Erro ao criar employee:', empError);
-        
-        // Se falhar, tentar versão mínima
-        const { data: minEmployee, error: minError } = await supabase
-          .from('employees')
-          .insert([{
-            name: 'USUÁRIO TESTE DASHBOARD',
-            company: 'MarBR',
-            is_test: true
-          }])
-          .select()
-          .single();
-
-        if (minError) throw minError;
-        return minEmployee?.id || null;
+        console.error('Erro ao criar employee_test:', empError);
+        throw empError;
       }
 
-      // Criar alguns contratos de teste
+      // 2. Criar um contrato de teste na tabela de TESTE
       if (employee?.id) {
+        const now = new Date();
+        const startCycle = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        
         await supabase
-          .from('contracts')
+          .from('employee_loans_test') 
           .insert([{
             employee_id: employee.id,
-            employee_name: employee.name,
-            company: employee.company,
-            value: 3000,
-            installment_value: 300,
+            amount: 5000,
             installments: 10,
-            installments_paid: 0,
-            balance: 3000,
-            status: 'ATIVO',
-            start_date: new Date().toISOString(),
-            end_date: new Date(Date.now() + 10 * 30 * 24 * 60 * 60 * 1000).toISOString(),
-            operation_number: 'TEST001',
-            description: 'Empréstimo de teste',
-            is_test: true
+            start_cycle: startCycle,
+            notes: 'Empréstimo de teste gerado automaticamente',
+            request_date: new Date().toISOString(),
+            paid_installments: 0,
+            postponed_months: 0,
+            amount_paid_extra: 0
           }]);
       }
 
@@ -65,28 +50,24 @@ export class TestEmployeeService {
     }
   }
 
-  // Remover todos os dados de teste
+  // Remover todos os dados das tabelas de teste
   static async removeTestData(): Promise<string> {
     try {
-      // Remover contratos de teste
-      const { error: contractError } = await supabase
-        .from('contracts')
+      // 1. Limpar empréstimos de teste
+      const { error: loanError } = await supabase
+        .from('employee_loans_test')
         .delete()
-        .eq('is_test', true);
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
 
-      if (contractError) {
-        console.error('Erro ao remover contratos teste:', contractError);
-      }
+      if (loanError) console.error('Erro ao limpar employee_loans_test:', loanError);
 
-      // Remover employees de teste
+      // 2. Limpar colaboradores de teste
       const { error: empError } = await supabase
-        .from('employees')
+        .from('employees_test')
         .delete()
-        .eq('is_test', true);
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
 
-      if (empError) {
-        console.error('Erro ao remover employees teste:', empError);
-      }
+      if (empError) console.error('Erro ao limpar employees_test:', empError);
 
       return 'Dados de teste removidos com sucesso';
     } catch (error) {
