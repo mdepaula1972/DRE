@@ -9,7 +9,7 @@ export interface Employee {
   balance: number;
   monthInstallment: number;
   contractsCount: number;
-  status: "Ativo" | "Provisão" | "Quitado" | "Inativo";
+  status: "Ativo" | "Provisão" | "Quitado" | "Inativo" | "Sem Empréstimo";
   avatar?: string;
   created_at?: string;
 }

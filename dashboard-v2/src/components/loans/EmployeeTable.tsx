@@ -141,7 +141,11 @@ function EmployeeRow({
               <p className="text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1">
                 {employee.name}
               </p>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${employee.status === 'Ativo' ? 'bg-success/10 text-success' : 'bg-amber-100 text-primary'}`}>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                employee.status === 'Ativo' ? 'bg-success/10 text-success' : 
+                employee.status === 'Quitado' ? 'bg-amber-100 text-amber-700' : 
+                'bg-slate-100 text-slate-500'
+              }`}>
                 {employee.status}
               </span>
             </div>

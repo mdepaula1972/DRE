@@ -233,7 +233,7 @@ export class LoansService {
         balance,
         monthInstallment,
         contractsCount: empLoans.length,
-        status: balance > 0 ? 'Ativo' : 'Quitado',
+        status: balance > 0 ? 'Ativo' : (totalTaken > 0 ? 'Quitado' : 'Sem Empréstimo'),
       });
     });
 
