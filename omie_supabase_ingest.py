@@ -366,7 +366,7 @@ def normalize_conta_pagar(item: Dict[str, Any], empresa_id: str, empresa_nome: s
     """Transforms a raw Omie record into a normalized structure."""
     info = item.get("info", {})
     cnab = item.get("cnab_integracao_bancaria", {})
-    data_entrada = item.get("data_entrada")
+    data_entrada = item.get("data_entrada") or datetime.now().strftime("%d/%m/%Y")
     ano, mes, yyyymm = parse_date_to_yyyymm(data_entrada)
     
     normalized = {
@@ -388,7 +388,7 @@ def normalize_conta_pagar(item: Dict[str, Any], empresa_id: str, empresa_nome: s
         "data_entrada": data_entrada,
         "data_previsao": item.get("data_previsao"),
         "data_vencimento": item.get("data_vencimento"),
-        "data_pagamento": item.get("data_baixa"),
+        "data_pagamento": item.get("data_baixa") or item.get("data_liquidacao") or item.get("dDtQuitacao"),
         "competencia": data_entrada,
         "ano_competencia": ano,
         "mes_competencia": mes,

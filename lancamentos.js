@@ -480,11 +480,11 @@ function formatCurrency(v) {
 
 // ─── EVENT HANDLERS ──────────────────────────────────────────────────────────
 
-document.getElementById('filterCompany').onchange = renderDashboard;
-document.getElementById('filterDateBase').onchange = renderDashboard;
-document.getElementById('filterMonth').onchange = renderDashboard;
-document.getElementById('filterStatus').onchange = renderDashboard;
-document.getElementById('filterSource').onchange = renderDashboard;
+// Filtragem manual: O dashboard só renderiza ao clicar no botão 'Aplicar Filtros'
+const btnApplyFilters = document.getElementById('applyFilters');
+if (btnApplyFilters) {
+    btnApplyFilters.onclick = renderDashboard;
+}
 
 document.getElementById('clearFilters').onclick = () => {
     document.getElementById('filterCompany').value = '';
