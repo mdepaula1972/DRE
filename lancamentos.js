@@ -9,6 +9,7 @@ let dimCategorias = new Map();
 let dimProjetos = new Map();
 let dimFornecedores = new Map();
 let dimDRE = new Map();
+let lastSyncInfo = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     init();
