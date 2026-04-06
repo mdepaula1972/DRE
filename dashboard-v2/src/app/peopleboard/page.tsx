@@ -9,6 +9,7 @@ import { EmployeeTable } from "@/components/loans/EmployeeTable";
 import { SideDrawer } from "@/components/loans/SideDrawer";
 import { ProfileDrawer } from "@/components/people/ProfileDrawer";
 import { PaymentProcessingModal } from "@/components/loans/PaymentProcessingModal";
+import { NewLoanModal } from "@/components/loans/NewLoanModal";
 import { LoansService, formatCurrency, getBillingMonthStr } from "@/services/loans.service";
 import { Employee, LoanStats, ProjectionData } from "@/types/loans";
 import { useDataMode } from "@/contexts/DataModeContext";
@@ -32,6 +33,7 @@ export default function PeopleboardPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isNewLoanOpen, setIsNewLoanOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<string | undefined>(undefined);
   
   // Data states
@@ -227,6 +229,7 @@ export default function PeopleboardPage() {
           activeFilters={activeFilters} 
           isTestMode={isTestMode} 
           onCreateEmployee={handleCreateEmployeeClick}
+          onOpenNewLoan={() => setIsNewLoanOpen(true)}
         />
         
         <FilterBar onFilterChange={handleFilterChange} />
@@ -424,6 +427,7 @@ export default function PeopleboardPage() {
         }} 
         employeeId={selectedEmployee}
         onDataChanged={fetchData}
+        onAddNewLoan={() => setIsNewLoanOpen(true)}
       />
 
       <ProfileDrawer 
@@ -440,6 +444,16 @@ export default function PeopleboardPage() {
       <PaymentProcessingModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
+      />
+
+      <NewLoanModal 
+        isOpen={isNewLoanOpen} 
+        onClose={() => setIsNewLoanOpen(false)} 
+        onSuccess={() => fetchData(activeFilters)}
+        onGenerateTerm={(loanData) => {
+          const { PDFService } = require('@/services/pdf.service');
+          PDFService.generateDebtTermPDF(loanData, {}, isTestMode);
+        }}
       />
     </main>
   );

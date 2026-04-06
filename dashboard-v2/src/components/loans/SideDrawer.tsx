@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Wallet, ArrowUpRight, History, CreditCard, Clock, CheckCircle, RotateCcw, Loader2 } from "lucide-react";
+import { X, Wallet, ArrowUpRight, History, CreditCard, Clock, CheckCircle, RotateCcw, Loader2, PlusCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Employee, Contract } from "@/types/loans";
 import { LoansService, formatCurrency, formatDate } from "@/services/loans.service";
@@ -14,9 +14,10 @@ interface SideDrawerProps {
   onClose: () => void;
   employeeId?: string;
   onDataChanged?: () => void;
+  onAddNewLoan?: () => void; // NOVO: prop para abrir o modal de criação
 }
 
-export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideDrawerProps) {
+export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged, onAddNewLoan }: SideDrawerProps) {
   const { isTestMode } = useDataMode();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -182,12 +183,22 @@ export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged }: SideD
                   </div>
                 </div>
               </div>
-              <button 
-                onClick={onClose}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-all text-slate-400 hover:text-red-500"
-              >
-                <X size={20} />
-              </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={onAddNewLoan}
+                    className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all shadow-sm flex items-center gap-2 text-xs font-bold"
+                    title="Novo Empréstimo"
+                  >
+                    <PlusCircle size={16} />
+                    <span>Novo</span>
+                  </button>
+                  <button 
+                    onClick={onClose}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-all text-slate-400 hover:text-red-500"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
             </div>
 
             {isLoading ? (

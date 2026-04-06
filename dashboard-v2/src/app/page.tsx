@@ -33,6 +33,7 @@ export default function LandingPage() {
     { href: "/contratos.html", icon: FileText, title: "Contratos", sub: "Vínculo Faturamento" },
     { href: "/comissoes.html", icon: BadgeDollarSign, title: "Comissões", sub: "Divisão Equipe" },
     { href: "/mutuos.html", icon: Landmark, title: "Mútuos & Dividendos", sub: "Transferências" },
+    { href: "/lancamentos.html", icon: HandCoins, title: "Lançamentos", sub: "Fluxo de Caixa (Omie)" },
   ];
 
   return (
