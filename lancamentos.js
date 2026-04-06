@@ -8,6 +8,7 @@ let allAllocations = [];
 let dimCategorias = new Map();
 let dimProjetos = new Map();
 let dimFornecedores = new Map();
+let dimDRE = new Map();
 
 document.addEventListener('DOMContentLoaded', () => {
     init();
@@ -92,16 +93,31 @@ async function fetchData() {
     // 3. Fetch Rateios (Paginação)
     const allocData = await fetchAll('omie_rateios', 'null', null);
 
-    // 5. Fetch Dimensão Fornecedores (Toda a lista contornando o limite de 1000)
+    // 5. Fetch Dimensões (Toda a lista contornando o limite de 1000)
     const fornData = await fetchAll('omie_dim_fornecedores', 'null', null);
     const catData = await fetchAll('omie_dim_categorias', 'null', null);
     const projData = await fetchAll('omie_dim_projetos', 'null', null);
+    const dreData = await fetchAll('omie_dim_dre', 'null', null);
 
     allAllocations = allocData || [];
     
     // Mapear Dimensões para busca rápida
-    dimCategorias = new Map((catData || []).map(c => [String(c.codigo_categoria), c.descricao_categoria]));
+    // Categorias: Guardamos objeto com descrição e vínculo DRE
+    dimCategorias = new Map();
+    (catData || []).forEach(c => {
+        dimCategorias.set(String(c.codigo_categoria), {
+            descricao: c.descricao_categoria,
+            codigo_dre: String(c.codigo_conta_dre || '')
+        });
+    });
+
     dimProjetos = new Map((projData || []).map(p => [String(p.codigo_projeto), p.descricao_projeto]));
+
+    // Dimensão DRE: Mapa de Código -> Descrição
+    dimDRE = new Map();
+    (dreData || []).forEach(d => {
+        dimDRE.set(String(d.codigo_conta_dre), d.descricao_conta_dre);
+    });
     
     // Mapear Fornecedores: Prioridade para Nome Fantasia, depois Razão Social, depois CNPJ
     dimFornecedores = new Map();
@@ -280,7 +296,7 @@ function renderTable(data) {
             <td class="td-data">${formatDateBR(item._dataLabel)}</td>
             <td class="fw-bold td-fornecedor" title="${item.fornecedor}">${item.fornecedor}</td>
             <td class="fw-bold text-dark td-valor">${formatCurrency(item.valor)}</td>
-            <td class="td-cat"><span class="badge bg-light text-dark border">${dimCategorias.get(item.categoria_id) || item.categoria_id}</span></td>
+            <td class="td-cat"><span class="badge bg-light text-dark border">${dimCategorias.get(item.categoria_id)?.descricao || item.categoria_id}</span></td>
             <td class="td-fonte"><span class="source-tag ${item.fonte === 'CP' ? 'source-cp' : 'source-mov'}">${item.fonte}</span></td>
             <td class="td-acoes">
                 <button class="btn btn-sm btn-outline-primary btn-expand" onclick="toggleExpand(event, '${item.id_global}')">
@@ -296,7 +312,19 @@ function renderTable(data) {
         detailTr.className = 'detail-row';
         detailTr.style.display = 'none';
 
-        const dreText = hasAlloc ? allocations[0].descricao_conta_dre : 'Não vinculado';
+        // Lógica de Conta DRE: 
+        // 1. Tenta pegar do rateio
+        // 2. Senão, tenta pegar da categoria principal
+        let dreText = 'Não vinculado';
+        if (hasAlloc && allocations[0].descricao_conta_dre) {
+            dreText = allocations[0].descricao_conta_dre;
+        } else {
+            const catInfo = dimCategorias.get(item.categoria_id);
+            if (catInfo && catInfo.codigo_dre) {
+                dreText = dimDRE.get(catInfo.codigo_dre) || `Cód: ${catInfo.codigo_dre}`;
+            }
+        }
+
         const projId = hasAlloc ? String(allocations[0].codigo_projeto) : String(item.codigo_projeto || '');
         const projText = dimProjetos.get(projId) || projId || 'Nenhum';
         const deptoText = hasAlloc ? allocations.map(a => `${a.descricao_departamento} (${a.percentual_departamento}%)`).join(', ') : 'Padrão';

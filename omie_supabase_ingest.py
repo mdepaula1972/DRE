@@ -643,7 +643,7 @@ def fetch_all_projetos(client: OmieClient, config: RuntimeConfig) -> List[Dict[s
     return all_proj
 
 def build_dimension_maps(cats: List[Dict[str, Any]], dre: List[Dict[str, Any]], projs: List[Dict[str, Any]]) -> Tuple[Dict, Dict, Dict]:
-    cat_map = {safe_str(c.get("codigo")): {"descricao": c.get("descricao"), "codigo_conta_dre": safe_str(c.get("conta_dre"))} for c in cats}
+    cat_map = {safe_str(c.get("codigo")): {"descricao": c.get("descricao"), "codigo_conta_dre": safe_str(c.get("codigo_dre"))} for c in cats}
     dre_map = {safe_str(d.get("codigoDRE")): {
         "descricao": d.get("descricaoDRE"),
         "nao_exibir_dre": d.get("naoExibirDRE"),
