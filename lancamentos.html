@@ -68,6 +68,8 @@
         }
         .td-status { width: 120px; }
         .td-data { width: 100px; }
+        .td-empresa { width: 100px; }
+        .td-fornecedor { width: 250px; }
         .td-valor { width: 130px; }
         .td-cat { width: 150px; }
         .td-fonte { width: 80px; }
@@ -142,7 +144,10 @@
                 <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" style="max-height:80px;">
                 <div>
                     <h1 class="h3 fw-bold text-dark mb-0">Lançamentos Financeiros</h1>
-                    <p class="text-muted mb-0">Gestão de Competência e Caixa (Omie) <span class="badge bg-light text-muted border ms-2" style="font-size: 0.6rem;">v29.0</span></p>
+                    <p class="text-muted mb-0">Gestão de Competência e Caixa (Omie) <span class="badge bg-light text-muted border ms-2" style="font-size: 0.6rem;">v30.0</span></p>
+                </div>
+                <div id="lastSyncContainer" class="small text-muted border-start ps-3 ms-3 d-none d-md-block">
+                    <!-- Preenchido pelo JS -->
                 </div>
             </div>
             <div class="d-flex gap-2">
@@ -197,6 +202,7 @@
                             <tr>
                                 <th class="ps-4 td-status">STATUS</th>
                                 <th class="td-data">DATA REG.</th>
+                                <th class="td-empresa">EMPRESA</th>
                                 <th class="td-fornecedor">FORNECEDOR / BENEFICIÁRIO</th>
                                 <th class="td-valor">VALOR</th>
                                 <th class="td-cat">CATEGORIA</th>
@@ -221,13 +227,36 @@
                     <h5 class="modal-title fw-bold text-primary">Sincronização Omie</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body text-center p-4">
-                    <i class="bi bi-info-circle text-info fs-1 mb-3"></i>
-                    <p>O dashboard exibe os dados salvos no <strong>Supabase</strong>.</p>
-                    <p class="text-muted small">Para buscar novos lançamentos do Omie, execute o comando abaixo no servidor:</p>
-                    <div class="bg-dark text-light p-3 rounded text-start font-monospace small mb-3">
-                        python omie_supabase_ingest.py --modo registro --persist-supabase
+                <div class="modal-body p-4">
+                    <p class="mb-4">Para atualizar os dados do dashboard com as informações mais recentes do Omie, siga os passos abaixo:</p>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted">1. DEFINA O PERÍODO INICIAL</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-calendar-event"></i></span>
+                            <input type="text" id="syncDateInput" class="form-control" value="01/06/2025" placeholder="DD/MM/AAAA">
+                        </div>
+                        <small class="text-muted mt-1 d-block">Padrão sugerido: 01/06/2025</small>
                     </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted">2. COPIE O COMANDO ABAIXO</label>
+                        <div class="bg-dark p-3 rounded position-relative">
+                            <code id="syncCommandCode" class="text-info small" style="word-break: break-all;">
+                                python omie_supabase_ingest.py --modo registro --de 01/06/2025 --empresa all --verbose --persist-supabase --include-movimentos-saida
+                            </code>
+                            <button class="btn btn-sm btn-outline-info position-absolute top-0 end-0 m-2" onclick="copySyncCommand()">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info border-0 bg-light-info mb-0">
+                        <h6 class="alert-heading fw-bold small"><i class="bi bi-terminal me-2"></i>3. EXECUTE NO TERMINAL</h6>
+                        <p class="mb-0 small text-muted">Abra o PowerShell na pasta do projeto e cole o comando copiado acima.</p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
                     <button class="btn btn-primary w-100 py-2" onclick="window.location.reload()">Recarregar Dashboard</button>
                 </div>
             </div>

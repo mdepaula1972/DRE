@@ -12,14 +12,45 @@ let dimDRE = new Map();
 
 document.addEventListener('DOMContentLoaded', () => {
     init();
+    
+    // Listener para o Gerador de Comando de Sincronização
+    const syncInput = document.getElementById('syncDateInput');
+    if (syncInput) {
+        syncInput.addEventListener('input', updateSyncCommand);
+    }
+    
     setupLayout();
 });
+
+function updateSyncCommand() {
+    const date = document.getElementById('syncDateInput').value || '01/06/2025';
+    const command = `python omie_supabase_ingest.py --modo registro --de ${date} --empresa all --verbose --persist-supabase --include-movimentos-saida`;
+    document.getElementById('syncCommandCode').textContent = command;
+}
+
+function copySyncCommand() {
+    const command = document.getElementById('syncCommandCode').textContent;
+    navigator.clipboard.writeText(command.trim()).then(() => {
+        const btn = document.querySelector('[onclick="copySyncCommand()"]');
+        const icon = btn.querySelector('i');
+        icon.className = 'bi bi-check-lg';
+        btn.classList.replace('btn-outline-info', 'btn-success');
+        setTimeout(() => {
+            icon.className = 'bi bi-clipboard';
+            btn.classList.replace('btn-success', 'btn-outline-info');
+        }, 2000);
+    });
+}
 
 async function init() {
     try {
         setLoading(true);
-        await fetchData();
+        await Promise.all([
+            fetchData(),
+            fetchLastSync()
+        ]);
         renderDashboard();
+        updateSyncUI();
     } catch (err) {
         console.error('Erro na inicialização:', err);
         alert('Erro ao carregar dados do Supabase.');
@@ -81,6 +112,37 @@ async function fetchAll(tableName, filterColumn = 'data_referencia', minDate = '
     return results;
 }
 
+async function fetchLastSync() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('omie_sync_logs')
+            .select('*')
+            .order('timestamp', { ascending: false })
+            .limit(1);
+        
+        if (data && data.length > 0) {
+            lastSyncInfo = data[0];
+        }
+    } catch (err) {
+        console.warn('Erro ao buscar logs de sincronização:', err);
+    }
+}
+
+function updateSyncUI() {
+    const container = document.getElementById('lastSyncContainer');
+    if (!container || !lastSyncInfo) return;
+
+    const date = new Date(lastSyncInfo.timestamp);
+    const dateStr = date.toLocaleString('pt-BR');
+    const statusClass = lastSyncInfo.status === 'SUCESSO' ? 'text-success' : 'text-danger';
+    
+    container.innerHTML = `
+        <span class="me-2">Última Atualização:</span>
+        <span class="fw-bold ${statusClass}">${dateStr}</span>
+        <i class="bi bi-info-circle ms-1" title="${lastSyncInfo.detalhes || ''}"></i>
+    `;
+}
+
 async function fetchData() {
     const START_DATE = '2025-06-01';
 
@@ -90,8 +152,8 @@ async function fetchData() {
     // 2. Fetch Movimentos de Saída (Paginação)
     const movData = await fetchAll('omie_mov_saidas', 'data_pagamento', START_DATE);
 
-    // 3. Fetch Rateios (Paginação)
-    const allocData = await fetchAll('omie_rateios', 'null', null);
+    // 3. Fetch Rateios (Tabela oficial do Supabase para alocação Categoria/Departamento)
+    const allocData = await fetchAll('omie_cp_allocations', 'null', null);
 
     // 5. Fetch Dimensões (Toda a lista contornando o limite de 1000)
     const fornData = await fetchAll('omie_dim_fornecedores', 'null', null);
@@ -149,6 +211,7 @@ async function fetchData() {
             id_global: `cp_${item.codigo_lancamento_omie}`,
             fonte: 'CP',
             fornecedor: fornecedorNome,
+            empresa: item.empresa_nome || 'DZM',
             valor: parseFloat(item.valor_documento) || 0,
             categoria_id: String(item.codigo_categoria_padrao || 'S/ Cat')
         };
@@ -176,6 +239,7 @@ async function fetchData() {
             id_global: `mov_${item.dedupe_key}`,
             fonte: 'MOV',
             fornecedor: fornecedorNome,
+            empresa: item.empresa_nome || 'Mar Brasil',
             valor: parseFloat(item.valor_pago) || 0,
             categoria_id: String(item.codigo_categoria || 'S/ Cat')
         };
@@ -294,6 +358,7 @@ function renderTable(data) {
                 <span class="small fw-bold">${statusLabel}</span>
             </td>
             <td class="td-data">${formatDateBR(item._dataLabel)}</td>
+            <td class="td-empresa small fw-bold text-muted">${item.empresa}</td>
             <td class="fw-bold td-fornecedor" title="${item.fornecedor}">${item.fornecedor}</td>
             <td class="fw-bold text-dark td-valor">${formatCurrency(item.valor)}</td>
             <td class="td-cat"><span class="badge bg-light text-dark border">${dimCategorias.get(item.categoria_id)?.descricao || item.categoria_id}</span></td>
@@ -327,7 +392,19 @@ function renderTable(data) {
 
         const projId = hasAlloc ? String(allocations[0].codigo_projeto) : String(item.codigo_projeto || '');
         const projText = dimProjetos.get(projId) || projId || 'Nenhum';
-        const deptoText = hasAlloc ? allocations.map(a => `${a.descricao_departamento} (${a.percentual_departamento}%)`).join(', ') : 'Padrão';
+        
+        // Detalhamento de Departamentos (Rateio)
+        let deptoHtml = '<span class="text-muted">Padrão / Sem Rateio</span>';
+        if (hasAlloc) {
+            deptoHtml = `<ul class="list-unstyled mb-0 mt-1">
+                ${allocations.map(a => `
+                    <li class="mb-1 border-bottom pb-1 d-flex justify-content-between">
+                        <span><i class="bi bi-diagram-3 me-2"></i>${a.descricao_departamento || a.codigo_departamento}</span>
+                        <span class="fw-bold">${formatCurrency(a.valor_alocado)} <small class="text-muted">(${a.percentual_departamento}%)</small></span>
+                    </li>
+                `).join('')}
+            </ul>`;
+        }
 
         detailTr.innerHTML = `
             <td colspan="7" class="p-4 border-top-0">
@@ -344,9 +421,9 @@ function renderTable(data) {
                         <div class="detail-label">Projeto</div>
                         <div class="detail-value">${projText}</div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="detail-label">Departamentos / Rateio</div>
-                        <div class="detail-value">${deptoText}</div>
+                    <div class="col-md-5">
+                        <div class="detail-label">Departamentos / Rateio Detalhado</div>
+                        <div class="detail-value">${deptoHtml}</div>
                         <div class="detail-label">Observação / ID</div>
                         <div class="detail-value small text-muted">
                             ${item.codigo_lancamento_omie ? `OMIE: ${item.codigo_lancamento_omie}` : (item.codigo_movimento_cc ? `MOV: ${item.codigo_movimento_cc}` : '')}

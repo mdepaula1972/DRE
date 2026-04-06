@@ -280,27 +280,45 @@ class SupabaseClient:
             end = min(start + chunk_size, total)
             chunk = records[start:end]
             
-            try:
-                resp = requests.post(target_url, json=chunk, headers=self.headers)
-                # Success status: 200, 201, 204
-                if resp.status_code in [200, 201, 204]:
-                    total_sent += len(chunk)
-                    if self.verbose:
-                        print(f"    Batch {i+1}/{num_chunks}: Success ({len(chunk)} rows)")
-                else:
-                    print(f"\n  [!] ERRO DE PERSISTÊNCIA NO SUPABASE")
-                    print(f"    Tabela: {table_name}")
-                    print(f"    Lote: {i+1}/{num_chunks}")
-                    print(f"    Status HTTP: {resp.status_code}")
-                    print(f"    Resposta: {resp.text}")
-                    print(f"    Interrompendo persistência para esta tabela.\n")
-                    return False
-            except Exception as e:
-                print(f"\n  [!] EXCEÇÃO NO SUPABASE: {str(e)}")
-                return False
+            success = False
+            max_retries = 3
+            retry_count = 0
+            
+            while not success and retry_count < max_retries:
+                try:
+                    resp = requests.post(target_url, json=chunk, headers=self.headers, timeout=60)
+                    if resp.status_code in [200, 201, 204]:
+                        success = True
+                        total_sent += len(chunk)
+                        if self.verbose: 
+                            print(f"    Batch {i+1}/{num_chunks}: Success ({len(chunk)} rows)")
+                    else:
+                        raise Exception(f"Status {resp.status_code}: {resp.text}")
+                except Exception as e:
+                    retry_count += 1
+                    print(f"    [!] Erro Batch {i+1}/{num_chunks} (Tentativa {retry_count}/{max_retries}): {e}")
+                    if retry_count < max_retries:
+                        print(f"    [!] Aguardando 5s para nova tentativa devido a instabilidade de rede...")
+                        time.sleep(5)
+                    else:
+                        print(f"    [!] EXCEÇÃO CRÍTICA NO SUPABASE APÓS RETRIES: {e}")
+                        return False
         
         print(f"  [v] {table_name} final: {total} prep, {total_sent} sent, {num_chunks} batches. Status: {'Sucesso' if total_sent == total else 'Parcial'}.")
         return True
+
+    def log_sync_status(self, empresa_nome: str, status: str, detalhes: str):
+        """Registra o resultado da sincronização na tabela omie_sync_logs."""
+        record = {
+            "empresa_nome": empresa_nome,
+            "status": status,
+            "detalhes": detalhes,
+            "timestamp": datetime.now().isoformat()
+        }
+        try:
+            self.client.table("omie_sync_logs").insert(record).execute()
+        except Exception as e:
+            print(f"  [!] Erro ao registrar log de sincronização: {e}")
 
 # --- Helper Functions ---
 
@@ -370,13 +388,14 @@ def normalize_conta_pagar(item: Dict[str, Any], empresa_id: str, empresa_nome: s
         "data_entrada": data_entrada,
         "data_previsao": item.get("data_previsao"),
         "data_vencimento": item.get("data_vencimento"),
+        "data_pagamento": item.get("data_baixa"),
         "competencia": data_entrada,
         "ano_competencia": ano,
         "mes_competencia": mes,
         "competencia_yyyymm": yyyymm,
         "status_titulo": item.get("status_titulo"),
         "valor_documento": item.get("valor_documento"),
-        "valor_pago": item.get("valor_pag"),
+        "valor_pago": item.get("valor_pago") or item.get("valor_pag"),
         "info_dinc": info.get("dInc"),
         "info_hinc": info.get("hInc"),
         "info_uinc": info.get("uInc"),
@@ -401,7 +420,7 @@ def normalize_movimento_saida(item: Dict[str, Any], empresa_id: str, empresa_nom
     detalhes = item.get("detalhes", {})
     resumo = item.get("resumo", {})
     
-    data_pagamento = detalhes.get("dDtPagto")
+    data_pagamento = detalhes.get("dDtPagto") or detalhes.get("dDataPagamento")
     ano, mes, yyyymm = parse_date_to_yyyymm(data_pagamento)
     
     n_cod_titulo = detalhes.get("nCodTitulo")
@@ -987,8 +1006,10 @@ def main():
             if config.verbose: print(f"    Alocações preparada: {len(sb_allocs)} registros")
             if not sb_client.upsert_records("omie_cp_allocations", sb_allocs, "empresa_id,codigo_lancamento_omie,codigo_categoria,codigo_departamento"):
                 print(f"    [!] Falha ao persistir Alocações. Interrompendo empresa {app.empresa_nome}")
+                sb_client.log_sync_status(app.empresa_nome, "ERRO", "Falha na persistência de Alocações")
                 continue
             
+            sb_client.log_sync_status(app.empresa_nome, "SUCESSO", f"Sincronização concluída: {len(sb_titulos)} títulos e {len(sb_allocs)} alocações.")
             print(f"  [v] Persistence for {app.empresa_nome} completed.")
 
         # --- Financial Movements Path (Optional) ---
@@ -1163,13 +1184,26 @@ def load_env_config():
     key = (os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_SERVICE_KEY") or "").strip()
     
     apps = []
+    # Try conventional numbering 1 and 2
     for i in ["1", "2"]:
-        k = os.getenv(f"OMIE_APP_{i}_KEY", "").strip()
-        s = os.getenv(f"OMIE_APP_{i}_SECRET", "").strip()
-        eid = os.getenv(f"OMIE_APP_{i}_EMPRESA_ID", "").strip()
-        n = os.getenv(f"OMIE_APP_{i}_EMPRESA_NOME", f"Empresa {i}").strip()
+        k = os.getenv(f"OMIE_APP_{i}_KEY") or os.getenv(f"OMIE_APP_KEY_{i}")
+        s = os.getenv(f"OMIE_APP_{i}_SECRET") or os.getenv(f"OMIE_APP_SECRET_{i}")
+        eid = os.getenv(f"OMIE_APP_{i}_EMPRESA_ID") or os.getenv(f"OMIE_APP_EMPRESA_ID_{i}")
+        n = os.getenv(f"OMIE_APP_{i}_EMPRESA_NOME") or os.getenv(f"OMIE_APP_EMPRESA_NOME_{i}") or f"Empresa {i}"
         if all([k, s, eid]):
-            apps.append(OmieAppConfig(k, s, eid, n))
+            apps.append(OmieAppConfig(k.strip(), s.strip(), eid.strip(), n.strip()))
+    
+    # Try named environment variables (GitHub Secrets style)
+    if not apps:
+        dzm_k = os.getenv("OMIE_APP_KEY_DZM")
+        dzm_s = os.getenv("OMIE_APP_SECRET_DZM")
+        if dzm_k and dzm_s:
+            apps.append(OmieAppConfig(dzm_k.strip(), dzm_s.strip(), "DZM_ID_PLACEHOLDER", "DZM"))
+            
+        mar_k = os.getenv("OMIE_APP_KEY_MARBRASIL")
+        mar_s = os.getenv("OMIE_APP_SECRET_MARBRASIL")
+        if mar_k and mar_s:
+            apps.append(OmieAppConfig(mar_k.strip(), mar_s.strip(), "MARBRASIL_ID_PLACEHOLDER", "Mar Brasil"))
             
     if not apps:
         print("Error: No Omie Apps configured (Environment was not loaded correctly).")
