@@ -114,17 +114,24 @@ async function fetchAll(tableName, filterColumn = 'data_referencia', minDate = '
 
 async function fetchLastSync() {
     try {
+        // Se a tabela ainda não existir (primeira carga), o Supabase retornará erro. 
+        // Vamos capturar isso para não travar o dashboard.
         const { data, error } = await supabaseClient
             .from('omie_sync_logs')
             .select('*')
             .order('timestamp', { ascending: false })
             .limit(1);
         
+        if (error) {
+            console.warn('Log de sincronização ainda não disponível (tabela inexistente).');
+            return;
+        }
+
         if (data && data.length > 0) {
             lastSyncInfo = data[0];
         }
     } catch (err) {
-        console.warn('Erro ao buscar logs de sincronização:', err);
+        console.warn('Erro silencioso ao buscar logs:', err);
     }
 }
 
