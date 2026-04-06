@@ -5,6 +5,10 @@
     "engines": {
         "node": "20.x"
     },
+    "scripts": {
+        "install-dashboard": "cd dashboard-v2 && npm install",
+        "build": "cd dashboard-v2 && npm run build"
+    },
     "dependencies": {
         "@supabase/supabase-js": "^2.95.3",
         "iconv-lite": "^0.7.2"
