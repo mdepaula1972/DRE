@@ -101,13 +101,13 @@ export class LancamentosService {
       }
       
       return {
-        id_global: `cp_${item.codigo_lancamento_omie}`,
+        id_global: `cp_${item.codigo_titulo}`,
         fonte: 'CP',
         fornecedor: fornecedorNome,
         empresa: item.empresa_nome || 'DZM',
         valor: parseFloat(item.valor_documento) || 0,
         categoria_id: String(item.codigo_categoria_padrao || 'S/ Cat'),
-        codigo_lancamento_omie: item.codigo_lancamento_omie,
+        codigo_lancamento_omie: item.codigo_titulo,
         data_emissao: item.data_emissao,
         data_entrada: item.data_entrada,
         data_previsao: item.data_previsao,

@@ -1,7 +1,7 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.50";
+export const APP_VERSION = "v.01.51";
 export const VERSION_DATE = "2026-04-02";
 export const VERSION_CHANGELOG = [
   "v.01.47 - Correção: Sincronização de Saldo Devedor (fix em postponed_months nos painéis detalhados).",
