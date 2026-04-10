@@ -104,7 +104,7 @@ export class LancamentosService {
         id_global: `cp_${item.codigo_lancamento_omie}`,
         fonte: 'CP',
         fornecedor: fornecedorNome,
-        empresa: item.empresa_nome || 'DZM',
+        empresa: item.empresa_nome || 'Não Identificada',
         valor: parseFloat(item.valor_documento) || 0,
         categoria_id: String(item.codigo_categoria_padrao || 'S/ Cat'),
         codigo_lancamento_omie: item.codigo_lancamento_omie,
@@ -130,14 +130,14 @@ export class LancamentosService {
                          payload?.detalhes?.cNumDocFiscal || 
                          payload?.resumo?.cNomeCliente ||
                          item.empresa_nome || 
-                         'Lançamento Direto';
+                         'Não Identificada';
       }
 
       return {
         id_global: `mov_${item.dedupe_key}`,
         fonte: 'MOV',
         fornecedor: fornecedorNome,
-        empresa: item.empresa_nome || 'Mar Brasil',
+        empresa: item.empresa_nome || 'Não Identificada',
         valor: parseFloat(item.valor_pago) || 0,
         categoria_id: String(item.codigo_categoria || 'S/ Cat'),
         codigo_movimento_cc: item.codigo_movimento_cc,

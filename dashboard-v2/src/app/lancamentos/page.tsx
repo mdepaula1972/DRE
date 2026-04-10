@@ -69,10 +69,18 @@ export default function LancamentosPage() {
     today.setHours(0,0,0,0);
 
     let result = base.filter(item => {
-      // 1. Empresa
+      // 1. Empresa - Filtro robusto para evitar mistura de dados entre DZM e Mar Brasil
       if (filters.empresa) {
-        const eName = (item.empresa || '').toUpperCase();
-        if (!eName.includes(filters.empresa.toUpperCase())) return false;
+        const itemEmpresa = (item.empresa || '').toUpperCase().trim();
+        const filterEmpresa = filters.empresa.toUpperCase().trim();
+        
+        // Se o filtro for Mar Brasil, o item deve conter Mar Brasil e NÃO conter DZM (por segurança)
+        if (filterEmpresa === 'MAR BRASIL' && (!itemEmpresa.includes('MAR BRASIL') || itemEmpresa.includes('DZM'))) return false;
+        // Se o filtro for DZM, o item deve conter DZM e NÃO conter Mar Brasil
+        if (filterEmpresa === 'DZM' && (!itemEmpresa.includes('DZM') || itemEmpresa.includes('MAR BRASIL'))) return false;
+        
+        // Fallback genérico para outros casos futuros
+        if (filterEmpresa !== 'MAR BRASIL' && filterEmpresa !== 'DZM' && !itemEmpresa.includes(filterEmpresa)) return false;
       }
 
       // 2. Data Base / Mês
