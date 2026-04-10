@@ -114,11 +114,14 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                     <td className="px-5 py-3 text-center">
                       <button 
                         onClick={() => toggleExpand(item.id_global)}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          isExpanded ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+                          isExpanded 
+                            ? 'bg-slate-100 border-slate-300 text-slate-800' 
+                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                       >
-                        {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                        <span>Detalhes</span>
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                       </button>
                     </td>
                   </tr>

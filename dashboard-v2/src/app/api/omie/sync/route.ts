@@ -1,51 +1,103 @@
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { supabase } from '@/lib/supabase';
 
-const execAsync = promisify(exec);
+// Helper de formatação de data para o Supabase (DD/MM/YYYY -> YYYY-MM-DD)
+function toISODate(dateStr: string | null | undefined) {
+  if (!dateStr || dateStr.trim() === '') return null;
+  const parts = dateStr.includes('/') ? dateStr.split('/') : dateStr.split('-');
+  if (parts.length !== 3) return null;
+  if (parts[0].length === 4) return dateStr; 
+  return `${parts[2].slice(0,2)}-${parts[1]}-${parts[0]}`;
+}
 
 export async function POST() {
   try {
-    // Definimos D-3 para captar apenas atualizações super recentes e rodar rápido (Incremental Sync)
-    const d3 = new Date();
-    d3.setDate(d3.getDate() - 3);
-    const mm = String(d3.getMonth() + 1).padStart(2, '0');
-    const dd = String(d3.getDate()).padStart(2, '0');
-    const yyyy = d3.getFullYear();
+    // Buscar chaves do ambiente (Vercel ou Local .env)
+    const keys = [
+      { name: 'Mar Brasil', key: process.env.OMIE_APP_KEY_MARBRASIL, secret: process.env.OMIE_APP_SECRET_MARBRASIL },
+      { name: 'DZM', key: process.env.OMIE_APP_KEY_DZM, secret: process.env.OMIE_APP_SECRET_DZM }
+    ].filter(k => k.key && k.secret);
+
+    if (keys.length === 0) {
+      return NextResponse.json(
+        { status: 'error', message: 'Credenciais da API Omie (OMIE_APP_KEY_...) não estão configuradas no ambiente Vercel.' },
+        { status: 400 }
+      );
+    }
+
+    // Configurando intervalo: Alterações cadastradas nos últimos 5 dias
+    const d5 = new Date();
+    d5.setDate(d5.getDate() - 5);
+    const mm = String(d5.getMonth() + 1).padStart(2, '0');
+    const dd = String(d5.getDate()).padStart(2, '0');
+    const yyyy = d5.getFullYear();
     const deStr = `${dd}/${mm}/${yyyy}`;
 
-    // Tentativa otimizada de execução do script Python nativo (Ambiente Local/Self-hosted)
-    // O comando usa o pipeline já existente, garantindo a lógica idêntica de explosoes estruturais e rateios.
-    // O ambiente de cloud serverless pode não suportar isso sem buildpacks.
+    let updatedCount = 0;
     
-    // Command line arguments following the python cli
-    const command = `python ../omie_supabase_ingest.py --modo alteracao --de ${deStr} --empresa all --persist-supabase --include-movimentos-saida`;
-    
-    // Non-blocking fire and forget se for ambiente Vercel (onde pode não ter Python),
-    // mas responderemos OK agendado para o usuário não ficar congelado.
-    if (process.env.VERCEL) {
-      // Ambiente Vercel - O Ideal é apontar para um Github Action ou AWS Lambda
-      console.warn("Aviso: Sincronização em ambiente Serverless. Sugerido mapear para um Webhook Serverless (Github Actions).");
-      // Retornar Sucesso-falso como Placeholder de transição
-      return NextResponse.json({ 
-        status: 'queued', 
-        message: 'Aviso: Rodando no Vercel. A sincronização profunda será delegada às Actions de back-office.'
-      });
+    // 1. Sincronização Delta de "Contas a Pagar" (Status e Valor Pago)
+    for (const app of keys) {
+      let pagina = 1;
+      let totalPaginas = 1;
+
+      while (pagina <= totalPaginas) {
+        const payload = {
+          call: 'ListarContasPagar',
+          app_key: app.key,
+          app_secret: app.secret,
+          param: [{
+            pagina: pagina,
+            registros_por_pagina: 100,
+            filtrar_por_data_de: deStr,
+            filtrar_apenas_inclusao: "N",
+            filtrar_apenas_alteracao: "S"
+          }]
+        };
+
+        const response = await fetch('https://app.omie.com.br/api/v1/financas/contapagar/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        
+        // Finalizar paginação imediatamente se houver falha de credencial do Omie
+        if (data.faultstring) {
+          console.error(`Omie API Error [${app.name}]:`, data.faultstring);
+          break;
+        }
+
+        totalPaginas = data.total_de_paginas || 0;
+        const contas = data.conta_pagar_cadastro || [];
+
+        // Fazer updates super leves e controlados no Supabase (apenas atualiza o status de quem já existe)
+        for (const c of contas) {
+          const pagoRaw = c.valor_pago || c.valor_pag || 0;
+          const dataPagto = c.data_baixa || c.data_liquidacao || c.dDtQuitacao || null;
+          
+          await supabase.from('omie_cp_titulos').update({
+            status_titulo: c.status_titulo,
+            valor_pago: pagoRaw,
+            data_pagamento: toISODate(dataPagto)
+          }).eq('codigo_lancamento_omie', c.codigo_lancamento_omie);
+          
+          updatedCount++;
+        }
+        
+        pagina++;
+      }
     }
 
-    const { stdout, stderr } = await execAsync(command, { timeout: 15000 }); // timeout 15s p/ evitar hung
-    console.log('[Omie Sync]', stdout);
-
-    if (stderr && !stderr.includes('Warning')) {
-      console.error('[Omie Sync Error]', stderr);
-    }
-
-    return NextResponse.json({ status: 'success', message: 'Sincronização Delta (3 dias) concluída.' });
+    return NextResponse.json({ 
+      status: 'success', 
+      message: `Sincronização Rápida concluída com sucesso via Vercel. ${updatedCount} movimentações recentes analisadas e atualizadas.` 
+    });
     
   } catch (error: any) {
     console.error('Falha geral na sincronização Omie:', error);
     return NextResponse.json(
-      { status: 'error', message: error.message || 'Erro interno na sincronização' },
+      { status: 'error', message: error.message || 'Erro interno na sincronização REST Serverless.' },
       { status: 500 }
     );
   }
