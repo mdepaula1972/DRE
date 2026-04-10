@@ -78,8 +78,7 @@ export async function POST() {
           
           await supabase.from('omie_cp_titulos').update({
             status_titulo: c.status_titulo,
-            valor_pago: pagoRaw,
-            data_pagamento: toISODate(dataPagto)
+            valor_pago: pagoRaw
           }).eq('codigo_lancamento_omie', c.codigo_lancamento_omie);
           
           updatedCount++;
