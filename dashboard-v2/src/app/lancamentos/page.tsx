@@ -29,6 +29,10 @@ export default function LancamentosPage() {
   const [activeFilters, setActiveFilters] = useState<LancamentoFilterValues>({ dateBase: 'registro' });
   const [isSyncing, setIsSyncing] = useState(false);
   
+  // Pagination Config
+  const [pageSize, setPageSize] = useState(50);
+  const [currentPage, setCurrentPage] = useState(1);
+  
   // Loading states
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -133,8 +137,12 @@ export default function LancamentosPage() {
     result.sort((a, b) => (b._dataSort?.getTime() || 0) - (a._dataSort?.getTime() || 0));
 
     setFilteredLancamentos(result);
+    setCurrentPage(1); // Reset page on filter change
     computeStats(result);
   };
+
+  const totalPages = Math.ceil(filteredLancamentos.length / pageSize) || 1;
+  const paginatedLancamentos = filteredLancamentos.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const computeStats = (items: Lancamento[]) => {
     let totalOut = 0, totalPaid = 0, totalPending = 0;
@@ -247,20 +255,58 @@ export default function LancamentosPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-end px-2">
               <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">
-                Resultados
+                Resultados (Página {currentPage} de {totalPages})
               </span>
-              <span className="px-3 py-1 bg-slate-200/50 text-slate-600 text-xs font-bold rounded-lg border border-slate-200">
-                {filteredLancamentos.length} registros
-              </span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                  <span>Itens por página:</span>
+                  <select 
+                    value={pageSize}
+                    onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                    className="bg-white border border-slate-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  >
+                    <option value={10}>10</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={500}>500</option>
+                  </select>
+                </div>
+                <span className="px-3 py-1 bg-slate-200/50 text-slate-600 text-xs font-bold rounded-lg border border-slate-200">
+                  {filteredLancamentos.length} registros totais
+                </span>
+              </div>
             </div>
             
             <LancamentosTable 
-              lancamentos={filteredLancamentos} 
+              lancamentos={paginatedLancamentos} 
               allocations={allocations}
               dimDRE={dimDRE}
               dimProjetos={dimProjetos}
               dimCategorias={dimCategorias}
             />
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-slate-200">
+                <button 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 text-sm font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  Anterior
+                </button>
+                <div className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl">
+                  {currentPage} / {totalPages}
+                </div>
+                <button 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 text-sm font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  Próxima
+                </button>
+              </div>
+            )}
           </div>
         )}
 
