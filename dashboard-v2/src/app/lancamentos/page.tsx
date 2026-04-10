@@ -166,14 +166,14 @@ export default function LancamentosPage() {
     setIsSyncing(true);
     try {
       const res = await fetch('/api/omie/sync', { method: 'POST' });
-      if (!res.ok) {
-        throw new Error('Falha na sincronização');
-      }
-      // Se sucesso, recarregar os dados do painel atualizados
+      const json = await res.json();
+      const msg = json.message || 'Sincronização concluída.';
+      const errMsg = json.errors?.length > 0 ? `\n\nAvisos:\n${json.errors.join('\n')}` : '';
+      alert(`✅ ${msg}${errMsg}`);
+      // Reload data from Supabase after sync
       await fetchData();
-    } catch (e) {
-      console.error(e);
-      alert('Erro ao tentar sincronizar o Omie. Verifique a página de Logs ou os Webhooks.');
+    } catch (e: any) {
+      alert(`❌ Erro na sincronização: ${e.message}`);
     } finally {
       setIsSyncing(false);
     }
