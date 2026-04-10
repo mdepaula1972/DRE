@@ -200,7 +200,7 @@ export default function LancamentosPage() {
               className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all disabled:opacity-75 disabled:cursor-wait"
             >
               {isSyncing ? <Loader2 size={18} className="animate-spin" /> : <Clock size={18} />}
-              {isSyncing ? "Sincronizando..." : "Sincronizar Últimos 3 Dias (Omie)"}
+              {isSyncing ? "Sincronizando..." : "Sincronizar Últimos 7 Dias (Omie)"}
             </button>
           </div>
         </div>
