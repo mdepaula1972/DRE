@@ -73,15 +73,21 @@ export async function POST() {
 
         // Fazer updates super leves e controlados no Supabase (apenas atualiza o status de quem já existe)
         for (const c of contas) {
-          const pagoRaw = c.valor_pago || c.valor_pag || 0;
-          const dataPagto = c.data_baixa || c.data_liquidacao || c.dDtQuitacao || null;
+          const det = c.detalhes || {};
+          const cab = c.cabecalho || {};
+          const res = c.resumo || {};
           
-          await supabase.from('omie_cp_titulos').update({
-            status_titulo: c.status_titulo,
-            valor_pago: pagoRaw
-          }).eq('codigo_lancamento_omie', c.codigo_lancamento_omie);
+          const omieCode = det.nCodTitulo;
+          const status = cab.cStatus;
+          const pagoRaw = res.nValPago || 0;
           
-          updatedCount++;
+          if (omieCode && status) {
+            await supabase.from('omie_cp_titulos').update({
+              status_titulo: status,
+              valor_pago: pagoRaw
+            }).eq('codigo_lancamento_omie', omieCode);
+            updatedCount++;
+          }
         }
         
         pagina++;
