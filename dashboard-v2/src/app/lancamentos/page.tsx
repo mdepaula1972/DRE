@@ -107,11 +107,12 @@ export default function LancamentosPage() {
         item._dataSort = new Date(0);
       }
 
-      // 3. Status
+      // 3. Status — Confiar no status_titulo do Omie/Supabase como fonte de verdade
       const statusRaw = (item.status_titulo || '').toUpperCase();
       const isPaid = statusRaw.includes('PAGO');
+      // Omie pode gravar "ATRASADO" diretamente, ou pode ter "A VENCER" para vencidas não atualizadas
       const dtVenc = item.data_vencimento ? new Date(item.data_vencimento + 'T12:00:00') : new Date('2099-01-01');
-      const isOverdue = !isPaid && dtVenc < today && !!item.data_vencimento && item.data_vencimento !== '---';
+      const isOverdue = !isPaid && (statusRaw === 'ATRASADO' || (dtVenc < today && !!item.data_vencimento && item.data_vencimento !== '---'));
 
       if (filters.status) {
         if (filters.status === 'PAGO' && !isPaid) return false;

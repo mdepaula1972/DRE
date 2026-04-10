@@ -25,10 +25,12 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
 
   const isOverdue = (item: Lancamento) => {
     const isPaid = (item.status_titulo || '').toUpperCase().includes('PAGO');
+    const statusRaw = (item.status_titulo || '').toUpperCase();
     const today = new Date();
     today.setHours(0,0,0,0);
     const dtVenc = item.data_vencimento ? new Date(item.data_vencimento + 'T12:00:00') : new Date('2099-01-01');
-    return !isPaid && dtVenc < today && !!item.data_vencimento && item.data_vencimento !== '---';
+    // Trust Omie: status "ATRASADO" = overdue. Also catch "A VENCER" with past due date.
+    return !isPaid && (statusRaw === 'ATRASADO' || (dtVenc < today && !!item.data_vencimento && item.data_vencimento !== '---'));
   };
 
   const getStatusInfo = (item: Lancamento) => {
