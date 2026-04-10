@@ -10,89 +10,111 @@ export async function POST() {
 
     if (keys.length === 0) {
       return NextResponse.json(
-        { status: 'error', message: 'Credenciais Omie (OMIE_APP_KEY_...) não configuradas no Vercel.' },
+        { status: 'error', message: 'Credenciais Omie não configuradas no Vercel (OMIE_APP_KEY_...).' },
         { status: 400 }
       );
     }
 
-    // Últimos 7 dias em formato DD/MM/YYYY
+    // Last 7 days in DD/MM/YYYY
     const d7 = new Date();
     d7.setDate(d7.getDate() - 7);
     const deStr = `${String(d7.getDate()).padStart(2,'0')}/${String(d7.getMonth()+1).padStart(2,'0')}/${d7.getFullYear()}`;
 
-    let updatedCount = 0;
-    const errors: string[] = [];
+    // Fetch ONE page from Omie per company in parallel (fast, avoids Vercel timeout)
+    // The most recently altered records appear on page 1 (Omie sorts by alteration date desc)
+    const MAX_PAGES = 5;
 
-    for (const app of keys) {
-      let pagina = 1;
-      let totalPaginas = 1;
-
-      while (pagina <= totalPaginas) {
-        // Campos exatos conforme documentação/python: filtrar_por_data_de refere a data_alteracao quando combinado com filtrar_apenas_alteracao = "S"
-        const omiePayload = {
+    const fetchOmiePage = async (app: typeof keys[0], pagina: number) => {
+      const res = await fetch('https://app.omie.com.br/api/v1/financas/contapagar/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           call: 'ListarContasPagar',
           app_key: app.key,
           app_secret: app.secret,
           param: [{
             pagina,
-            registros_por_pagina: 50,
+            registros_por_pagina: 100,
             filtrar_por_data_de: deStr,
             filtrar_apenas_inclusao: "N",
             filtrar_apenas_alteracao: "S"
           }]
-        };
+        })
+      });
+      return res.json();
+    };
 
-        let data: any;
-        try {
-          const res = await fetch('https://app.omie.com.br/api/v1/financas/contapagar/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(omiePayload)
+    // Collect all records from multiple pages in parallel
+    const allContas: Array<{ codigo_lancamento_omie: number; status_titulo: string; valor_pago: number }> = [];
+    const errors: string[] = [];
+
+    for (const app of keys) {
+      try {
+        // Fetch page 1 first to know total pages
+        const firstData = await fetchOmiePage(app, 1);
+
+        if (firstData.faultstring) {
+          errors.push(`[${app.name}] Omie: ${firstData.faultstring}`);
+          continue;
+        }
+
+        const totalPages = Math.min(firstData.total_de_paginas || 1, MAX_PAGES);
+        const firstContas = firstData.conta_pagar_cadastro || [];
+
+        // Fetch remaining pages in parallel
+        const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+        const remainingData = await Promise.all(remainingPages.map(p => fetchOmiePage(app, p)));
+
+        const allFromApp = [
+          ...firstContas,
+          ...remainingData.flatMap(d => d.conta_pagar_cadastro || [])
+        ];
+
+        for (const c of allFromApp) {
+          if (!c.codigo_lancamento_omie || !c.status_titulo) continue;
+          allContas.push({
+            codigo_lancamento_omie: c.codigo_lancamento_omie,
+            status_titulo: c.status_titulo,
+            valor_pago: parseFloat(c.valor_pag || c.valor_pago || '0') || 0
           });
-          data = await res.json();
-        } catch (fetchErr: any) {
-          errors.push(`Fetch error [${app.name}]: ${fetchErr.message}`);
-          break;
         }
+      } catch (e: any) {
+        errors.push(`[${app.name}] Fetch error: ${e.message}`);
+      }
+    }
 
-        if (data.faultstring) {
-          errors.push(`Omie fault [${app.name}]: ${data.faultstring}`);
-          break;
-        }
+    if (allContas.length === 0) {
+      return NextResponse.json({
+        status: 'warning',
+        message: `Nenhum lançamento alterado nos últimos 7 dias foi encontrado no Omie.`,
+        errors
+      });
+    }
 
-        totalPaginas = data.total_de_paginas || 1;
-        // ListarContasPagar retorna array de objetos PLANOS (não aninhados)
-        // Campos baseados em normalize_conta_pagar() do omie_supabase_ingest.py:
-        // item.codigo_lancamento_omie, item.status_titulo, item.valor_pago or item.valor_pag
-        const contas: any[] = data.conta_pagar_cadastro || [];
+    // Batch update Supabase in parallel (groups of 20 to avoid rate limits)
+    let updatedCount = 0;
+    const BATCH = 20;
 
-        for (const c of contas) {
-          const omieCode = c.codigo_lancamento_omie;
-          const status = c.status_titulo;
-          const valorPago = c.valor_pago ?? c.valor_pag ?? 0;
-
-          if (!omieCode || !status) continue;
-
-          const { error: updateErr } = await supabase
+    for (let i = 0; i < allContas.length; i += BATCH) {
+      const batch = allContas.slice(i, i + BATCH);
+      const results = await Promise.all(
+        batch.map(c =>
+          supabase
             .from('omie_cp_titulos')
-            .update({ status_titulo: status, valor_pago: valorPago })
-            .eq('codigo_lancamento_omie', omieCode);
-
-          if (updateErr) {
-            errors.push(`Supabase update error [${omieCode}]: ${updateErr.message}`);
-          } else {
-            updatedCount++;
-          }
-        }
-
-        pagina++;
+            .update({ status_titulo: c.status_titulo, valor_pago: c.valor_pago })
+            .eq('codigo_lancamento_omie', c.codigo_lancamento_omie)
+        )
+      );
+      for (const { error } of results) {
+        if (error) errors.push(error.message);
+        else updatedCount++;
       }
     }
 
     return NextResponse.json({
       status: errors.length === 0 ? 'success' : 'partial',
-      message: `Sincronizados: ${updatedCount} lançamentos nos últimos 7 dias.`,
-      errors: errors.length > 0 ? errors : undefined
+      message: `✅ ${updatedCount} de ${allContas.length} lançamentos sincronizados (últimos 7 dias, ${MAX_PAGES} páginas).`,
+      errors: errors.length > 0 ? errors.slice(0, 5) : undefined
     });
 
   } catch (error: any) {
