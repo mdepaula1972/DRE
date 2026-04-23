@@ -316,6 +316,9 @@ export class DreService {
 
     const resultado = totalEntradas + getVal("Ativos") + outrasEntradas - totalSaidas;
     const fcl = resultado - getVal("Ativos");
+    
+    // Novo: Equipamentos
+    const totalEquipamentos = getCatTotal("Equipamentos");
 
     valoresTotal["Total Entradas Operacionais"] = totalEntradas;
     valoresTotal["Outras Entradas"] = outrasEntradas;
@@ -449,7 +452,8 @@ export class DreService {
         resultado,
         fcl,
         percLucro,
-        percFcl
+        percFcl,
+        totalEquipamentos
       }
     };
   }

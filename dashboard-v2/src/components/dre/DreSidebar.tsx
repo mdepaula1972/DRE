@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { UploadCloud, Filter, XCircle } from 'lucide-react';
-import { DreFilters, DreMetadata } from '@/types/dre';
+import { DreFilters, DreMetadata, DreRow } from '@/types/dre';
 
 interface DreSidebarProps {
   metadata: DreMetadata | null;
+  rawData: DreRow[];
   filters: DreFilters;
   onFilterChange: (filters: DreFilters) => void;
   onFileUpload: (file: File) => void;
@@ -14,6 +15,7 @@ interface DreSidebarProps {
 
 export function DreSidebar({ 
   metadata, 
+  rawData,
   filters, 
   onFilterChange, 
   onFileUpload, 
@@ -28,21 +30,71 @@ export function DreSidebar({
   };
 
   const handleClearFilters = () => {
-    onFilterChange({
-      empresas: [],
-      periodos: [],
-      projetos: [],
-      categorias: []
-    });
+    onFilterChange({ empresas: [], periodos: [], projetos: [], categorias: [] });
   };
 
-  const toggleFilter = (key: keyof DreFilters, value: string) => {
-    const current = filters[key];
-    const updated = current.includes(value) 
-      ? current.filter(item => item !== value)
-      : [...current, value];
-    
-    onFilterChange({ ...filters, [key]: updated });
+  // ── Cascading Filter Options ──────────────────────────────────────────────
+  // Periods: always all (no dependency)
+  const availablePeriods = metadata?.periodos ?? [];
+
+  // Empresas: always all
+  const availableEmpresas = metadata?.empresas ?? [];
+
+  // Filter raw rows by selected empresas + periodos
+  const rowsAfterEmpresaPeriodo = useMemo(() => {
+    if (!rawData.length || !metadata) return rawData;
+    return rawData.filter(row => {
+      const empresaOk = filters.empresas.length === 0 || filters.empresas.includes(row.Empresa);
+      if (!empresaOk) return false;
+      if (filters.periodos.length === 0) return true;
+      // Row has any value in any of the selected period columns
+      const periodCols = Object.keys(metadata.mapaMeses).filter(col => {
+        const mes = metadata.mapaMeses[col];
+        const ano = col.split('/')[1]?.trim();
+        return filters.periodos.includes(`${mes}/${ano}`);
+      });
+      return periodCols.some(col => {
+        const v = parseFloat((row[col] as string)?.toString().replace(',', '.') || '0');
+        return !isNaN(v) && v !== 0;
+      });
+    });
+  }, [rawData, filters.empresas, filters.periodos, metadata]);
+
+  // Available projects = unique Projeto from rows after empresa+periodo filter
+  const availableProjetos = useMemo(() =>
+    Array.from(new Set(rowsAfterEmpresaPeriodo.map(r => r.Projeto).filter(Boolean))).sort() as string[]
+  , [rowsAfterEmpresaPeriodo]);
+
+  // Filter rows further by selected projetos
+  const rowsAfterProjeto = useMemo(() => {
+    if (filters.projetos.length === 0) return rowsAfterEmpresaPeriodo;
+    return rowsAfterEmpresaPeriodo.filter(r => filters.projetos.includes(r.Projeto));
+  }, [rowsAfterEmpresaPeriodo, filters.projetos]);
+
+  // Available categories = unique Categoria from rows after empresa+periodo+projeto filter
+  const availableCategorias = useMemo(() =>
+    Array.from(new Set(rowsAfterProjeto.map(r => r.Categoria).filter(Boolean))).sort() as string[]
+  , [rowsAfterProjeto]);
+
+  // Auto-clean stale selections when options shrink
+  const handleEmpresaChange = (opts: string[]) => {
+    const newProjetos = filters.projetos.filter(p => {
+      // Keep only projects still valid in new empresa set
+      const tempRows = rawData.filter(r => opts.length === 0 || opts.includes(r.Empresa));
+      return tempRows.some(r => r.Projeto === p);
+    });
+    const newCategorias = filters.categorias.filter(c => {
+      const tempRows = rawData.filter(r => opts.length === 0 || opts.includes(r.Empresa));
+      return tempRows.some(r => r.Categoria === c);
+    });
+    onFilterChange({ ...filters, empresas: opts, projetos: newProjetos, categorias: newCategorias });
+  };
+
+  const handleProjetoChange = (opts: string[]) => {
+    const newCategorias = filters.categorias.filter(c =>
+      rowsAfterEmpresaPeriodo.filter(r => opts.length === 0 || opts.includes(r.Projeto)).some(r => r.Categoria === c)
+    );
+    onFilterChange({ ...filters, projetos: opts, categorias: newCategorias });
   };
 
   return (
@@ -145,11 +197,11 @@ export function DreSidebar({
                 className="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl p-2 h-32 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"
                 value={filters.empresas}
                 onChange={(e) => {
-                  const opts = Array.from(e.target.selectedOptions, option => option.value);
-                  onFilterChange({ ...filters, empresas: opts });
+                  const opts = Array.from(e.target.selectedOptions, o => o.value);
+                  handleEmpresaChange(opts);
                 }}
               >
-                {metadata.empresas.map(e => (
+                {availableEmpresas.map(e => (
                   <option key={e} value={e}>{e}</option>
                 ))}
               </select>
@@ -158,40 +210,50 @@ export function DreSidebar({
 
             {/* Projeto */}
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-2">Projeto</label>
+              <label className="block text-xs font-semibold text-slate-400 mb-2">
+                Projeto
+                {(filters.empresas.length > 0 || filters.periodos.length > 0) && (
+                  <span className="ml-1.5 text-amber-500 text-[9px] font-bold uppercase tracking-wide">filtrado</span>
+                )}
+              </label>
               <select 
                 multiple
                 className="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl p-2 h-32 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"
                 value={filters.projetos}
                 onChange={(e) => {
-                  const opts = Array.from(e.target.selectedOptions, option => option.value);
-                  onFilterChange({ ...filters, projetos: opts });
+                  const opts = Array.from(e.target.selectedOptions, o => o.value);
+                  handleProjetoChange(opts);
                 }}
               >
-                {metadata.projetos.map(p => (
+                {availableProjetos.map(p => (
                   <option key={p} value={p}>{p}</option>
                 ))}
               </select>
-              <p className="text-[10px] text-slate-500 mt-1">Segure Ctrl/Cmd para múltipla seleção</p>
+              <p className="text-[10px] text-slate-500 mt-1">{availableProjetos.length} projeto(s) disponível(eis)</p>
             </div>
             
             {/* Categoria */}
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-2">Categoria</label>
+              <label className="block text-xs font-semibold text-slate-400 mb-2">
+                Categoria
+                {(filters.empresas.length > 0 || filters.periodos.length > 0 || filters.projetos.length > 0) && (
+                  <span className="ml-1.5 text-amber-500 text-[9px] font-bold uppercase tracking-wide">filtrado</span>
+                )}
+              </label>
               <select 
                 multiple
                 className="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl p-2 h-32 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"
                 value={filters.categorias}
                 onChange={(e) => {
-                  const opts = Array.from(e.target.selectedOptions, option => option.value);
+                  const opts = Array.from(e.target.selectedOptions, o => o.value);
                   onFilterChange({ ...filters, categorias: opts });
                 }}
               >
-                {metadata.categorias.map(c => (
+                {availableCategorias.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-              <p className="text-[10px] text-slate-500 mt-1">Segure Ctrl/Cmd para múltipla seleção</p>
+              <p className="text-[10px] text-slate-500 mt-1">{availableCategorias.length} categoria(s) disponível(eis)</p>
             </div>
 
             {/* Botão Limpar Filtros Destaque */}

@@ -58,6 +58,7 @@ export interface DreKpis {
   fcl: number;
   percLucro: number;
   percFcl: number;
+  totalEquipamentos: number;
 }
 
 export interface DreCalculatedResult {

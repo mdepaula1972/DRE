@@ -12,6 +12,7 @@ import { DreSimulator } from '@/components/dre/DreSimulator';
 import { DreService } from '@/services/dre.service';
 import { DreAlertsService } from '@/services/dre-alerts.service';
 import { DreFilters, DreMetadata, DreCalculatedResult, DreRow, DreSimulationParams } from '@/types/dre';
+import { TableIcon, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function DrePage() {
   const [isUploading, setIsUploading] = useState(false);
@@ -27,6 +28,7 @@ export default function DrePage() {
   
   // Simulator state
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+  const [showTable, setShowTable] = useState(false);
   const [simParams, setSimParams] = useState<DreSimulationParams>({
     revenueMultiplier: 1.0,
     costsMultiplier: 1.0,
@@ -121,6 +123,7 @@ export default function DrePage() {
       {/* Sidebar - Fixa */}
       <DreSidebar 
         metadata={metadata}
+        rawData={rawData}
         filters={filters}
         onFilterChange={handleFilterChange}
         onFileUpload={handleFileUpload}
@@ -161,13 +164,31 @@ export default function DrePage() {
                 />
               )}
 
-              {/* Tabela de Operação */}
+              {/* Tabela de Operação - Oculta por padrão */}
               {results && (
-                <DreTable 
-                  results={results} 
-                  isPrivacyMode={isPrivacyMode} 
-                  onRowClick={handleOpenDetails}
-                />
+                <div>
+                  <button
+                    onClick={() => setShowTable(!showTable)}
+                    className="w-full flex items-center justify-between px-5 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:bg-slate-50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5 text-slate-700 font-semibold">
+                      <TableIcon size={16} className="text-amber-500" />
+                      Detalhamento Completo (Tabela DRE)
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 group-hover:text-slate-600 transition-colors">
+                      {showTable ? <><ChevronUp size={15}/> Ocultar</> : <><ChevronDown size={15}/> Exibir</>}
+                    </div>
+                  </button>
+                  <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                    showTable ? 'max-h-[9999px] opacity-100 mt-4' : 'max-h-0 opacity-0'
+                  }`}>
+                    <DreTable 
+                      results={results} 
+                      isPrivacyMode={isPrivacyMode} 
+                      onRowClick={handleOpenDetails}
+                    />
+                  </div>
+                </div>
               )}
               
               {!results && !isUploading && (
