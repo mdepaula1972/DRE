@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { UploadCloud, Filter, XCircle } from 'lucide-react';
 import { DreFilters, DreMetadata } from '@/types/dre';
 
@@ -46,6 +47,23 @@ export function DreSidebar({
 
   return (
     <aside className="w-72 flex-shrink-0 bg-slate-900 text-slate-300 min-h-[calc(100vh-4rem)] p-5 flex flex-col rounded-2xl shadow-xl">
+      {/* Logo Area (Monetization / White-label) */}
+      <div className="mb-8 flex flex-col items-center justify-center p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
+        {/* Usando o logo nativo da pasta public da Mar Brasil */}
+        <div className="relative w-32 h-12 mb-2">
+          <Image 
+            src="/mar-brasil-logo.png" 
+            alt="Logo Empresa" 
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
+        <div className="flex flex-col text-center">
+          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">DRE Analítico V1</span>
+        </div>
+      </div>
+
       {/* Upload Section */}
       <div className="mb-8">
         <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -175,6 +193,18 @@ export function DreSidebar({
               </select>
               <p className="text-[10px] text-slate-500 mt-1">Segure Ctrl/Cmd para múltipla seleção</p>
             </div>
+
+            {/* Botão Limpar Filtros Destaque */}
+            {(filters.empresas.length > 0 || filters.periodos.length > 0 || filters.projetos.length > 0 || filters.categorias.length > 0) && (
+              <button
+                onClick={handleClearFilters}
+                className="w-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-sm font-semibold py-3 px-4 rounded-xl mt-8 transition-colors flex items-center justify-center gap-2 border border-slate-700/50 hover:border-slate-600 group"
+              >
+                <XCircle size={16} className="text-amber-500 group-hover:text-amber-400" />
+                Limpar Todos os Filtros
+              </button>
+            )}
+
           </div>
         )}
       </div>

@@ -27,8 +27,8 @@
 ### Bloco 1: MVP Comercial (Modo "Lite")
 - **Status:** Concluído
 - **O que foi feito:** 
-  - **Simulador In-Memory (V1):** Adicionado painel sobreposto ativado pelo header com sliders de multiplicadores (+/- %) para Receitas, Custos e Despesas, recalculando FCL instantaneamente.
-  - **Drill-down de Confiança Básico (Lineage Lite):** Modal atualizado para possuir abas (Gráfico vs Transações), mostrando as linhas reais do CSV que deram origem ao total de cada mês na DRE.
+  - **Simulador In-Memory (V1) + Goal Seek:** Adicionado painel sobreposto com sliders manuais e o motor prescritivo de "Busca de Meta" (que sugere ações automáticas para bater o FCL Alvo).
+  - **Drill-down de Confiança Básico (Lineage Lite):** Modal atualizado com a aba "Transações de Origem", oferecendo uma tabela dinâmica unificada lado a lado que consolida as categorias e permite expandir o rateio de projetos por mês.
   - **Alertas Determinísticos Locais:** Criado `dre-alerts.service.ts` para capturar desvios de margem > 5%, escalada de custos/despesas > 15% e quedas de receita consecutivas, sendo renderizados pelo novo componente `SmartAlerts`.
 
 ### Bloco 2: Arquitetura Evolutiva de Médio Prazo (Modo Pro)

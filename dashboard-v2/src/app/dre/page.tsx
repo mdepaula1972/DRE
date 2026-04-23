@@ -128,9 +128,11 @@ export default function DrePage() {
         fileName={fileName}
       />
 
-      {/* Conteúdo Principal */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-8">
+      {/* Conteúdo Principal + Painel Direito */}
+      <div className="flex-1 flex overflow-hidden">
+        
+        {/* Coluna Central: Dashboard */}
+        <div className={`flex-1 overflow-y-auto p-6 md:p-8 transition-all duration-300`}>
           <div className="max-w-7xl mx-auto">
             <DreHeader 
               lastUpdate={lastUpdate}
@@ -140,17 +142,7 @@ export default function DrePage() {
               onToggleSimulator={() => setIsSimulatorOpen(!isSimulatorOpen)}
             />
 
-            <div className="space-y-8">
-              {/* Simulador */}
-              <DreSimulator 
-                isOpen={isSimulatorOpen}
-                params={simParams}
-                onChange={setSimParams}
-                onReset={() => setSimParams({ revenueMultiplier: 1, costsMultiplier: 1, expensesMultiplier: 1 })}
-                originalResults={originalResults}
-                simulatedFcl={results?.kpis.fcl || 0}
-              />
-
+            <div className="space-y-8 mt-8">
               {/* Alertas Inteligentes */}
               <SmartAlerts alerts={alerts} />
 
@@ -187,6 +179,21 @@ export default function DrePage() {
             </div>
           </div>
         </div>
+
+        {/* Coluna Direita: Simulador (Side Panel Persistente) */}
+        {isSimulatorOpen && (
+          <div className="w-full md:w-[450px] flex-shrink-0 border-l border-slate-200 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.03)] h-screen overflow-hidden animate-in slide-in-from-right duration-300 z-40">
+            <DreSimulator 
+              isOpen={isSimulatorOpen}
+              onClose={() => setIsSimulatorOpen(false)}
+              params={simParams}
+              onChange={setSimParams}
+              onReset={() => setSimParams({ revenueMultiplier: 1, costsMultiplier: 1, expensesMultiplier: 1 })}
+              originalResults={originalResults}
+              simulatedFcl={results?.kpis.fcl || 0}
+            />
+          </div>
+        )}
       </div>
 
       <DreDetailsModal 
