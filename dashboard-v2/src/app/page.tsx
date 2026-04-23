@@ -22,10 +22,10 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  const SATELLITES = [
-    { href: "/gestao-integrada.html", icon: Receipt, title: "Gestão Integrada", sub: "Faturamento & Impostos" },
-    { href: "/dre.html", icon: TrendingUp, title: "DRE Gerencial", sub: "Visão Financeira" },
-    { href: "/analise-setorial.html", icon: PieChart, title: "Análise Setorial", sub: "Custos por Área" },
+    const SATELLITES = [
+      { href: "/gestao-integrada.html", icon: Receipt, title: "Gestão Integrada", sub: "Faturamento & Impostos" },
+      { href: "/dre", icon: TrendingUp, title: "DRE Gerencial", sub: "Visão Financeira" },
+      { href: "/analise-setorial.html", icon: PieChart, title: "Análise Setorial", sub: "Custos por Área" },
     { href: "/parcelamentos.html", icon: CreditCard, title: "Parcelamentos", sub: "Controle de Dívidas" },
     { href: "/peopleboard", icon: Users, title: "PeopleBoard", sub: "Gestão Cockpit RH" },
     { href: "/seguros.html", icon: ShieldCheck, title: "Seguros", sub: "Gestão de Apólices" },
