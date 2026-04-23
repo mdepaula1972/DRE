@@ -72,29 +72,31 @@ if (typeof CONFIG === 'undefined') {
 };
 }
 
-// State
-let state = {
-    rawData: [],
-    filteredData: [],
-    mapaMeses: {},
-    filters: {
-        empresas: [],
-        periodos: [],  // ← NOVO
-        projetos: [],
-        categorias: []
-    },
-    metrics: {},
-    dreData: [],
-    charts: {
-        main: null,
-        pie: null,
-        waterfall: null,
-        topExpenses: null,
-        modal: null
-    },
-    isProjectionMode: false,
-    originalValidColumns: []
-};
+// State - só declarar se não existir (evitar conflito com script.js)
+if (typeof state === 'undefined') {
+    var state = {
+        rawData: [],
+        filteredData: [],
+        mapaMeses: {},
+        filters: {
+            empresas: [],
+            periodos: [],
+            projetos: [],
+            categorias: []
+        },
+        metrics: {},
+        dreData: [],
+        charts: {
+            main: null,
+            pie: null,
+            waterfall: null,
+            topExpenses: null,
+            modal: null
+        },
+        isProjectionMode: false,
+        originalValidColumns: []
+    };
+}
 
 // ... (existing code)
 
@@ -2127,6 +2129,9 @@ function showCardDetails(key, title) {
 
     modal.show();
 }
+
+// Expose globally so onclick handlers work regardless of script load order
+window.showCardDetails = showCardDetails;
 
 function exportTableToCSV() {
     // Simple CSV export implementation
