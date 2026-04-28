@@ -1,12 +1,12 @@
-
-document.addEventListener('DOMContentLoaded', () => {
+function initBrisinhAI() {
+    if (document.getElementById('brisinhai-root')) return; // Previne múltiplas injeções
     // Inject HTML Structure
     const root = document.createElement('div');
     root.id = 'brisinhai-root';
     root.innerHTML = `
         <!-- Floating Button -->
         <div class="brisinhai-float" id="brisinhaiBtn" title="Falar com BrisinhAI">
-            <img src="BrisinhAI.jpeg" alt="BrisinhAI">
+            <img src="/BrisinhAI.jpeg" alt="BrisinhAI">
         </div>
         <style>
             .brisinhai-float {
@@ -488,36 +488,222 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof state !== 'undefined' && state && state.filteredData) {
             // Provide a summary of the data instead of raw rows if possible
             context.dataSummary = `Total de registros filtrados: ${state.filteredData.length}.`;
+            icon.classList.remove('bi-volume-mute-fill');
+            icon.classList.add('bi-volume-up-fill');
+            voiceToggleBtn.title = "Desativar Voz";
+        } else {
+            icon.classList.remove('bi-volume-up-fill');
+            icon.classList.add('bi-volume-mute-fill');
+            voiceToggleBtn.title = "Ativar Voz";
+        }
+    }
+
+    // Text-to-Speech Helper
+    function speakText(text) {
+        if (!isVoiceEnabled) return;
+
+        // Cancel previous speech
+        window.speechSynthesis.cancel();
+
+        // Strip HTML tags for clean reading
+        const cleanText = text.replace(/<[^>]*>/g, '').replace(/[*_#]/g, ''); // Simple strip
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 1.1; // Slightly faster
+        utterance.pitch = 1;
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Toggle Chat
+    btn.addEventListener('click', () => {
+        chat.classList.add('active');
+        if (!aiService.isAuthenticated()) {
+            addMessage("bot", "⚠️ <strong>Configuração Necessária</strong><br>A chave da API não foi inserida no código. Por favor, edite o arquivo <code>ai.service.v2.js</code> e coloque sua chave.");
+        }
+    });
+
+    close.addEventListener('click', () => {
+        chat.classList.remove('active');
+        window.speechSynthesis.cancel(); // Stop talking when closing
+    });
+
+    minimize.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chat.classList.toggle('minimized');
+        window.speechSynthesis.cancel(); // stop talking when minimizing
+        const icon = minimize.querySelector('i');
+        if (chat.classList.contains('minimized')) {
+            icon.classList.remove('bi-dash-lg');
+            icon.classList.add('bi-square'); // Restore icon
+        } else {
+            icon.classList.remove('bi-square');
+            icon.classList.add('bi-dash-lg');
+        }
+    });
+
+    // Maximize on header click if minimized
+    document.querySelector('.brisinhai-header').addEventListener('click', (e) => {
+        if (chat.classList.contains('minimized') && !e.target.closest('button')) {
+            chat.classList.remove('minimized');
+            minimize.querySelector('i').classList.replace('bi-square', 'bi-dash-lg');
+        }
+    });
+
+    // Helper: Add Message
+    window.addMessage = function (type, text) {
+        if (type === 'bot') lastBotMessage = text; // Armazena para retomada de áudio
+        const div = document.createElement('div');
+        div.className = `message ${type}`;
+
+        // Simple Markdown parsing
+        let html = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>')
+            .replace(/- (.*?)(<br>|$)/g, '<ul><li>$1</li></ul>');
+
+        // Merge adjacent lists
+        html = html.replace(/<\/ul><br><ul>/g, '');
+
+        div.innerHTML = html;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Resizing Logic
+    let isResizing = false;
+    const resizeHandle = document.querySelector('.brisinhai-resize-handle');
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        document.body.style.cursor = 'nwse-resize';
+        e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+
+        const rect = chat.getBoundingClientRect();
+        const newWidth = rect.right - e.clientX;
+        const newHeight = rect.bottom - e.clientY;
+
+        if (newWidth > 300) chat.style.width = newWidth + 'px';
+        if (newHeight > 200) chat.style.height = newHeight + 'px';
+    });
+
+    window.addEventListener('mouseup', () => {
+        isResizing = false;
+        document.body.style.cursor = 'default';
+    });
+
+    // Helper: Gather Context
+    function getDashboardContext() {
+        const context = {
+            url: window.location.pathname,
+            pageType: 'unknown',
+            filtros: {},
+            indicadores: [],
+            resumo: {}
+        };
+
+        // CORREÇÃO: Prioriza o contexto específico da página (ex: PeopleBoard)
+        if (typeof window.getPageContext === 'function') {
+            const pageCtx = window.getPageContext();
+            Object.assign(context, pageCtx);
+            return context;
+        }
+
+        // 1. Detect Page Type
+        if (document.getElementById('dreTable')) context.pageType = 'DRE';
+        else if (document.getElementById('indicatorsContainer')) context.pageType = 'INDICADORES';
+        else if (document.getElementById('segurosGrid')) context.pageType = 'SEGUROS';
+        else if (document.getElementById('parcelasTable')) context.pageType = 'PARCELAMENTOS';
+        else if (document.getElementById('dataTable') && document.querySelector('h1')?.innerText.includes('Setorial')) context.pageType = 'SETORIAL';
+
+        // 2. Get Filters (Common to all)
+        context.filtros.periodo = getSelectedValues('filterPeriodo');
+        context.filtros.empresa = getSelectedValues('filterEmpresa');
+
+        // Other filters based on page
+        if (document.getElementById('filterCategoria')) context.filtros.categoria = getSelectedValues('filterCategoria');
+        if (document.getElementById('filterProjeto')) context.filtros.projeto = getSelectedValues('filterProjeto');
+
+        // 3. Gather Page-Specific Data
+        gatherPageSpecificData(context);
+
+        // 4. Get Cards Data (Generic Fallback + Specifics)
+        document.querySelectorAll('.indicator-card, .metric-card, #kpiRow .card, .kpi-card').forEach(card => {
+            let title, value, subtitle;
+
+            if (card.classList.contains('indicator-card')) {
+                title = card.querySelector('.card-title')?.innerText;
+                value = card.querySelector('.display-5')?.innerText;
+                subtitle = card.querySelector('.text-muted:not(.card-title)')?.innerText;
+            } else {
+                title = card.querySelector('.title')?.innerText;
+                value = card.querySelector('.value')?.innerText;
+                subtitle = card.querySelector('.small.text-muted, .sub')?.innerText;
+
+                // Extra info in breakdown items
+                const breakdownItems = card.querySelectorAll('.breakdown-item');
+                if (breakdownItems.length > 0) {
+                    const details = [];
+                    breakdownItems.forEach(item => {
+                        const l = item.querySelector('.breakdown-label')?.innerText;
+                        const v = item.querySelector('.breakdown-value')?.innerText;
+                        if (l && v) details.push(`${l}: ${v}`);
+                    });
+                    if (details.length > 0) subtitle = (subtitle ? subtitle + ". " : "") + details.join(", ");
+                }
+            }
+
+            if (title || value) {
+                context.indicadores.push({
+                    indicador: title?.trim() || "Sem Título",
+                    valor: value?.trim() || "-",
+                    detalhe: subtitle?.trim() || ""
+                });
+            }
+        });
+
+        // 5. Get Last Update
+        const update = document.getElementById('lastUpdate')?.innerText;
+        if (update) context.update = update;
+
+        if (update) context.update = update;
+
+        // 6. Global CSV Data (Added for deeper analysis)
+        if (typeof window.FULL_CSV_DATA !== 'undefined' && window.FULL_CSV_DATA.length > 0) {
+            context.csvData = window.FULL_CSV_DATA;
+            context.dataSummary = `Total de registros carregados: ${window.FULL_CSV_DATA.length}.`;
+        }
+
+        // 7. CSV Data Summary (Legacy/Fallback)
+        if (typeof state !== 'undefined' && state && state.filteredData) {
+            // Provide a summary of the data instead of raw rows if possible
+            context.dataSummary = `Total de registros filtrados: ${state.filteredData.length}.`;
             // For DRE, maybe send the calculated DRE structure instead of raw CSV
             if (context.pageType === 'DRE' && state.dreData) {
                 // dreData usually sits in UI, let's grab from table if state isn't populated with final DRE rows
             }
         }
-
         return context;
     }
 
     function gatherPageSpecificData(context) {
         switch (context.pageType) {
             case 'DRE':
-                // Scrape the main DRE table for high-level structure
                 const drePixel = {};
                 document.querySelectorAll('#dreTable tbody tr').forEach(tr => {
                     const label = tr.querySelector('td:first-child')?.innerText?.trim();
-                    const val = tr.querySelector('.fw-bold')?.innerText?.trim(); // Assuming bold is the total column
+                    const val = tr.querySelector('.fw-bold')?.innerText?.trim();
                     if (label && val) drePixel[label] = val;
                 });
                 context.resumo.dre = drePixel;
                 break;
-
             case 'PARCELAMENTOS':
-                // Scrape KPI cards specifically if not covered by generic scraper
                 context.resumo.dividaTotal = document.querySelector('#evolutionChart')?.parentElement?.parentElement?.parentElement?.querySelector('.value')?.innerText;
-                break;
-
-            case 'SEGUROS':
-                // Any specific grid data?
-                // Maybe list top 5 insurances
                 break;
         }
     }
@@ -531,43 +717,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentController = null;
 
-    // Send Message Logic
     window.sendMessage = async function () {
         const text = input.value.trim();
         if (!text) return;
 
         if (!aiService.isAuthenticated()) {
-            addMessage('bot', "⚠️ Configure a API Key no arquivo <code>ai.service.v2.js</code>");
+            addMessage('bot', "⚠️ API Key não configurada.");
             return;
         }
 
-        // Check if there is an active request
         if (currentController) {
             currentController.abort();
-            currentController = null;
         }
         currentController = new AbortController();
 
-        // User Message
         addMessage('user', text);
         input.value = '';
 
-        // Context
         const context = getDashboardContext();
 
-        // CORREÇÃO: Permite análise se houver indicadores, dossiê de funcionário ou CSV
-        const hasData = (context.indicadores && context.indicadores.length > 0) ||
-            (context.csvData && context.csvData.length > 0) ||
-            (context.activeEmployee) ||
-            (context.totalEmployees > 0);
-
-        if (!hasData) {
-            addMessage('bot', "Não encontrei dados na tela. Por favor, carregue um arquivo CSV ou abra um perfil para análise.");
-            currentController = null;
-            return;
-        }
-
-        // Loading
         const loadingId = 'loading-' + Date.now();
         const loadingDiv = document.createElement('div');
         loadingDiv.id = loadingId;
@@ -576,62 +744,58 @@ document.addEventListener('DOMContentLoaded', () => {
         messages.appendChild(loadingDiv);
         messages.scrollTop = messages.scrollHeight;
 
-        // UI State: Show Stop, Hide Send
         stopBtn.classList.remove('d-none');
         sendBtn.classList.add('d-none');
 
         try {
             const response = await aiService.generateAnalysis(context, text, currentController.signal);
-
-            // If we are here, it wasn't aborted
             const loader = document.getElementById(loadingId);
             if (loader) loader.remove();
 
             addMessage('bot', response);
-            speakText(response); // Speak the response
+            speakText(response);
         } catch (error) {
             const loader = document.getElementById(loadingId);
             if (loader) loader.remove();
 
-            if (error.name === 'AbortError' || (error.code === 20 && error.name === 'ABORT_ERR')) {
-                // Quietly handle abort or show a small note
-                // addMessage('bot', '<em>Parado pelo usuário.</em>'); 
-            } else {
+            if (error.name !== 'AbortError') {
                 addMessage('bot', `❌ Erro: ${error.message}`);
             }
         } finally {
-            // Reset UI
             stopBtn.classList.add('d-none');
             sendBtn.classList.remove('d-none');
             currentController = null;
         }
-    }
+    };
 
-    // Stop Button Listener
     stopBtn.addEventListener('click', () => {
-        window.speechSynthesis.cancel(); // Stop the voice
+        window.speechSynthesis.cancel();
         if (currentController) {
             currentController.abort();
             currentController = null;
         }
     });
 
-    // Exposed API for PDF Generation
     window.getBrisinhAIAnalysis = async function () {
         if (!aiService.isAuthenticated()) return "Erro: API Key não configurada.";
-
         const context = getDashboardContext();
-        // Force a specific prompt for the report
         try {
-            const analysis = await aiService.generateAnalysis(context, "Gere um relatório formal e completo para exportação em PDF, focado em insights estratégicos.");
+            const analysis = await aiService.generateAnalysis(context, "Gere um relatório formal e completo para exportação em PDF.");
             return analysis;
         } catch (error) {
-            console.error("Erro ao gerar análise para PDF:", error);
-            return "Não foi possível gerar a análise automática neste momento.";
+            console.error(error);
+            return "Não foi possível gerar a análise automática.";
         }
     };
 
     window.handleEnter = function (e) {
         if (e.key === 'Enter') sendMessage();
     }
-});
+}
+
+// Inicialização segura para Next.js ou HTML tradicional
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBrisinhAI);
+} else {
+    initBrisinhAI();
+}

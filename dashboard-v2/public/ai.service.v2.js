@@ -3,24 +3,14 @@
 
 
 
-// Detecção de ambiente
-const IS_LOCAL = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('192.168');
-const GEMINI_API_URL = IS_LOCAL ? null : "/api/chat";
-
-// CONFIGURAÇÃO LOCAL: Insira sua API key aqui para desenvolvimento local
-const LOCAL_API_KEY = "AIzaSyBkZ294OldnJ7SpULDLGTPhOjUGN7ChvWs"; // Coloque sua chave da API Gemini aqui para testar localmente
+// Detecção de ambiente e definição da URL da API de Chat
+const GEMINI_API_URL = "/api/chat";
 
 class GeminiService {
     constructor() {
-        if (IS_LOCAL) {
-            this.apiKey = LOCAL_API_KEY;
-            this.isLocal = true;
-            console.log("🔧 BrisinhAI: Modo LOCAL ativado");
-        } else {
-            this.apiKey = null;
-            this.isLocal = false;
-            console.log("☁️ BrisinhAI: Modo PRODUÇÃO (Vercel Proxy)");
-        }
+        this.apiKey = null;
+        this.isLocal = false; // Sempre usará a rota do Next.js
+        console.log("☁️ BrisinhAI: Integrado via Rota de API Next.js");
     }
 
     isAuthenticated() {
