@@ -88,7 +88,7 @@ export class DreAlertsService {
           id: 'revenue-drop',
           type: 'danger',
           title: 'Tendência de Queda',
-          message: `A Receita Operacional está caindo há 3 meses consecutivos (${m2} a ${currentMonth}).`
+          message: `A Receita Operacional está caindo há 2 meses consecutivos (${m2} a ${currentMonth}).`
         });
       }
     }

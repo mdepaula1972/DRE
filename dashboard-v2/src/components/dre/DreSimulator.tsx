@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { SlidersHorizontal, ArrowRight, RotateCcw, Target, Lightbulb, TrendingUp, TrendingDown, X } from 'lucide-react';
+import { SlidersHorizontal, ArrowRight, RotateCcw, Target, Lightbulb, TrendingUp, TrendingDown, X, Save, Bookmark, Trash2, Loader2 } from 'lucide-react';
 import { DreSimulationParams, DreCalculatedResult } from '@/types/dre';
+import { DreSupabaseService, DreSimulationRecord } from '@/services/dre-supabase.service';
 
 interface DreSimulatorProps {
   isOpen: boolean;
@@ -10,18 +11,86 @@ interface DreSimulatorProps {
   onReset: () => void;
   originalResults: DreCalculatedResult | null;
   simulatedFcl: number;
+  empresaContext: string;
 }
 
-export function DreSimulator({ isOpen, onClose, params, onChange, onReset, originalResults, simulatedFcl }: DreSimulatorProps) {
+export function DreSimulator({ isOpen, onClose, params, onChange, onReset, originalResults, simulatedFcl, empresaContext }: DreSimulatorProps) {
   const [targetMode, setTargetMode] = useState(false);
   const [targetFcl, setTargetFcl] = useState<string>('');
 
+  // Estados de Persistência
+  const [savedSimulations, setSavedSimulations] = useState<DreSimulationRecord[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [simulationName, setSimulationName] = useState('');
+  const [showSaveInput, setShowSaveInput] = useState(false);
+  const [isLoadingSimulations, setIsLoadingSimulations] = useState(false);
+
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      loadSimulations();
+    } else {
+      setTargetMode(false);
+      setTargetFcl('');
+      setShowSaveInput(false);
+      setSimulationName('');
+    }
+  }, [isOpen, empresaContext]);
+
+  const loadSimulations = async () => {
+    setIsLoadingSimulations(true);
+    const data = await DreSupabaseService.getSimulationsByEmpresa(empresaContext);
+    setSavedSimulations(data);
+    setIsLoadingSimulations(false);
+  };
+
+  const handleSaveSimulation = async () => {
+    if (!simulationName.trim()) return;
+    setIsSaving(true);
+    
+    // Opcionalmente salvar o FCL Target se estiver no Target Mode
+    const fclTargetValue = targetMode && targetFcl ? parseFloat(targetFcl) : undefined;
+    
+    const { error } = await DreSupabaseService.saveSimulation(
+      simulationName,
+      empresaContext,
+      params,
+      fclTargetValue
+    );
+
+    setIsSaving(false);
+    
+    if (error) {
+      alert("Erro ao salvar simulação: " + error.message);
+    } else {
+      setShowSaveInput(false);
+      setSimulationName('');
+      loadSimulations();
+    }
+  };
+
+  const loadScenario = (record: DreSimulationRecord) => {
+    onChange({
+      revenueMultiplier: record.revenue_multiplier,
+      costsMultiplier: record.costs_multiplier,
+      expensesMultiplier: record.expenses_multiplier
+    });
+    
+    if (record.fcl_target) {
+      setTargetMode(true);
+      setTargetFcl(record.fcl_target.toString());
+    } else {
       setTargetMode(false);
       setTargetFcl('');
     }
-  }, [isOpen]);
+  };
+
+  const deleteScenario = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Evita carregar o cenário ao clicar em deletar
+    if (confirm("Tem certeza que deseja apagar este cenário salvo?")) {
+      await DreSupabaseService.deleteSimulation(id);
+      loadSimulations();
+    }
+  };
 
   const originalFcl = originalResults?.kpis.fcl || 0;
 
@@ -137,9 +206,12 @@ export function DreSimulator({ isOpen, onClose, params, onChange, onReset, origi
         <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
           
           {/* Controles de Ação Rápidos */}
-          <div className="flex gap-3 mb-8">
+          <div className="flex gap-3 mb-6">
             <button 
-              onClick={() => setTargetMode(!targetMode)}
+              onClick={() => {
+                setTargetMode(!targetMode);
+                setShowSaveInput(false);
+              }}
               className={`flex-1 flex justify-center items-center gap-2 text-sm font-bold px-4 py-3 rounded-xl transition-all shadow-sm border ${
                 targetMode 
                   ? 'bg-amber-500 text-white border-amber-600 hover:bg-amber-600' 
@@ -158,6 +230,87 @@ export function DreSimulator({ isOpen, onClose, params, onChange, onReset, origi
             >
               <RotateCcw size={16} />
             </button>
+          </div>
+
+          {/* Gerenciamento de Simulações */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="font-bold text-slate-700 text-sm flex items-center gap-2">
+                <Bookmark size={16} className="text-indigo-500"/> Meus Cenários
+              </h4>
+              <button 
+                onClick={() => {
+                  setShowSaveInput(!showSaveInput);
+                  setTargetMode(false);
+                }}
+                className={`text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  showSaveInput 
+                    ? 'bg-slate-200 text-slate-700' 
+                    : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                }`}
+              >
+                <Save size={14} /> {showSaveInput ? 'Cancelar' : 'Salvar Atual'}
+              </button>
+            </div>
+
+            {/* Input de Salvar Novo */}
+            {showSaveInput && (
+              <div className="bg-white p-4 rounded-xl border border-indigo-200 shadow-sm mb-4 animate-in slide-in-from-top-2 duration-200">
+                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">Nome do Cenário</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={simulationName}
+                    onChange={(e) => setSimulationName(e.target.value)}
+                    placeholder="Ex: Cenário Otimista Q3"
+                    className="flex-1 bg-slate-50 border border-slate-200 px-3 py-2 text-sm rounded-lg focus:border-indigo-500 outline-none"
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveSimulation()}
+                  />
+                  <button 
+                    onClick={handleSaveSimulation}
+                    disabled={isSaving || !simulationName.trim()}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center min-w-[90px]"
+                  >
+                    {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Salvar'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Lista de Cenários Salvos */}
+            {isLoadingSimulations ? (
+              <div className="flex justify-center py-4">
+                <Loader2 size={20} className="text-slate-400 animate-spin" />
+              </div>
+            ) : savedSimulations.length > 0 ? (
+              <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                {savedSimulations.map((sim) => (
+                  <div 
+                    key={sim.id} 
+                    onClick={() => loadScenario(sim)}
+                    className="bg-white border border-slate-200 hover:border-indigo-300 p-3 rounded-xl cursor-pointer transition-all group flex justify-between items-center"
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-700">{sim.titulo}</p>
+                      <p className="text-[10px] text-slate-400">
+                        R: {sim.revenue_multiplier}x | C: {sim.costs_multiplier}x | D: {sim.expenses_multiplier}x
+                        {sim.fcl_target && ` | Meta: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(sim.fcl_target)}`}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={(e) => deleteScenario(sim.id!, e)}
+                      className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-xs text-slate-400 bg-slate-100/50 rounded-xl border border-dashed border-slate-200">
+                Nenhum cenário salvo para {empresaContext}
+              </div>
+            )}
           </div>
 
       {targetMode && (

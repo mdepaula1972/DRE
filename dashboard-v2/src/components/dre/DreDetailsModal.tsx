@@ -52,7 +52,7 @@ export function DreDetailsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="flex flex-col border-b border-slate-100 bg-slate-50/50">
@@ -163,8 +163,8 @@ export function DreDetailsModal({
                 <table className="w-full text-xs text-left whitespace-nowrap">
                   <thead className="bg-slate-100/50 text-slate-500 font-semibold uppercase tracking-wider">
                     <tr>
-                      <th className="px-4 py-3 border-b border-slate-200 sticky left-0 bg-slate-50 z-10 border-r">Categoria / Projeto</th>
-                      <th className="px-4 py-3 border-b border-slate-200 text-right bg-slate-50 border-r">Total</th>
+                      <th className="px-4 py-3 border-b border-slate-200 sticky left-0 min-w-[280px] max-w-[280px] bg-slate-50 z-20 border-r">Categoria / Projeto</th>
+                      <th className="px-4 py-3 border-b border-slate-200 text-right bg-slate-50 border-r sticky left-[280px] min-w-[120px] max-w-[120px] z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">Total</th>
                       {data.map(item => (
                         <th key={item.name} className="px-4 py-3 border-b border-slate-200 text-right">{item.name}</th>
                       ))}
@@ -232,16 +232,16 @@ export function DreDetailsModal({
                               className="hover:bg-slate-50 cursor-pointer transition-colors group"
                               onClick={() => toggleCat('global', cat)}
                             >
-                              <td className="px-4 py-3 flex items-center gap-2 text-amber-700 font-bold text-[13px] sticky left-0 bg-white z-10 border-r border-slate-100 group-hover:bg-slate-50">
-                                <div className="w-5 h-5 rounded bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-200 transition-colors">
+                              <td className="px-4 py-3 flex items-center gap-2 text-amber-700 font-bold text-[13px] sticky left-0 min-w-[280px] max-w-[280px] whitespace-normal bg-white z-10 border-r border-slate-100 group-hover:bg-slate-50">
+                                <div className="min-w-5 h-5 rounded bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-200 transition-colors">
                                   {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                 </div>
-                                {cat}
-                                <span className="text-[10px] font-normal text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full ml-2">
-                                  {Object.keys(catData.projetos).length} {Object.keys(catData.projetos).length === 1 ? 'registro' : 'registros'}
+                                <span className="flex-1 leading-tight">{cat}</span>
+                                <span className="text-[10px] font-normal text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full ml-1 whitespace-nowrap shrink-0">
+                                  {Object.keys(catData.projetos).length} {Object.keys(catData.projetos).length === 1 ? 'reg' : 'regs'}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-right font-mono font-bold text-slate-700 bg-slate-50 border-r border-slate-200">
+                              <td className="px-4 py-3 text-right font-mono font-bold text-slate-700 bg-slate-50 border-r border-slate-200 sticky left-[280px] min-w-[120px] max-w-[120px] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                                 {formatValue(catData.totalGlobal)}
                               </td>
                               {data.map(item => (
@@ -254,11 +254,11 @@ export function DreDetailsModal({
                             {/* Linhas Projetos */}
                             {isExpanded && Object.values(catData.projetos).map((p, pIdx) => (
                               <tr key={`${cat}-${pIdx}`} className="bg-amber-50/20 border-l-2 border-l-amber-300">
-                                <td className="px-4 py-2.5 pl-12 flex flex-col gap-0.5 sticky left-0 bg-amber-50/90 z-10 border-r border-amber-100/50">
-                                  <span className="text-slate-700 font-semibold text-[11px] uppercase tracking-wider">{p.projeto}</span>
-                                  {p.empresa !== '-' && <span className="text-slate-400 text-[10px]">{p.empresa}</span>}
+                                <td className="px-4 py-2.5 pl-10 flex flex-col gap-0.5 sticky left-0 min-w-[280px] max-w-[280px] whitespace-normal bg-amber-50/95 z-10 border-r border-amber-100/50">
+                                  <span className="text-slate-700 font-semibold text-[11px] uppercase tracking-wider leading-tight">{p.projeto}</span>
+                                  {p.empresa !== '-' && <span className="text-slate-400 text-[10px] truncate">{p.empresa}</span>}
                                 </td>
-                                <td className="px-4 py-2.5 text-right font-mono text-[12px] text-slate-600 bg-amber-50/50 border-r border-amber-200/50 font-semibold">
+                                <td className="px-4 py-2.5 text-right font-mono text-[12px] text-slate-600 bg-amber-50/95 border-r border-amber-200/50 font-semibold sticky left-[280px] min-w-[120px] max-w-[120px] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                                   {formatValue(p.totalProjGlobal)}
                                 </td>
                                 {data.map(item => (

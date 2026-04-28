@@ -34,6 +34,12 @@ export interface DreStructureItem {
   formula?: string;
 }
 
+export interface DreTemplateDefinition {
+  versao: string;
+  nome: string;
+  estrutura: DreStructureItem[];
+}
+
 export interface DreTotal {
   [key: string]: number;
 }

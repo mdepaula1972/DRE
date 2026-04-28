@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",
+    "@google/generative-ai": "^0.21.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dom-to-image-more": "^3.7.2",
     "framer-motion": "^12.38.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",

@@ -11,7 +11,11 @@ import { SmartAlerts } from '@/components/dre/SmartAlerts';
 import { DreSimulator } from '@/components/dre/DreSimulator';
 import { DreService } from '@/services/dre.service';
 import { DreAlertsService } from '@/services/dre-alerts.service';
-import { DreFilters, DreMetadata, DreCalculatedResult, DreRow, DreSimulationParams } from '@/types/dre';
+import { ExportPdfService } from '@/services/exportPdf.service';
+import { BrisinhaiService } from '@/services/brisinhai.service';
+import { DreFilters, DreMetadata, DreCalculatedResult, DreRow, DreSimulationParams, DreStructureItem, DreTemplateDefinition } from '@/types/dre';
+import { DreExportModal, ExportSelections } from '@/components/dre/DreExportModal';
+import { DrePrintCharts } from '@/components/dre/DrePrintCharts';
 import { TableIcon, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function DrePage() {
@@ -20,8 +24,11 @@ export default function DrePage() {
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
   
-  // Modal state
+  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalData, setModalData] = useState<Record<string, number>>({});
   const [modalSourceRows, setModalSourceRows] = useState<Record<string, DreRow[]>>({});
@@ -37,12 +44,23 @@ export default function DrePage() {
 
   const [rawData, setRawData] = useState<DreRow[]>([]);
   const [metadata, setMetadata] = useState<DreMetadata | null>(null);
+  const [estrutura, setEstrutura] = useState<DreStructureItem[] | null>(null);
   const [filters, setFilters] = useState<DreFilters>({
     empresas: [],
     periodos: [],
     projetos: [],
     categorias: []
   });
+
+  // Load JSON Template on mount
+  React.useEffect(() => {
+    fetch('/templates/dre-padrao.json')
+      .then(res => res.json())
+      .then((data: DreTemplateDefinition) => {
+        setEstrutura(data.estrutura);
+      })
+      .catch(err => console.error("Erro ao carregar template DRE:", err));
+  }, []);
 
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
@@ -85,18 +103,18 @@ export default function DrePage() {
 
   // Base Calculation (No Simulation)
   const originalResults: DreCalculatedResult | null = useMemo(() => {
-    if (rawData.length === 0 || !metadata) return null;
-    return DreService.calculate(rawData, metadata, filters);
-  }, [rawData, metadata, filters]);
+    if (rawData.length === 0 || !metadata || !estrutura) return null;
+    return DreService.calculate(rawData, metadata, estrutura, filters);
+  }, [rawData, metadata, estrutura, filters]);
 
   // Simulated Calculation
   const results: DreCalculatedResult | null = useMemo(() => {
-    if (!originalResults) return null;
+    if (!originalResults || !estrutura) return null;
     if (simParams.revenueMultiplier === 1 && simParams.costsMultiplier === 1 && simParams.expensesMultiplier === 1) {
       return originalResults;
     }
-    return DreService.calculate(rawData, metadata, filters, simParams);
-  }, [rawData, metadata, filters, simParams, originalResults]);
+    return DreService.calculate(rawData, metadata!, estrutura, filters, simParams);
+  }, [rawData, metadata, estrutura, filters, simParams, originalResults]);
 
   // Alertas Inteligentes
   const alerts = useMemo(() => {
@@ -104,8 +122,41 @@ export default function DrePage() {
     return DreAlertsService.generateAlerts(results);
   }, [results]);
 
-  const handleExportPDF = () => {
-    window.print();
+  const handleOpenExportModal = () => {
+    setIsExportModalOpen(true);
+  };
+
+  const handleConfirmExport = async (selections: ExportSelections) => {
+    setIsExportingPdf(true);
+    
+    let aiText: string | undefined;
+    
+    const empresa = filters.empresas.length === 1 ? filters.empresas[0] : (filters.empresas.length > 1 ? "Varias" : "Global");
+    const periodo = filters.periodos.length > 0 ? `${filters.periodos[0]}...` : "Completo";
+
+    // Se marcou IA, gerar análise
+    if (selections.includeAiAnalysis && results) {
+      setIsAiAnalyzing(true);
+      try {
+        aiText = await BrisinhaiService.analyzeDre(results, empresa, periodo);
+      } catch (err) {
+        console.error("Erro na IA:", err);
+      } finally {
+        setIsAiAnalyzing(false);
+      }
+    }
+
+    try {
+      // Chamada para o NOVO gerador nativo
+      await ExportPdfService.buildNativePdf(results!, selections, empresa, periodo, aiText);
+      
+      setIsExportModalOpen(false);
+    } catch (error: any) {
+      alert("Falha ao gerar o PDF. Erro: " + (error?.message || String(error)));
+      console.error(error);
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   const handleOpenDetails = (title: string) => {
@@ -135,11 +186,11 @@ export default function DrePage() {
       <div className="flex-1 flex overflow-hidden">
         
         {/* Coluna Central: Dashboard */}
-        <div className={`flex-1 overflow-y-auto p-6 md:p-8 transition-all duration-300`}>
+        <div id="dre-dashboard-content" className={`flex-1 overflow-y-auto p-6 md:p-8 transition-all duration-300 ${isExportingPdf ? 'opacity-50' : ''}`}>
           <div className="max-w-7xl mx-auto">
             <DreHeader 
               lastUpdate={lastUpdate}
-              onExportPDF={handleExportPDF}
+              onExportPDF={handleOpenExportModal}
               onTogglePrivacy={() => setIsPrivacyMode(!isPrivacyMode)}
               isPrivacyMode={isPrivacyMode}
               onToggleSimulator={() => setIsSimulatorOpen(!isSimulatorOpen)}
@@ -212,6 +263,7 @@ export default function DrePage() {
               onReset={() => setSimParams({ revenueMultiplier: 1, costsMultiplier: 1, expensesMultiplier: 1 })}
               originalResults={originalResults}
               simulatedFcl={results?.kpis.fcl || 0}
+              empresaContext={filters.empresas.length === 1 ? filters.empresas[0] : (filters.empresas.length > 1 ? "Múltiplas" : "Todas as Empresas")}
             />
           </div>
         )}
@@ -225,6 +277,29 @@ export default function DrePage() {
         sourceRows={modalSourceRows}
         isPrivacyMode={isPrivacyMode}
       />
+
+      <DreExportModal 
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleConfirmExport}
+        isExporting={isExportingPdf}
+        isAiAnalyzing={isAiAnalyzing}
+      />
+
+      {/* Off-screen renderer for high-quality PDF charts */}
+      {results && (
+        <DrePrintCharts 
+          results={results} 
+          selections={{
+            includeEvolution: true,
+            includeWaterfall: true,
+            includeDonut: true,
+            includeAiAnalysis: false,
+            includeKpis: false,
+            includeTable: false
+          }} 
+        />
+      )}
     </main>
   );
 }
