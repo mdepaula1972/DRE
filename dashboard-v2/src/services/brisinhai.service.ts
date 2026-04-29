@@ -8,16 +8,19 @@ export class BrisinhaiService {
         receitaBruta: results.totais["Total Entradas Operacionais"] || 0,
         custos: results.totais["Total Custos Operacionais"] || 0,
         despesas: results.totais["Total Despesas Rateadas"] || 0,
-        lucroLiquido: results.kpis.lucroLiquido || 0,
+        lucroLiquido: (results.kpis as any).lucroLiquido || results.kpis.resultado || 0,
         fcl: results.kpis.fcl || 0,
-        margemOperacional: results.kpis.margemOperacional || 0,
-        pontoEquilibrio: results.kpis.pontoEquilibrio || 0
+        margemOperacional: (results.kpis as any).margemOperacional || 0,
+        pontoEquilibrio: (results.kpis as any).pontoEquilibrio || 0
       };
 
       // Pegando as 3 maiores despesas
       const maioresDespesas = Object.entries(results.mensal)
-        .filter(([_, value]) => value > 0) // despesas são positivas aqui dependendo da formula, vamos checar
-        .map(([nome, valor]) => ({ nome, valor }))
+        .map(([nome, valueObj]) => {
+          const totalValor = Object.values(valueObj).reduce((sum, v) => sum + (Number(v) || 0), 0);
+          return { nome, valor: totalValor };
+        })
+        .filter(item => item.valor > 0)
         .sort((a, b) => b.valor - a.valor)
         .slice(0, 3);
 

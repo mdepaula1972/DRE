@@ -85,7 +85,8 @@ export class ExportPdfService {
         };
 
         drawKpi("Faturamento", formatCurrency(results.totais['Total Entradas Operacionais'] || 0), margin);
-        drawKpi("Lucro Líquido", formatCurrency(results.kpis.lucroLiquido || 0), margin + kpiBoxWidth + 5, (results.kpis.lucroLiquido || 0) >= 0);
+        const lucroLiquido = (results.kpis as any).lucroLiquido || results.kpis.resultado || 0;
+        drawKpi("Lucro Líquido", formatCurrency(lucroLiquido), margin + kpiBoxWidth + 5, lucroLiquido >= 0);
         drawKpi("FCL (Caixa Livre)", formatCurrency(results.kpis.fcl || 0), margin + (kpiBoxWidth * 2) + 10, (results.kpis.fcl || 0) >= 0);
         
         currentY += 28;
@@ -126,10 +127,10 @@ export class ExportPdfService {
 
         let rowIndex = 0;
         results.estrutura.forEach((item) => {
-          if (item.id === 'TOTAL_ENTRADAS_SAIDAS') return; // Pula linha em branco
+          if ((item as any).id === 'TOTAL_ENTRADAS_SAIDAS') return; // Pula linha em branco
           
-          const isSoma = item.tipo === 'soma' || item.tipo === 'fcl' || item.tipo === 'margem';
-          const isGrupo = item.tipo === 'grupo';
+          const isSoma = (item.tipo as any) === 'soma' || (item.tipo as any) === 'fcl' || (item.tipo as any) === 'margem';
+          const isGrupo = (item.tipo as any) === 'grupo';
           
           const rowData = [item.titulo];
           let rowTotal = 0;
@@ -137,14 +138,14 @@ export class ExportPdfService {
           results.validColumns.forEach(col => {
             const val = results.mensal[item.titulo]?.[col] || 0;
             rowTotal += val;
-            if (item.tipo === 'margem') {
+            if ((item.tipo as any) === 'margem') {
               rowData.push(val.toFixed(1) + '%');
             } else {
               rowData.push(formatCurrency(val).replace('R$', '').trim());
             }
           });
           
-          if (item.tipo === 'margem') rowData.push('');
+          if ((item.tipo as any) === 'margem') rowData.push('');
           else rowData.push(formatCurrency(rowTotal).replace('R$', '').trim());
 
           tableBody.push(rowData);

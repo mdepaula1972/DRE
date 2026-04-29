@@ -64,7 +64,7 @@ export class ReportExportService {
 
   // Buscar dados para relatório de contratos (usando a lógica que já funciona no Dash)
   static async getContractReport(isTestMode?: boolean): Promise<ContractReportData[]> {
-    const emps = await LoansService.getEmployees({ mostrarTodos: false }, isTestMode);
+    const emps = await LoansService.getEmployees({ mostrarTodos: true }, isTestMode);
     let allContracts: ContractReportData[] = [];
 
     for (const emp of emps) {
@@ -91,40 +91,115 @@ export class ReportExportService {
     return allContracts.sort((a, b) => a.colaborador.localeCompare(b.colaborador));
   }
 
-  // Buscar dados para relatório de parcelas
-  static async getPaymentReport(): Promise<PaymentReportData[]> {
-    const { data, error } = await supabase
-      .from('loan_payments')
-      .select(`
-        *,
-        employees:employee_id (
-          full_name,
-          corporate_name,
-          company
-        )
-      `)
-      .order('due_date');
-    
-    if (error) {
-      console.error('Erro ao buscar parcelas:', error);
+  // Buscar dados para relatório de parcelas (usando lógica algorítmica do LoansService/Sidebar)
+  static async getPaymentReport(isTestMode?: boolean): Promise<PaymentReportData[]> {
+    const safeTestMode = Boolean(isTestMode);
+    const empsTable = safeTestMode ? 'employees_test' : 'employees';
+    const loansTable = safeTestMode ? 'employee_loans_test' : 'employee_loans';
+
+    const [empsRes, loansRes] = await Promise.all([
+      supabase.from(empsTable).select('id, full_name, corporate_name, company'),
+      supabase.from(loansTable).select('*')
+    ]);
+
+    if (empsRes.error) {
+      console.error('Erro ao buscar colaboradores:', empsRes.error);
       throw new Error('Falha ao carregar dados');
     }
-    
-    return (data || []).map(item => {
-      const emp = item.employees as any;
-      const name = emp?.full_name || emp?.corporate_name || 'Desconhecido';
-      
-      return {
-        colaborador: name,
-        empresa: emp?.company || '-',
-        ciclo: item.month_cycle,
-        vencimento: item.due_date,
-        valor: item.amount || 0,
-        status: item.status,
-        dataPagamento: item.payment_date,
-        formaPagamento: item.payment_method
-      };
+    if (loansRes.error) {
+      console.error('Erro ao buscar empréstimos:', loansRes.error);
+      throw new Error('Falha ao carregar dados');
+    }
+
+    const emps = empsRes.data || [];
+    const loans = loansRes.data || [];
+
+    const empMap = new Map();
+    emps.forEach(e => {
+      empMap.set(e.id, {
+        name: e.full_name || e.corporate_name || 'Desconhecido',
+        company: e.company || '-'
+      });
     });
+
+    const paymentReport: PaymentReportData[] = [];
+
+    loans.forEach(loan => {
+      const emp = empMap.get(loan.employee_id);
+      if (!emp) return;
+
+      const amount = parseFloat(String(loan.amount)) || 0;
+      const inst = parseInt(String(loan.installments)) || 1;
+      const installmentValue = amount / inst;
+
+      const now = new Date();
+      const [y, m] = loan.start_cycle ? loan.start_cycle.split('-').map(Number) : [now.getFullYear(), now.getMonth() + 1];
+      
+      let elapsed = (now.getFullYear() - y) * 12 + ((now.getMonth() + 1) - m) + 1;
+      if (now.getDate() < 10) elapsed--;
+      
+      const postponed = parseInt(String(loan.postponed_months)) || 0;
+      elapsed -= postponed;
+      elapsed = Math.max(0, Math.min(elapsed, inst));
+
+      const extraPaid = parseFloat(String(loan.amount_paid_extra)) || 0;
+      const anticipatedCount = Math.floor(extraPaid / installmentValue);
+
+      // Calcular se o contrato está liquidado (saldo <= 0)
+      const standardPaid = elapsed * installmentValue;
+      const debt = Math.max(0, amount - (standardPaid + extraPaid));
+      const isLiquidated = debt <= 0;
+
+      let currentAbs = (y * 12) + m;
+      let physicalIndex = 1;
+      let paidViaElapsed = 0;
+      let postponedUsed = 0;
+
+      for (let i = 0; i < inst + postponed; i++) {
+        const curY = Math.floor((currentAbs - 1) / 12);
+        const curM = ((currentAbs - 1) % 12) + 1;
+        
+        const ciclo = `${curY}-${String(curM).padStart(2, '0')}`;
+        const vencimento = `${curY}-${String(curM).padStart(2, '0')}-10`;
+
+        let statusStr = 'PENDENTE';
+        let valorParcela = installmentValue;
+
+        if (isLiquidated) {
+          statusStr = 'PAGO';
+          physicalIndex++;
+        } else if (paidViaElapsed < elapsed) {
+          statusStr = 'PAGO';
+          paidViaElapsed++;
+          physicalIndex++;
+        } else if (postponedUsed < postponed) {
+          statusStr = 'POSTERGADO';
+          postponedUsed++;
+          valorParcela = 0;
+        } else if ((physicalIndex - 1) < (elapsed + anticipatedCount)) {
+          statusStr = 'PAGO';
+          physicalIndex++;
+        } else {
+          statusStr = 'PENDENTE';
+          physicalIndex++;
+        }
+
+        paymentReport.push({
+          colaborador: emp.name,
+          empresa: emp.company,
+          ciclo: ciclo,
+          vencimento: vencimento,
+          valor: valorParcela,
+          status: statusStr,
+          dataPagamento: statusStr === 'PAGO' ? vencimento : null,
+          formaPagamento: statusStr === 'PAGO' ? 'Automático' : null
+        });
+
+        currentAbs++;
+      }
+    });
+
+    return paymentReport.sort((a, b) => a.vencimento.localeCompare(b.vencimento));
   }
 
   // Converter dados para CSV
@@ -179,7 +254,7 @@ export class ReportExportService {
       let [employees, contracts, payments] = await Promise.all([
         this.getEmployeeReport(isTestMode),
         this.getContractReport(isTestMode),
-        this.getPaymentReport() // Ainda usa Supabase mas para pagamentos o view costuma ser seguro
+        this.getPaymentReport(isTestMode) // Usa a mesma lógica do dashboard
       ]);
 
       // Aplicar filtros se existirem
@@ -276,7 +351,7 @@ export class ReportExportService {
       let [employees, contracts, payments] = await Promise.all([
         this.getEmployeeReport(isTestMode),
         this.getContractReport(isTestMode),
-        this.getPaymentReport()
+        this.getPaymentReport(isTestMode)
       ]);
 
       // Aplicar filtros para sincronizar com o que o usuário vê no Dashboard
