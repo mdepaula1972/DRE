@@ -4,6 +4,102 @@ import { Employee } from "../types/loans";
 import { supabase } from "@/lib/supabase";
 
 export class PDFService {
+  static async promptWitness(isTestMode: boolean): Promise<string | null> {
+    const wantWitness = window.confirm("Deseja inserir uma testemunha neste termo?");
+    if (!wantWitness) return null;
+
+    try {
+      const table = isTestMode ? 'employees_test' : 'employees';
+      const { data: emps } = await supabase.from(table).select('full_name, responsible_name').order('full_name');
+      
+      const list = Array.from(new Set((emps || []).map((e: any) => e.responsible_name || e.full_name).filter(Boolean).map((s: string) => s.trim()))).sort();
+
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.id = 'witness-modal-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.6)';
+        overlay.style.backdropFilter = 'blur(4px)';
+        overlay.style.zIndex = '999999';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+
+        const modal = document.createElement('div');
+        modal.style.backgroundColor = '#ffffff';
+        modal.style.padding = '24px';
+        modal.style.borderRadius = '16px';
+        modal.style.width = '420px';
+        modal.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+        modal.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+
+        modal.innerHTML = `
+          <h3 style="margin-top: 0; font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Inserir Testemunha</h3>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.5;">Selecione um colaborador da lista ou preencha manualmente o nome da testemunha.</p>
+          
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Preenchimento Manual</label>
+            <input type="text" id="witness-manual-input" placeholder="Digite o nome completo" style="width: 100%; padding: 10px 14px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; box-sizing: border-box; transition: border-color 0.2s;" />
+          </div>
+
+          <div style="margin-bottom: 24px;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Ou Selecione da Lista</label>
+            <select id="witness-select" style="width: 100%; padding: 10px 14px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; background: #ffffff; box-sizing: border-box;">
+              <option value="">-- Escolha um colaborador --</option>
+              ${list.map(name => `<option value="${name}">${name}</option>`).join('')}
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button id="witness-cancel-btn" style="padding: 10px 20px; font-size: 14px; font-weight: 600; color: #64748b; background: #f1f5f9; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s;">Cancelar</button>
+            <button id="witness-confirm-btn" style="padding: 10px 20px; font-size: 14px; font-weight: 600; color: #ffffff; background: #059669; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s;">Confirmar</button>
+          </div>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        const manualInput = overlay.querySelector('#witness-manual-input') as HTMLInputElement;
+        const selectEl = overlay.querySelector('#witness-select') as HTMLSelectElement;
+        const cancelBtn = overlay.querySelector('#witness-cancel-btn') as HTMLButtonElement;
+        const confirmBtn = overlay.querySelector('#witness-confirm-btn') as HTMLButtonElement;
+
+        manualInput.addEventListener('input', () => {
+          if (manualInput.value.trim() !== '') {
+            selectEl.value = '';
+          }
+        });
+
+        selectEl.addEventListener('change', () => {
+          if (selectEl.value !== '') {
+            manualInput.value = '';
+          }
+        });
+
+        cancelBtn.addEventListener('click', () => {
+          document.body.removeChild(overlay);
+          resolve(null);
+        });
+
+        confirmBtn.addEventListener('click', () => {
+          let selectedName = manualInput.value.trim();
+          if (!selectedName && selectEl.value) {
+            selectedName = selectEl.value;
+          }
+          document.body.removeChild(overlay);
+          resolve(selectedName || null);
+        });
+      });
+    } catch (e) {
+      console.error("Erro ao processar testemunhas:", e);
+      return null;
+    }
+  }
+
   static async generateDebtTermPDF(loanData: any, emp: any, isTestMode: boolean = false) {
     const amount = loanData.amount || loanData.value || 0;
     
@@ -11,6 +107,8 @@ export class PDFService {
       alert("Este colaborador não possui empréstimo registrado para gerar o termo.");
       return;
     }
+
+    const witnessName = await PDFService.promptWitness(isTestMode);
 
     let fullEmpDetails = { ...emp };
     try {
@@ -192,6 +290,9 @@ CLÁUSULA QUINTA – DAS DISPOSIÇÕES GERAIS
       doc.line(margin + 95, cursorY, margin + 170, cursorY);
       doc.setFontSize(8);
       doc.text("Nome:", margin, cursorY + 4);
+      if (witnessName) {
+        doc.text(witnessName, margin + 10, cursorY + 4);
+      }
       doc.text("CPF:", margin, cursorY + 8);
       doc.text("Nome:", margin + 95, cursorY + 4);
       doc.text("CPF:", margin + 95, cursorY + 8);
