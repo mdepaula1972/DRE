@@ -4,8 +4,8 @@ import { Employee } from "../types/loans";
 import { supabase } from "@/lib/supabase";
 
 export class PDFService {
-  static async promptWitness(isTestMode: boolean): Promise<string | null> {
-    const wantWitness = window.confirm("Deseja inserir uma testemunha neste termo?");
+  static async promptWitness(isTestMode: boolean): Promise<[string | null, string | null] | null> {
+    const wantWitness = window.confirm("Deseja inserir testemunhas neste termo?");
     if (!wantWitness) return null;
 
     try {
@@ -33,52 +33,61 @@ export class PDFService {
         modal.style.backgroundColor = '#ffffff';
         modal.style.padding = '24px';
         modal.style.borderRadius = '16px';
-        modal.style.width = '420px';
+        modal.style.width = '440px';
         modal.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
         modal.style.fontFamily = 'system-ui, -apple-system, sans-serif';
 
         modal.innerHTML = `
-          <h3 style="margin-top: 0; font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Inserir Testemunha</h3>
-          <p style="font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.5;">Selecione um colaborador da lista ou preencha manualmente o nome da testemunha.</p>
+          <h3 style="margin-top: 0; font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Inserir Testemunhas</h3>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.5;">Preencha manualmente ou selecione até duas testemunhas da lista.</p>
           
-          <div style="margin-bottom: 16px;">
-            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Preenchimento Manual</label>
-            <input type="text" id="witness-manual-input" placeholder="Digite o nome completo" style="width: 100%; padding: 10px 14px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; box-sizing: border-box; transition: border-color 0.2s;" />
+          <div style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #1e293b;">Testemunha 1</h4>
+            <div style="margin-bottom: 10px;">
+              <input type="text" id="witness1-manual" placeholder="Digite o nome completo (T1)" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;" />
+            </div>
+            <div>
+              <select id="witness1-select" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #ffffff; box-sizing: border-box;">
+                <option value="">-- Escolha da lista (T1) --</option>
+                ${list.map(name => `<option value="${name}">${name}</option>`).join('')}
+              </select>
+            </div>
           </div>
 
           <div style="margin-bottom: 24px;">
-            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Ou Selecione da Lista</label>
-            <select id="witness-select" style="width: 100%; padding: 10px 14px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; background: #ffffff; box-sizing: border-box;">
-              <option value="">-- Escolha um colaborador --</option>
-              ${list.map(name => `<option value="${name}">${name}</option>`).join('')}
-            </select>
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #1e293b;">Testemunha 2</h4>
+            <div style="margin-bottom: 10px;">
+              <input type="text" id="witness2-manual" placeholder="Digite o nome completo (T2)" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;" />
+            </div>
+            <div>
+              <select id="witness2-select" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #ffffff; box-sizing: border-box;">
+                <option value="">-- Escolha da lista (T2) --</option>
+                ${list.map(name => `<option value="${name}">${name}</option>`).join('')}
+              </select>
+            </div>
           </div>
 
           <div style="display: flex; gap: 12px; justify-content: flex-end;">
-            <button id="witness-cancel-btn" style="padding: 10px 20px; font-size: 14px; font-weight: 600; color: #64748b; background: #f1f5f9; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s;">Cancelar</button>
-            <button id="witness-confirm-btn" style="padding: 10px 20px; font-size: 14px; font-weight: 600; color: #ffffff; background: #059669; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s;">Confirmar</button>
+            <button id="witness-cancel-btn" style="padding: 10px 20px; font-size: 14px; font-weight: 600; color: #64748b; background: #f1f5f9; border: none; border-radius: 10px; cursor: pointer;">Cancelar</button>
+            <button id="witness-confirm-btn" style="padding: 10px 20px; font-size: 14px; font-weight: 600; color: #ffffff; background: #059669; border: none; border-radius: 10px; cursor: pointer;">Confirmar</button>
           </div>
         `;
 
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
 
-        const manualInput = overlay.querySelector('#witness-manual-input') as HTMLInputElement;
-        const selectEl = overlay.querySelector('#witness-select') as HTMLSelectElement;
+        const w1Manual = overlay.querySelector('#witness1-manual') as HTMLInputElement;
+        const w1Select = overlay.querySelector('#witness1-select') as HTMLSelectElement;
+        const w2Manual = overlay.querySelector('#witness2-manual') as HTMLInputElement;
+        const w2Select = overlay.querySelector('#witness2-select') as HTMLSelectElement;
+        
         const cancelBtn = overlay.querySelector('#witness-cancel-btn') as HTMLButtonElement;
         const confirmBtn = overlay.querySelector('#witness-confirm-btn') as HTMLButtonElement;
 
-        manualInput.addEventListener('input', () => {
-          if (manualInput.value.trim() !== '') {
-            selectEl.value = '';
-          }
-        });
-
-        selectEl.addEventListener('change', () => {
-          if (selectEl.value !== '') {
-            manualInput.value = '';
-          }
-        });
+        w1Manual.addEventListener('input', () => { if (w1Manual.value.trim()) w1Select.value = ''; });
+        w1Select.addEventListener('change', () => { if (w1Select.value) w1Manual.value = ''; });
+        w2Manual.addEventListener('input', () => { if (w2Manual.value.trim()) w2Select.value = ''; });
+        w2Select.addEventListener('change', () => { if (w2Select.value) w2Manual.value = ''; });
 
         cancelBtn.addEventListener('click', () => {
           document.body.removeChild(overlay);
@@ -86,12 +95,10 @@ export class PDFService {
         });
 
         confirmBtn.addEventListener('click', () => {
-          let selectedName = manualInput.value.trim();
-          if (!selectedName && selectEl.value) {
-            selectedName = selectEl.value;
-          }
+          const t1 = w1Manual.value.trim() || w1Select.value || null;
+          const t2 = w2Manual.value.trim() || w2Select.value || null;
           document.body.removeChild(overlay);
-          resolve(selectedName || null);
+          resolve([t1, t2]);
         });
       });
     } catch (e) {
@@ -108,7 +115,9 @@ export class PDFService {
       return;
     }
 
-    const witnessName = await PDFService.promptWitness(isTestMode);
+    const witnessNames = await PDFService.promptWitness(isTestMode);
+    const witness1 = witnessNames ? witnessNames[0] : null;
+    const witness2 = witnessNames ? witnessNames[1] : null;
 
     let fullEmpDetails = { ...emp };
     try {
@@ -290,11 +299,15 @@ CLÁUSULA QUINTA – DAS DISPOSIÇÕES GERAIS
       doc.line(margin + 95, cursorY, margin + 170, cursorY);
       doc.setFontSize(8);
       doc.text("Nome:", margin, cursorY + 4);
-      if (witnessName) {
-        doc.text(witnessName, margin + 10, cursorY + 4);
+      if (witness1) {
+        doc.text(witness1, margin + 10, cursorY + 4);
       }
       doc.text("CPF:", margin, cursorY + 8);
+
       doc.text("Nome:", margin + 95, cursorY + 4);
+      if (witness2) {
+        doc.text(witness2, margin + 105, cursorY + 4);
+      }
       doc.text("CPF:", margin + 95, cursorY + 8);
 
       const safeName = (fullEmpDetails.full_name || 'Desconhecido').replace(/\s+/g, '_');
