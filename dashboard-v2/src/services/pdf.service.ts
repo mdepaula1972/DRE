@@ -10,12 +10,12 @@ export class PDFService {
 
     try {
       const table = isTestMode ? 'employees_test' : 'employees';
-      const { data: emps } = await supabase.from(table).select('full_name, responsible_name, document_id').order('full_name');
+      const { data: emps } = await supabase.from(table).select('full_name, responsible_name, responsible_cpf, document_id').order('full_name');
       
       const rawList: { name: string, cpf: string }[] = [];
       (emps || []).forEach((e: any) => {
         const name = (e.responsible_name || e.full_name || '').trim();
-        const cpf = (e.document_id || '').trim();
+        const cpf = (e.responsible_cpf || e.document_id || '').trim();
         if (name) {
           rawList.push({ name, cpf });
         }
