@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.60";
+export const APP_VERSION = "v.01.61";
 export const VERSION_DATE = "2026-04-29";
 export const VERSION_CHANGELOG = [
+  "v.01.61 - Funcionalidade: Resgate e aplicação de CPF das testemunhas nos termos PDF.",
   "v.01.60 - Funcionalidade: Adição de suporte a até duas testemunhas no Termo de Confissão de Dívida.",
   "v.01.59 - Correção: Lógica de parcelas quitadas e novos contratos no relatório PDF.",
   "v.01.47 - Correção: Sincronização de Saldo Devedor (fix em postponed_months nos painéis detalhados).",

@@ -4,15 +4,24 @@ import { Employee } from "../types/loans";
 import { supabase } from "@/lib/supabase";
 
 export class PDFService {
-  static async promptWitness(isTestMode: boolean): Promise<[string | null, string | null] | null> {
+  static async promptWitness(isTestMode: boolean): Promise<[{ name: string | null, cpf: string | null }, { name: string | null, cpf: string | null }] | null> {
     const wantWitness = window.confirm("Deseja inserir testemunhas neste termo?");
     if (!wantWitness) return null;
 
     try {
       const table = isTestMode ? 'employees_test' : 'employees';
-      const { data: emps } = await supabase.from(table).select('full_name, responsible_name').order('full_name');
+      const { data: emps } = await supabase.from(table).select('full_name, responsible_name, document_id').order('full_name');
       
-      const list = Array.from(new Set((emps || []).map((e: any) => e.responsible_name || e.full_name).filter(Boolean).map((s: string) => s.trim()))).sort();
+      const rawList: { name: string, cpf: string }[] = [];
+      (emps || []).forEach((e: any) => {
+        const name = (e.responsible_name || e.full_name || '').trim();
+        const cpf = (e.document_id || '').trim();
+        if (name) {
+          rawList.push({ name, cpf });
+        }
+      });
+
+      const list = Array.from(new Map(rawList.map(item => [item.name, item])).values()).sort((a, b) => a.name.localeCompare(b.name));
 
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
@@ -46,10 +55,13 @@ export class PDFService {
             <div style="margin-bottom: 10px;">
               <input type="text" id="witness1-manual" placeholder="Digite o nome completo (T1)" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;" />
             </div>
+            <div style="margin-bottom: 10px;">
+              <input type="text" id="witness1-cpf" placeholder="Digite o CPF (T1)" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;" />
+            </div>
             <div>
               <select id="witness1-select" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #ffffff; box-sizing: border-box;">
                 <option value="">-- Escolha da lista (T1) --</option>
-                ${list.map(name => `<option value="${name}">${name}</option>`).join('')}
+                ${list.map(item => `<option value="${item.name}" data-cpf="${item.cpf}">${item.name}</option>`).join('')}
               </select>
             </div>
           </div>
@@ -59,10 +71,13 @@ export class PDFService {
             <div style="margin-bottom: 10px;">
               <input type="text" id="witness2-manual" placeholder="Digite o nome completo (T2)" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;" />
             </div>
+            <div style="margin-bottom: 10px;">
+              <input type="text" id="witness2-cpf" placeholder="Digite o CPF (T2)" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;" />
+            </div>
             <div>
               <select id="witness2-select" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #ffffff; box-sizing: border-box;">
                 <option value="">-- Escolha da lista (T2) --</option>
-                ${list.map(name => `<option value="${name}">${name}</option>`).join('')}
+                ${list.map(item => `<option value="${item.name}" data-cpf="${item.cpf}">${item.name}</option>`).join('')}
               </select>
             </div>
           </div>
@@ -77,17 +92,19 @@ export class PDFService {
         document.body.appendChild(overlay);
 
         const w1Manual = overlay.querySelector('#witness1-manual') as HTMLInputElement;
+        const w1Cpf = overlay.querySelector('#witness1-cpf') as HTMLInputElement;
         const w1Select = overlay.querySelector('#witness1-select') as HTMLSelectElement;
         const w2Manual = overlay.querySelector('#witness2-manual') as HTMLInputElement;
+        const w2Cpf = overlay.querySelector('#witness2-cpf') as HTMLInputElement;
         const w2Select = overlay.querySelector('#witness2-select') as HTMLSelectElement;
         
         const cancelBtn = overlay.querySelector('#witness-cancel-btn') as HTMLButtonElement;
         const confirmBtn = overlay.querySelector('#witness-confirm-btn') as HTMLButtonElement;
 
         w1Manual.addEventListener('input', () => { if (w1Manual.value.trim()) w1Select.value = ''; });
-        w1Select.addEventListener('change', () => { if (w1Select.value) w1Manual.value = ''; });
+        w1Select.addEventListener('change', () => { if (w1Select.value) { w1Manual.value = ''; w1Cpf.value = ''; } });
         w2Manual.addEventListener('input', () => { if (w2Manual.value.trim()) w2Select.value = ''; });
-        w2Select.addEventListener('change', () => { if (w2Select.value) w2Manual.value = ''; });
+        w2Select.addEventListener('change', () => { if (w2Select.value) { w2Manual.value = ''; w2Cpf.value = ''; } });
 
         cancelBtn.addEventListener('click', () => {
           document.body.removeChild(overlay);
@@ -95,10 +112,24 @@ export class PDFService {
         });
 
         confirmBtn.addEventListener('click', () => {
-          const t1 = w1Manual.value.trim() || w1Select.value || null;
-          const t2 = w2Manual.value.trim() || w2Select.value || null;
+          let n1 = w1Manual.value.trim();
+          let c1 = w1Cpf.value.trim();
+          if (!n1 && w1Select.value) {
+            n1 = w1Select.value;
+            const opt = w1Select.options[w1Select.selectedIndex];
+            c1 = opt ? opt.getAttribute('data-cpf') || '' : '';
+          }
+
+          let n2 = w2Manual.value.trim();
+          let c2 = w2Cpf.value.trim();
+          if (!n2 && w2Select.value) {
+            n2 = w2Select.value;
+            const opt = w2Select.options[w2Select.selectedIndex];
+            c2 = opt ? opt.getAttribute('data-cpf') || '' : '';
+          }
+
           document.body.removeChild(overlay);
-          resolve([t1, t2]);
+          resolve([{ name: n1 || null, cpf: c1 || null }, { name: n2 || null, cpf: c2 || null }]);
         });
       });
     } catch (e) {
@@ -299,16 +330,22 @@ CLÁUSULA QUINTA – DAS DISPOSIÇÕES GERAIS
       doc.line(margin + 95, cursorY, margin + 170, cursorY);
       doc.setFontSize(8);
       doc.text("Nome:", margin, cursorY + 4);
-      if (witness1) {
-        doc.text(witness1, margin + 10, cursorY + 4);
+      if (witness1 && witness1.name) {
+        doc.text(witness1.name, margin + 10, cursorY + 4);
       }
       doc.text("CPF:", margin, cursorY + 8);
+      if (witness1 && witness1.cpf) {
+        doc.text(witness1.cpf, margin + 10, cursorY + 8);
+      }
 
       doc.text("Nome:", margin + 95, cursorY + 4);
-      if (witness2) {
-        doc.text(witness2, margin + 105, cursorY + 4);
+      if (witness2 && witness2.name) {
+        doc.text(witness2.name, margin + 105, cursorY + 4);
       }
       doc.text("CPF:", margin + 95, cursorY + 8);
+      if (witness2 && witness2.cpf) {
+        doc.text(witness2.cpf, margin + 105, cursorY + 8);
+      }
 
       const safeName = (fullEmpDetails.full_name || 'Desconhecido').replace(/\s+/g, '_');
       doc.save(`Termo_Divida_${safeName}_${Date.now()}.pdf`);
