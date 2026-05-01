@@ -75,8 +75,8 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                 dreText = dimDRE.get(catInfo.codigo_dre) || `Cód: ${catInfo.codigo_dre}`;
               }
 
-              const projId = hasAlloc ? String(itemAllocs[0].codigo_projeto) : String(item.codigo_projeto || '');
-              const projText = dimProjetos.get(projId) || projId || 'Nenhum';
+              const projText = (hasAlloc && itemAllocs[0].descricao_projeto) || 
+                               (item._projetos && item._projetos.length > 0 ? item._projetos[0] : 'Nenhum');
 
               return (
                 <React.Fragment key={item.id_global}>

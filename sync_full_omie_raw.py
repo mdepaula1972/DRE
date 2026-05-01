@@ -80,6 +80,7 @@ def process_and_push(records, empresa_nome, dim_maps):
                 "categoria_codigo": cat_cod,
                 "categoria_nome": dim_maps["categorias"].get(cat_cod, cat_cod),
                 "projeto_nome": dim_maps["projetos"].get(proj_cod, r.get("nome_projeto") or "Sem Projeto"),
+                "fornecedor_nome": r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social") or "Fornecedor",
                 "departamento_codigo": d.get("cCodDep"),
                 "departamento_nome": d.get("cDesDep"),
                 "numero_documento": r.get("numero_documento"),

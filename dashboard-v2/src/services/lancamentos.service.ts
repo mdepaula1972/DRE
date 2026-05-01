@@ -125,6 +125,7 @@ export class LancamentosService {
                                raw.nome_cliente || 
                                raw.razao_social || 
                                raw.nome_fantasia || 
+                               item.fornecedor_nome || // Caso eu adicione esta coluna
                                'Fornecedor';
 
         groupedMap.set(item.omie_id, {
@@ -134,7 +135,7 @@ export class LancamentosService {
           fornecedor: fornecedorNome,
           valor: parseFloat(item.valor_total),
           categoria_id: item.categoria_codigo,
-          codigo_projeto: String(item.projeto_codigo || ''),
+          codigo_projeto: String(item.projeto_codigo || raw.codigo_projeto || ''),
           codigo_lancamento_omie: item.omie_id,
           data_emissao: raw.data_emissao,
           data_entrada: item.data_registro,
