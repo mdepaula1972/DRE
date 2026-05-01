@@ -50,7 +50,7 @@ export default function LancamentosPage() {
     setIsLoading(true);
     try {
       // By default fetch from 2025-06-01. We could make this dynamic, but aligning with legacy.
-      const data = await LancamentosService.getLancamentos('2025-06-01');
+      const data = await LancamentosService.getLancamentos('2024-01-01');
       setAllLancamentos(data.lancamentos);
       setAllocations(data.allocations);
       setDimDRE(data.dimDRE);
@@ -131,7 +131,26 @@ export default function LancamentosPage() {
       // 4. Origem
       if (filters.source && item.fonte !== filters.source) return false;
 
-      // 5. Search Text
+      // 4. Categoria
+      if (filters.categoria && item.categoria_id !== filters.categoria) {
+        // Tentar buscar por nome amigável se o ID não bater
+        const catName = dimCategorias.get(item.categoria_id)?.descricao;
+        if (catName !== filters.categoria) return false;
+      }
+
+      // 5. Projeto
+      if (filters.projeto) {
+        const hasProj = item._projetos?.includes(filters.projeto);
+        if (!hasProj) return false;
+      }
+
+      // 6. Departamento
+      if (filters.departamento) {
+        const hasDep = item._departamentos?.includes(filters.departamento);
+        if (!hasDep) return false;
+      }
+
+      // 7. Search Text
       if (filters.search) {
         const term = filters.search.toLowerCase();
         if (!item.fornecedor.toLowerCase().includes(term) && !item.observacao?.toLowerCase().includes(term)) {
@@ -199,7 +218,12 @@ export default function LancamentosPage() {
               <Receipt className="text-emerald-600" size={28} />
               Lançamentos Financeiros
             </h1>
-            <p className="text-sm text-slate-500 font-medium mt-1">Gestão de Competência e Caixa Integrada ao Omie</p>
+            <p className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-2">
+              Gestão de Competência e Caixa Integrada ao Omie
+              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 uppercase tracking-widest">
+                {APP_VERSION}
+              </span>
+            </p>
           </div>
           
           <div className="flex items-center gap-3 w-full md:w-auto">
@@ -227,7 +251,12 @@ export default function LancamentosPage() {
           </div>
         )}
 
-        <LancamentosFilterBar onFilterChange={setActiveFilters} />
+        <LancamentosFilterBar 
+          onFilterChange={setActiveFilters} 
+          availableCategories={Array.from(new Set(allLancamentos.map(l => dimCategorias.get(l.categoria_id)?.descricao).filter(Boolean))).sort()}
+          availableProjects={Array.from(new Set(allLancamentos.flatMap(l => l._projetos || []).filter(Boolean))).sort()}
+          availableDepartments={Array.from(new Set(allLancamentos.flatMap(l => l._departamentos || []).filter(Boolean))).sort()}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <StatCard 

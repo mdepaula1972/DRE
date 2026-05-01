@@ -22,6 +22,8 @@ export interface Lancamento {
   // Computed na runtime
   _dataSort?: Date;
   _dataLabel?: string;
+  _departamentos?: string[];
+  _projetos?: string[];
 }
 
 export interface LancamentoFilterValues {
@@ -31,6 +33,9 @@ export interface LancamentoFilterValues {
   status?: string; // PAGO, ABERTO, ATRASADO
   source?: string; // CP, MOV
   search?: string;
+  categoria?: string;
+  projeto?: string;
+  departamento?: string;
 }
 
 export interface LancamentoStats {

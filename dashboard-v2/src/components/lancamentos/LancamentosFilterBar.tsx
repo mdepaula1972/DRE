@@ -6,9 +6,12 @@ import { LancamentoFilterValues } from "@/types/lancamentos";
 
 interface Props {
   onFilterChange: (filters: LancamentoFilterValues) => void;
+  availableCategories: string[];
+  availableProjects: string[];
+  availableDepartments: string[];
 }
 
-export function LancamentosFilterBar({ onFilterChange }: Props) {
+export function LancamentosFilterBar({ onFilterChange, availableCategories, availableProjects, availableDepartments }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<LancamentoFilterValues>({
     dateBase: 'registro',
@@ -117,6 +120,51 @@ export function LancamentosFilterBar({ onFilterChange }: Props) {
                 <option value="PAGO">Pago</option>
                 <option value="ABERTO">Em Aberto</option>
                 <option value="ATRASADO">Atrasado</option>
+              </select>
+            </div>
+
+            {/* Categoria */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Categoria</label>
+              <select
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+                value={filters.categoria || ""}
+                onChange={(e) => handleChange("categoria", e.target.value)}
+              >
+                <option value="">Todas as Categorias</option>
+                {availableCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Projeto */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Projeto</label>
+              <select
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+                value={filters.projeto || ""}
+                onChange={(e) => handleChange("projeto", e.target.value)}
+              >
+                <option value="">Todos os Projetos</option>
+                {availableProjects.map(proj => (
+                  <option key={proj} value={proj}>{proj}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Departamento */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Departamento</label>
+              <select
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+                value={filters.departamento || ""}
+                onChange={(e) => handleChange("departamento", e.target.value)}
+              >
+                <option value="">Todos os Departamentos</option>
+                {availableDepartments.map(dep => (
+                  <option key={dep} value={dep}>{dep}</option>
+                ))}
               </select>
             </div>
 

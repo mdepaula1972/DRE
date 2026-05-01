@@ -1,9 +1,10 @@
 // Version Control - Dashboard Financeiro
 // Updated automatically on each commit
 
-export const APP_VERSION = "v.01.62";
-export const VERSION_DATE = "2026-04-29";
+export const APP_VERSION = "v.01.70";
+export const VERSION_DATE = "2026-05-01";
 export const VERSION_CHANGELOG = [
+  "v.01.70 - Auditoria: Transição para omie_raw e expansão de filtros (Cat/Proj/Dep).",
   "v.01.62 - Ajuste: Priorização do responsible_cpf sobre document_id para testemunhas PJ.",
   "v.01.61 - Funcionalidade: Resgate e aplicação de CPF das testemunhas nos termos PDF.",
   "v.01.60 - Funcionalidade: Adição de suporte a até duas testemunhas no Termo de Confissão de Dívida.",

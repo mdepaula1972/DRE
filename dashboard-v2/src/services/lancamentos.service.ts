@@ -37,7 +37,7 @@ export class LancamentosService {
     return results;
   }
 
-  static async getLancamentos(startDate: string = '2025-06-01'): Promise<{ 
+  static async getLancamentos(startDate: string = '2024-01-01'): Promise<{ 
     lancamentos: Lancamento[], 
     allocations: any[], 
     dimCategorias: Map<string, any>, 
@@ -45,23 +45,44 @@ export class LancamentosService {
     dimDRE: Map<string, string> 
   }> {
     
-    // Disparar todas as buscas em paralelo (igual ao legado)
-    const [
-      cpData, movData, allocData, 
-      fornData, catData, projData, dreData
-    ] = await Promise.all([
-      this.fetchAll('omie_cp_titulos', 'data_entrada', startDate),
-      this.fetchAll('omie_mov_saidas', 'data_pagamento', startDate),
-      this.fetchAll('omie_cp_allocations', 'null', null),
-      this.fetchAll('omie_dim_fornecedores', 'null', null),
-      this.fetchAll('omie_dim_categorias', 'null', null),
-      this.fetchAll('omie_dim_projetos', 'null', null),
-      this.fetchAll('omie_dim_dre', 'null', null)
+    // 1. Buscar os dados brutos da nova tabela omie_raw
+    // Nota: Estamos buscando desde 2024 conforme a nova carga histórica
+    let rawData: any[] = [];
+    let from = 0;
+    let limit = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('omie_raw')
+        .select('*')
+        .gte('data_registro', startDate)
+        .order('data_registro', { ascending: false })
+        .range(from, from + limit - 1);
+
+      if (error) {
+        console.error('Erro ao buscar omie_raw:', error);
+        break;
+      }
+
+      if (data && data.length > 0) {
+        rawData = rawData.concat(data);
+        from += limit;
+        if (data.length < limit) hasMore = false;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    // 2. Buscar Dimensões para compatibilidade com o componente Legado
+    const [catData, projData, dreData] = await Promise.all([
+      supabase.from('omie_dim_categorias').select('*'),
+      supabase.from('omie_dim_projetos').select('*'),
+      supabase.from('omie_dim_dre').select('*')
     ]);
 
-    // Map Dimensions
     const dimCategorias = new Map<string, any>();
-    (catData || []).forEach(c => {
+    (catData.data || []).forEach(c => {
       dimCategorias.set(String(c.codigo_categoria), {
         descricao: c.descricao_categoria,
         codigo_dre: String(c.codigo_conta_dre || '')
@@ -69,89 +90,73 @@ export class LancamentosService {
     });
 
     const dimProjetos = new Map<string, string>();
-    (projData || []).forEach(p => {
+    (projData.data || []).forEach(p => {
       dimProjetos.set(String(p.codigo_projeto), p.descricao_projeto);
     });
 
     const dimDRE = new Map<string, string>();
-    (dreData || []).forEach(d => {
+    (dreData.data || []).forEach(d => {
       dimDRE.set(String(d.codigo_conta_dre), d.descricao_conta_dre);
     });
 
-    const dimFornecedores = new Map<string, string>();
-    (fornData || []).forEach(f => {
-      const name = f.nome_fantasia || f.razao_social || f.cnpj_cpf || 'Sem Nome';
-      dimFornecedores.set(String(f.codigo_cliente_omie), name);
-    });
+    // 3. Processar Lançamentos (Agrupando por omie_id para a tabela principal)
+    const groupedMap = new Map<number, Lancamento>();
+    const allocations: any[] = [];
 
-    // Consolidation (CP)
-    const cpMapped: Lancamento[] = (cpData || []).map(item => {
-      let payload: any = {};
-      try { payload = typeof item.payload_json === 'string' ? JSON.parse(item.payload_json) : (item.payload_json || {}); } catch(e) {}
-      
-      let fornecedorNome = dimFornecedores.get(String(item.codigo_cliente_fornecedor)) || item.fornecedor_nome_transferencia;
-      
-      if (!fornecedorNome || fornecedorNome === 'Desconhecido') {
-        fornecedorNome = payload?.nm_cliente || 
-                         payload?.nome_cliente || 
-                         payload?.nome_fantasia || 
-                         payload?.razao_social || 
-                         payload?.contas_pagar_cadastro?.[0]?.nm_cliente || 
-                         'Desconhecido';
+    rawData.forEach(item => {
+      // Alimentar lista de allocations para o modal de detalhes
+      allocations.push({
+        codigo_lancamento_omie: item.omie_id,
+        descricao_departamento: item.departamento_nome,
+        codigo_departamento: item.departamento_codigo,
+        valor_alocado: item.valor_alocado,
+        percentual_departamento: item.valor_total > 0 ? ((item.valor_alocado / item.valor_total) * 100).toFixed(2) : 0,
+        descricao_categoria: item.categoria_nome,
+        descricao_projeto: item.projeto_nome,
+        descricao_conta_dre: item.dre_conta_nome
+      });
+
+      // Agrupar para a linha principal da tabela
+      if (!groupedMap.has(item.omie_id)) {
+        groupedMap.set(item.omie_id, {
+          id_global: `raw_${item.omie_id}`,
+          fonte: 'CP',
+          empresa: item.empresa_nome,
+          fornecedor: item.raw_data?.nm_cliente || 'Fornecedor',
+          valor: parseFloat(item.valor_total),
+          categoria_id: item.categoria_codigo,
+          codigo_lancamento_omie: item.omie_id,
+          data_emissao: item.raw_data?.data_emissao,
+          data_entrada: item.data_registro,
+          data_previsao: item.data_vencimento,
+          data_vencimento: item.data_vencimento,
+          data_pagamento: item.data_pagamento,
+          status_titulo: item.status,
+          observacao: item.raw_data?.observacao || '',
+          _dataLabel: item.data_registro,
+          _departamentos: [item.departamento_nome],
+          _projetos: [item.projeto_nome]
+        } as Lancamento);
+      } else {
+        const existing = groupedMap.get(item.omie_id);
+        if (existing) {
+          if (!existing._departamentos?.includes(item.departamento_nome)) {
+            existing._departamentos?.push(item.departamento_nome);
+          }
+          if (!existing._projetos?.includes(item.projeto_nome)) {
+            existing._projetos?.push(item.projeto_nome);
+          }
+        }
       }
-      
-      return {
-        id_global: `cp_${item.codigo_lancamento_omie}`,
-        fonte: 'CP',
-        fornecedor: fornecedorNome,
-        empresa: item.empresa_nome || 'Não Identificada',
-        valor: parseFloat(item.valor_documento) || 0,
-        categoria_id: String(item.codigo_categoria_padrao || 'S/ Cat'),
-        codigo_lancamento_omie: item.codigo_lancamento_omie,
-        data_emissao: item.data_emissao,
-        data_entrada: item.data_entrada,
-        data_previsao: item.data_previsao,
-        data_vencimento: item.data_vencimento,
-        data_pagamento: item.data_pagamento,
-        status_titulo: item.status_titulo,
-        observacao: item.observacao || payload?.observacao || ''
-      };
     });
 
-    // Consolidation (MOV)
-    const movMapped: Lancamento[] = (movData || []).map(item => {
-      let payload: any = {};
-      try { payload = typeof item.payload_json === 'string' ? JSON.parse(item.payload_json) : (item.payload_json || {}); } catch(e) {}
-      
-      let fornecedorNome = dimFornecedores.get(String(item.codigo_cliente_fornecedor)) || item.fornecedor_nome_transferencia;
-      if (!fornecedorNome || fornecedorNome === 'Desconhecido') {
-        fornecedorNome = payload?.detalhes?.cNomeCliente || 
-                         payload?.detalhes?.cNomeFantasia || 
-                         payload?.detalhes?.cNumDocFiscal || 
-                         payload?.resumo?.cNomeCliente ||
-                         item.empresa_nome || 
-                         'Não Identificada';
-      }
-
-      return {
-        id_global: `mov_${item.dedupe_key}`,
-        fonte: 'MOV',
-        fornecedor: fornecedorNome,
-        empresa: item.empresa_nome || 'Não Identificada',
-        valor: parseFloat(item.valor_pago) || 0,
-        categoria_id: String(item.codigo_categoria || 'S/ Cat'),
-        codigo_movimento_cc: item.codigo_movimento_cc,
-        data_emissao: item.data_emissao,
-        data_vencimento: item.data_vencimento,
-        data_previsao: item.data_previsao,
-        data_pagamento: item.data_pagamento,
-        status_titulo: item.status_titulo || 'PAGO (MOV)', // Movimento já é pago em regra
-        observacao: item.observacao || payload?.detalhes?.cObservacao || ''
-      };
-    });
-
-    const lancamentos = [...cpMapped, ...movMapped];
-    return { lancamentos, allocations: allocData || [], dimCategorias, dimProjetos, dimDRE };
+    return { 
+      lancamentos: Array.from(groupedMap.values()), 
+      allocations, 
+      dimCategorias, 
+      dimProjetos, 
+      dimDRE 
+    };
   }
 }
 
