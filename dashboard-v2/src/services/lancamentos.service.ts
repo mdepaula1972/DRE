@@ -113,26 +113,36 @@ export class LancamentosService {
         percentual_departamento: item.valor_total > 0 ? ((item.valor_alocado / item.valor_total) * 100).toFixed(2) : 0,
         descricao_categoria: item.categoria_nome,
         descricao_projeto: item.projeto_nome,
+        codigo_projeto: item.projeto_codigo, // Importante para o De-Para
         descricao_conta_dre: item.dre_conta_nome
       });
 
       // Agrupar para a linha principal da tabela
       if (!groupedMap.has(item.omie_id)) {
+        // Busca robusta de fornecedor no raw_data
+        const raw = item.raw_data || {};
+        const fornecedorNome = raw.nm_cliente || 
+                               raw.nome_cliente || 
+                               raw.razao_social || 
+                               raw.nome_fantasia || 
+                               'Fornecedor';
+
         groupedMap.set(item.omie_id, {
           id_global: `raw_${item.omie_id}`,
           fonte: 'CP',
           empresa: item.empresa_nome,
-          fornecedor: item.raw_data?.nm_cliente || 'Fornecedor',
+          fornecedor: fornecedorNome,
           valor: parseFloat(item.valor_total),
           categoria_id: item.categoria_codigo,
+          codigo_projeto: String(item.projeto_codigo || ''),
           codigo_lancamento_omie: item.omie_id,
-          data_emissao: item.raw_data?.data_emissao,
+          data_emissao: raw.data_emissao,
           data_entrada: item.data_registro,
           data_previsao: item.data_vencimento,
           data_vencimento: item.data_vencimento,
           data_pagamento: item.data_pagamento,
           status_titulo: item.status,
-          observacao: item.raw_data?.observacao || '',
+          observacao: raw.observacao || '',
           _dataLabel: item.data_registro,
           _departamentos: [item.departamento_nome],
           _projetos: [item.projeto_nome]
