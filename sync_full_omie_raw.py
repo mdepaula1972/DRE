@@ -42,6 +42,7 @@ def fetch_omie_page(app_key, app_secret, pagina):
         "param": [{
             "pagina": pagina,
             "registros_por_pagina": 100,
+            "exibir_obs": "S",
             "filtrar_por_data_de": "01/01/2024",
             "filtrar_por_data_ate": datetime.now().strftime("%d/%m/%Y")
         }]
@@ -82,20 +83,30 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
         dist = r.get("distribuicao", []) or [{"cCodDep": None, "cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento", 0)}]
         
         status = r.get("status_titulo")
+        # Nome do fornecedor vindo da lista (muitas vezes vem "Fornecedor" generico)
+        fornecedor_nome = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social") or "Fornecedor"
         dt_pagamento = format_date(r.get("data_baixa"))
+        dt_registro = format_date(r.get("data_entrada"))
 
-        # Se estiver PAGO mas sem data de baixa na listagem, buscar detalhes
-        if status == "PAGO" and not dt_pagamento:
+        # Se estiver PAGO ou nome estiver generico ou data de registro vazia, buscar detalhes
+        if (status == "PAGO" and not dt_pagamento) or (fornecedor_nome == "Fornecedor") or not dt_registro:
             details = fetch_omie_details(app_key, app_secret, r.get("codigo_lancamento_omie"))
             if details:
-                # Na consulta detalhada, a data de baixa costuma vir em data_baixa ou na lista de liquidacoes
-                dt_pagamento = format_date(details.get("data_baixa"))
-                if not dt_pagamento and details.get("liquidacoes"):
-                    dt_pagamento = format_date(details["liquidacoes"][0].get("data_liquidacao"))
-            time.sleep(0.05) # Pequena pausa para nao estourar a API
+                # Atualizar dados reais da consulta detalhada
+                fornecedor_nome = details.get("nm_cliente") or details.get("nome_cliente") or fornecedor_nome
+                if not dt_registro:
+                    dt_registro = format_date(details.get("data_entrada"))
+                if not dt_pagamento:
+                    dt_pagamento = format_date(details.get("data_baixa"))
+                    if not dt_pagamento and details.get("liquidacoes"):
+                        dt_pagamento = format_date(details["liquidacoes"][0].get("data_liquidacao"))
+            time.sleep(0.02)
         
-        # Injetar nome do fornecedor no JSON para garantir que o front encontre
-        fornecedor_nome = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social") or r.get("nome_fantasia") or "Fornecedor"
+        # Validacao critica de Data de Registro
+        if not dt_registro:
+            log(f"  [ERRO] Titulo {r.get('codigo_lancamento_omie')} sem Data de Registro (entrada)!")
+
+        # Injetar nome real no JSON
         r["nm_cliente"] = fornecedor_nome 
 
         for d in dist:
@@ -105,7 +116,7 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
                 "status": status,
                 "valor_total": r.get("valor_documento"),
                 "valor_alocado": d.get("nValDep"),
-                "data_registro": format_date(r.get("data_entrada")),
+                "data_registro": dt_registro,
                 "data_vencimento": format_date(r.get("data_vencimento")),
                 "data_pagamento": dt_pagamento,
                 "categoria_codigo": cat_cod,
