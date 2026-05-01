@@ -95,18 +95,18 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
         dist = r.get("distribuicao", []) or [{"cCodDep": None, "cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento", 0)}]
         
         status = r.get("status_titulo")
+        # Tentar pegar o nome de varias chaves
         fornecedor_nome = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social") or "Fornecedor"
         dt_pagamento = format_date(r.get("data_baixa"))
         dt_registro = format_date(r.get("data_entrada"))
 
-        # Busca profunda se necessario
-        if (status == "PAGO" and not dt_pagamento) or (fornecedor_nome == "Fornecedor") or not dt_registro:
+        # Busca profunda apenas se necessario
+        if fornecedor_nome == "Fornecedor" or (status == "PAGO" and not dt_pagamento):
             details = fetch_omie_details(app_key, app_secret, r.get("codigo_lancamento_omie"))
             if details:
                 if fornecedor_nome == "Fornecedor":
-                    fornecedor_nome = details.get("nm_cliente") or details.get("nome_cliente") or fornecedor_nome
+                    fornecedor_nome = details.get("nm_cliente") or details.get("nome_cliente") or details.get("razao_social") or fornecedor_nome
                 
-                # Se ainda for Fornecedor, tentar busca direta pelo ID do cliente
                 if fornecedor_nome == "Fornecedor":
                     real_name = fetch_supplier_name(app_key, app_secret, r.get("codigo_cliente_fornecedor"))
                     if real_name: fornecedor_nome = real_name
@@ -118,11 +118,10 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
                     if not dt_pagamento and details.get("liquidacoes"):
                         dt_pagamento = format_date(details["liquidacoes"][0].get("data_liquidacao"))
             
-            # Fallback de data de pagamento para Previsao (conforme imagem)
             if status == "PAGO" and not dt_pagamento:
                 dt_pagamento = format_date(r.get("data_previsao"))
             
-            time.sleep(0.02)
+            time.sleep(0.01)
         
         r["nm_cliente"] = fornecedor_nome 
 
@@ -133,7 +132,7 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
                 "status": status,
                 "valor_total": r.get("valor_documento"),
                 "valor_alocado": d.get("nValDep"),
-                "data_registro": dt_registro,
+                "data_registro": dt_registro or format_date(r.get("info", {}).get("dInc")),
                 "data_vencimento": format_date(r.get("data_vencimento")),
                 "data_pagamento": dt_pagamento,
                 "categoria_codigo": cat_cod,
