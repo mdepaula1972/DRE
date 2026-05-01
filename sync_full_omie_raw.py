@@ -2,6 +2,7 @@ import os
 import requests
 import json
 import time
+import re
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -86,6 +87,14 @@ def format_date(date_str):
     try: return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
     except: return None
 
+def extract_name_from_pix(pix_str):
+    if not pix_str: return None
+    # Tenta achar o nome em um QR Code PIX (geralmente após o código da moeda ou em campos específicos)
+    # Ex: FLASH APP, SOLIDES, etc
+    match = re.search(r'([A-Z\s]{4,30})[0-9]{2}BR', pix_str)
+    if match: return match.group(1).strip()
+    return None
+
 def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
     if not records: return
     rows = []
@@ -95,17 +104,22 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
         dist = r.get("distribuicao", []) or [{"cCodDep": None, "cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento", 0)}]
         
         status = r.get("status_titulo")
-        # Tentar pegar o nome de varias chaves
         fornecedor_nome = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social") or "Fornecedor"
         dt_pagamento = format_date(r.get("data_baixa"))
         dt_registro = format_date(r.get("data_entrada"))
 
-        # Busca profunda apenas se necessario
+        # Busca profunda se necessario
         if fornecedor_nome == "Fornecedor" or (status == "PAGO" and not dt_pagamento):
             details = fetch_omie_details(app_key, app_secret, r.get("codigo_lancamento_omie"))
             if details:
                 if fornecedor_nome == "Fornecedor":
                     fornecedor_nome = details.get("nm_cliente") or details.get("nome_cliente") or details.get("razao_social") or fornecedor_nome
+                
+                # Tentar extrair do PIX se ainda for Fornecedor
+                if fornecedor_nome == "Fornecedor":
+                    pix = details.get("cnab_integracao_bancaria", {}).get("pix_qrcode")
+                    pix_name = extract_name_from_pix(pix)
+                    if pix_name: fornecedor_nome = pix_name
                 
                 if fornecedor_nome == "Fornecedor":
                     real_name = fetch_supplier_name(app_key, app_secret, r.get("codigo_cliente_fornecedor"))
@@ -118,6 +132,7 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
                     if not dt_pagamento and details.get("liquidacoes"):
                         dt_pagamento = format_date(details["liquidacoes"][0].get("data_liquidacao"))
             
+            # Fallback final de data
             if status == "PAGO" and not dt_pagamento:
                 dt_pagamento = format_date(r.get("data_previsao"))
             
@@ -170,7 +185,7 @@ def sync_company(key_env, secret_env, name):
         
         if pagina >= data.get("total_de_paginas", 0): break
         pagina += 1
-        time.sleep(0.1)
+        time.sleep(0.05)
 
 # --- Main ---
 log("=== INICIANDO SINCRONIZAÇÃO HISTÓRICA OMIE RAW ===")
