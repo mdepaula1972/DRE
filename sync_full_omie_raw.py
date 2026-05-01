@@ -78,7 +78,7 @@ def process_and_push(records, empresa_nome, dim_maps):
                 "status": r.get("status_titulo"),
                 "valor_total": r.get("valor_documento"),
                 "valor_alocado": d.get("nValDep"),
-                "data_registro": format_date(r.get("info", {}).get("dInc")),
+                "data_registro": format_date(r.get("data_entrada")),
                 "data_vencimento": format_date(r.get("data_vencimento")),
                 "data_pagamento": format_date(r.get("data_baixa")),
                 "categoria_codigo": cat_cod,
