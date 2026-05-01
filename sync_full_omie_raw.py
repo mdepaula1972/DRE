@@ -54,18 +54,45 @@ def fetch_omie_page(app_key, app_secret, pagina):
         except: time.sleep(1)
     return {}
 
+def fetch_omie_details(app_key, app_secret, omie_id):
+    url = "https://app.omie.com.br/api/v1/financas/contapagar/"
+    payload = {
+        "call": "ConsultarContaPagar",
+        "app_key": app_key,
+        "app_secret": app_secret,
+        "param": [{"codigo_lancamento_omie": omie_id}]
+    }
+    try:
+        resp = requests.post(url, json=payload, timeout=20)
+        if resp.status_code == 200: return resp.json()
+    except: pass
+    return {}
+
 def format_date(date_str):
     if not date_str: return None
     try: return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
     except: return None
 
-def process_and_push(records, empresa_nome, dim_maps):
+def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
     if not records: return
     rows = []
     for r in records:
         cat_cod = r.get("codigo_categoria")
         proj_cod = str(r.get("codigo_projeto"))
         dist = r.get("distribuicao", []) or [{"cCodDep": None, "cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento", 0)}]
+        
+        status = r.get("status_titulo")
+        dt_pagamento = format_date(r.get("data_baixa"))
+
+        # Se estiver PAGO mas sem data de baixa na listagem, buscar detalhes
+        if status == "PAGO" and not dt_pagamento:
+            details = fetch_omie_details(app_key, app_secret, r.get("codigo_lancamento_omie"))
+            if details:
+                # Na consulta detalhada, a data de baixa costuma vir em data_baixa ou na lista de liquidacoes
+                dt_pagamento = format_date(details.get("data_baixa"))
+                if not dt_pagamento and details.get("liquidacoes"):
+                    dt_pagamento = format_date(details["liquidacoes"][0].get("data_liquidacao"))
+            time.sleep(0.05) # Pequena pausa para nao estourar a API
         
         # Injetar nome do fornecedor no JSON para garantir que o front encontre
         fornecedor_nome = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social") or r.get("nome_fantasia") or "Fornecedor"
@@ -75,12 +102,12 @@ def process_and_push(records, empresa_nome, dim_maps):
             rows.append({
                 "empresa_nome": empresa_nome,
                 "omie_id": r.get("codigo_lancamento_omie"),
-                "status": r.get("status_titulo"),
+                "status": status,
                 "valor_total": r.get("valor_documento"),
                 "valor_alocado": d.get("nValDep"),
                 "data_registro": format_date(r.get("data_entrada")),
                 "data_vencimento": format_date(r.get("data_vencimento")),
-                "data_pagamento": format_date(r.get("data_baixa")),
+                "data_pagamento": dt_pagamento,
                 "categoria_codigo": cat_cod,
                 "categoria_nome": dim_maps["categorias"].get(cat_cod, cat_cod),
                 "projeto_nome": dim_maps["projetos"].get(proj_cod, r.get("nome_projeto") or "Sem Projeto"),
@@ -113,7 +140,7 @@ def sync_company(key_env, secret_env, name):
         records = data.get("conta_pagar_cadastro", [])
         if not records: break
         
-        process_and_push(records, name, dim_maps)
+        process_and_push(records, name, dim_maps, key, sec)
         total_processado += len(records)
         log(f"  {name}: Página {pagina} processada ({total_processado} títulos)")
         
