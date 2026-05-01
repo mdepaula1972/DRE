@@ -253,9 +253,24 @@ export default function LancamentosPage() {
 
         <LancamentosFilterBar 
           onFilterChange={setActiveFilters} 
-          availableCategories={Array.from(new Set(allLancamentos.map(l => dimCategorias.get(l.categoria_id)?.descricao).filter(Boolean))).sort()}
-          availableProjects={Array.from(new Set(allLancamentos.flatMap(l => l._projetos || []).filter(Boolean))).sort()}
-          availableDepartments={Array.from(new Set(allLancamentos.flatMap(l => l._departamentos || []).filter(Boolean))).sort()}
+          availableCategories={(() => {
+            const base = activeFilters.empresa 
+              ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
+              : allLancamentos;
+            return Array.from(new Set(base.map(l => dimCategorias.get(l.categoria_id)?.descricao).filter(Boolean))).sort();
+          })()}
+          availableProjects={(() => {
+            const base = activeFilters.empresa 
+              ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
+              : allLancamentos;
+            return Array.from(new Set(base.flatMap(l => l._projetos || []).filter(Boolean))).sort();
+          })()}
+          availableDepartments={(() => {
+            const base = activeFilters.empresa 
+              ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
+              : allLancamentos;
+            return Array.from(new Set(base.flatMap(l => l._departamentos || []).filter(Boolean))).sort();
+          })()}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
