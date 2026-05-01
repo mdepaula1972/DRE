@@ -1,6 +1,6 @@
 import os
-import json
 import requests
+import json
 import time
 from datetime import datetime
 from dotenv import load_dotenv
@@ -8,25 +8,21 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-HEADERS = {
-    "apikey": SUPABASE_KEY,
-    "Authorization": f"Bearer {SUPABASE_KEY}",
-    "Content-Type": "application/json"
-}
+KEY = os.getenv("SUPABASE_SERVICE_KEY")
+HEADERS = {"apikey": KEY, "Authorization": f"Bearer {KEY}", "Content-Type": "application/json"}
 
 def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
 
-def get_dim_maps():
+def get_dim_maps(empresa_nome):
     maps = {"categorias": {}, "projetos": {}}
-    log("Carregando Dimensões do Supabase...")
+    log(f"Carregando Dimensões para {empresa_nome}...")
     try:
-        resp_cat = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_categorias?select=codigo_categoria,descricao_categoria", headers=HEADERS)
+        resp_cat = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_categorias?empresa_nome=eq.{empresa_nome}&select=codigo_categoria,descricao_categoria", headers=HEADERS)
         if resp_cat.status_code == 200:
             for item in resp_cat.json(): maps["categorias"][item["codigo_categoria"]] = item["descricao_categoria"]
             
-        resp_proj = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?select=codigo_projeto,descricao_projeto", headers=HEADERS)
+        resp_proj = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?empresa_nome=eq.{empresa_nome}&select=codigo_projeto,descricao_projeto", headers=HEADERS)
         if resp_proj.status_code == 200:
             for item in resp_proj.json(): maps["projetos"][str(item["codigo_projeto"])] = item["descricao_projeto"]
     except Exception as e:
@@ -47,11 +43,10 @@ def fetch_omie_page(app_key, app_secret, pagina):
             "filtrar_por_data_ate": datetime.now().strftime("%d/%m/%Y")
         }]
     }
-    for _ in range(3): # Retries
+    for _ in range(3):
         try:
             resp = requests.post(url, json=payload, timeout=30)
             if resp.status_code == 200: return resp.json()
-            if resp.status_code == 429: time.sleep(2)
         except: time.sleep(1)
     return {}
 
@@ -69,6 +64,23 @@ def fetch_omie_details(app_key, app_secret, omie_id):
     except: pass
     return {}
 
+def fetch_supplier_name(app_key, app_secret, cliente_id):
+    if not cliente_id: return None
+    url = "https://app.omie.com.br/api/v1/geral/clientes/"
+    payload = {
+        "call": "ConsultarCliente",
+        "app_key": app_key,
+        "app_secret": app_secret,
+        "param": [{"codigo_cliente_omie": cliente_id}]
+    }
+    try:
+        resp = requests.post(url, json=payload, timeout=20)
+        if resp.status_code == 200: 
+            data = resp.json()
+            return data.get("nome_fantasia") or data.get("razao_social")
+    except: pass
+    return None
+
 def format_date(date_str):
     if not date_str: return None
     try: return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
@@ -83,30 +95,35 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
         dist = r.get("distribuicao", []) or [{"cCodDep": None, "cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento", 0)}]
         
         status = r.get("status_titulo")
-        # Nome do fornecedor vindo da lista (muitas vezes vem "Fornecedor" generico)
         fornecedor_nome = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social") or "Fornecedor"
         dt_pagamento = format_date(r.get("data_baixa"))
         dt_registro = format_date(r.get("data_entrada"))
 
-        # Se estiver PAGO ou nome estiver generico ou data de registro vazia, buscar detalhes
+        # Busca profunda se necessario
         if (status == "PAGO" and not dt_pagamento) or (fornecedor_nome == "Fornecedor") or not dt_registro:
             details = fetch_omie_details(app_key, app_secret, r.get("codigo_lancamento_omie"))
             if details:
-                # Atualizar dados reais da consulta detalhada
-                fornecedor_nome = details.get("nm_cliente") or details.get("nome_cliente") or fornecedor_nome
+                if fornecedor_nome == "Fornecedor":
+                    fornecedor_nome = details.get("nm_cliente") or details.get("nome_cliente") or fornecedor_nome
+                
+                # Se ainda for Fornecedor, tentar busca direta pelo ID do cliente
+                if fornecedor_nome == "Fornecedor":
+                    real_name = fetch_supplier_name(app_key, app_secret, r.get("codigo_cliente_fornecedor"))
+                    if real_name: fornecedor_nome = real_name
+
                 if not dt_registro:
                     dt_registro = format_date(details.get("data_entrada"))
                 if not dt_pagamento:
                     dt_pagamento = format_date(details.get("data_baixa"))
                     if not dt_pagamento and details.get("liquidacoes"):
                         dt_pagamento = format_date(details["liquidacoes"][0].get("data_liquidacao"))
+            
+            # Fallback de data de pagamento para Previsao (conforme imagem)
+            if status == "PAGO" and not dt_pagamento:
+                dt_pagamento = format_date(r.get("data_previsao"))
+            
             time.sleep(0.02)
         
-        # Validacao critica de Data de Registro
-        if not dt_registro:
-            log(f"  [ERRO] Titulo {r.get('codigo_lancamento_omie')} sem Data de Registro (entrada)!")
-
-        # Injetar nome real no JSON
         r["nm_cliente"] = fornecedor_nome 
 
         for d in dist:
@@ -128,7 +145,6 @@ def process_and_push(records, empresa_nome, dim_maps, app_key, app_secret):
                 "raw_data": r
             })
     
-    # Upsert no Supabase (em lotes de 100)
     for i in range(0, len(rows), 100):
         batch = rows[i:i+100]
         requests.post(f"{SUPABASE_URL}/rest/v1/omie_raw", json=batch, headers=HEADERS)
@@ -139,13 +155,11 @@ def sync_company(key_env, secret_env, name):
     if not key or not sec: return
     
     log(f"Iniciando {name}...")
-    # Limpar dados antigos da empresa para evitar duplicidade no histórico total
     requests.delete(f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}", headers=HEADERS)
     
-    dim_maps = get_dim_maps()
+    dim_maps = get_dim_maps(name)
     pagina = 1
     total_processado = 0
-    
     while True:
         data = fetch_omie_page(key, sec, pagina)
         records = data.get("conta_pagar_cadastro", [])
@@ -157,7 +171,7 @@ def sync_company(key_env, secret_env, name):
         
         if pagina >= data.get("total_de_paginas", 0): break
         pagina += 1
-        time.sleep(0.2) # Evitar rate limit
+        time.sleep(0.1)
 
 # --- Main ---
 log("=== INICIANDO SINCRONIZAÇÃO HISTÓRICA OMIE RAW ===")
