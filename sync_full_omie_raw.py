@@ -25,40 +25,42 @@ def format_date(date_str):
     try: return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
     except: return None
 
+def load_supplier_cache(app_key, app_secret, name):
+    log(f"Carregando Cadastro de Clientes/Fornecedores para {name}...")
+    company_caches[name] = {}
+    pagina = 1
+    while True:
+        url = "https://app.omie.com.br/api/v1/geral/clientes/"
+        payload = {
+            "call": "ListarClientes",
+            "app_key": app_key,
+            "app_secret": app_secret,
+            "param": [{"pagina": pagina, "registros_por_pagina": 500, "apenas_importado_api": "N"}]
+        }
+        try:
+            resp = requests.post(url, json=payload, timeout=30)
+            if resp.status_code == 200:
+                data = resp.json()
+                for c in data.get("clientes_cadastro", []):
+                    cid = str(c.get("codigo_cliente_omie"))
+                    company_caches[name][cid] = c.get("nome_fantasia") or c.get("razao_social") or "Fornecedor"
+                if pagina >= data.get("total_de_paginas", 0): break
+                pagina += 1
+            else: break
+        except: break
+    log(f"  [OK] {len(company_caches[name])} fornecedores memorizados.")
+
 def load_project_map(name):
     log(f"Carregando Mapa de Projetos para {name}...")
+    project_maps[name] = {}
     try:
-        project_maps[name] = {}
         resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?empresa_nome=eq.{name}&select=codigo_projeto,descricao_projeto", headers=HEADERS)
         if resp.status_code == 200:
             for item in resp.json():
                 pid = str(item["codigo_projeto"]).strip()
                 project_maps[name][pid] = item["descricao_projeto"]
             log(f"  [OK] {len(project_maps[name])} projetos mapeados.")
-    except Exception as e:
-        log(f"Erro ao carregar projetos: {e}")
-
-def get_supplier_name(app_key, app_secret, client_id, empresa_nome):
-    if not client_id: return "Fornecedor"
-    cache = company_caches.get(empresa_nome, {})
-    if str(client_id) in cache: return cache[str(client_id)]
-    
-    url = "https://app.omie.com.br/api/v1/geral/clientes/"
-    payload = {
-        "call": "ConsultarCliente",
-        "app_key": app_key,
-        "app_secret": app_secret,
-        "param": [{"codigo_cliente_omie": client_id}]
-    }
-    try:
-        resp = requests.post(url, json=payload, timeout=20)
-        if resp.status_code == 200:
-            data = resp.json()
-            name = data.get("nome_fantasia") or data.get("razao_social") or "Fornecedor"
-            cache[str(client_id)] = name
-            return name
     except: pass
-    return "Fornecedor"
 
 def get_omie_page(app_key, app_secret, pagina):
     url = "https://app.omie.com.br/api/v1/financas/contapagar/"
@@ -85,8 +87,9 @@ def sync_company(key_env, secret_env, name):
     sec = os.getenv(secret_env)
     if not key or not sec: return
     
-    log(f"--- INICIANDO {name.upper()} v.02.13 ---")
+    log(f"--- INICIANDO {name.upper()} v.02.14 ---")
     load_project_map(name)
+    load_supplier_cache(key, sec, name)
     
     first_page = get_omie_page(key, sec, 1)
     if not first_page.get("conta_pagar_cadastro"):
@@ -103,20 +106,16 @@ def sync_company(key_env, secret_env, name):
         if not records: break
         
         rows = []
-        for i, r in enumerate(records):
-            # Log de progresso a cada 20 t tulos para n o inundar o terminal
-            if i % 20 == 0:
-                print(".", end="", flush=True)
-
-            cid = r.get("codigo_cliente_fornecedor")
-            fornecedor = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social")
-            if not fornecedor or fornecedor == "Fornecedor":
-                fornecedor = get_supplier_name(key, sec, cid, name)
-            
+        for r in records:
+            # Busca instant nea no cache memorizado
+            cid = str(r.get("codigo_cliente_fornecedor"))
+            fornecedor = company_caches[name].get(cid) or r.get("nm_cliente") or r.get("nome_cliente") or "Fornecedor"
             r["nm_cliente"] = fornecedor
+            
             pid = str(r.get("codigo_projeto", "")).strip()
             projeto = project_maps[name].get(pid) or r.get("nome_projeto") or "Sem Projeto"
             r["nome_projeto"] = projeto
+            
             dt_pagamento_final = format_date(r.get("data_previsao"))
             
             dist = r.get("distribuicao", []) or [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
@@ -137,8 +136,6 @@ def sync_company(key_env, secret_env, name):
                     "raw_data": r
                 })
         
-        print(f" > Enviando lote {pagina}...")
-        sys.stdout.flush()
         if rows:
             requests.post(f"{SUPABASE_URL}/rest/v1/omie_raw", json=rows, headers=HEADERS)
         
@@ -147,9 +144,9 @@ def sync_company(key_env, secret_env, name):
         
         if pagina >= data.get("total_de_paginas", 0): break
         pagina += 1
-        time.sleep(0.05)
+        time.sleep(0.01)
 
-log("=== INICIANDO SINCRONIZA  O v.02.13 ===")
+log("=== SINCRONIZA  O TURBO v.02.14 ===")
 sync_company("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil")
 sync_company("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
-log("=== FINALIZADO v.02.13 ===")
+log("=== FINALIZADO v.02.14 ===")
