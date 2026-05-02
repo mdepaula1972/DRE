@@ -11,11 +11,9 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 KEY = os.getenv("SUPABASE_SERVICE_KEY")
 HEADERS = {"apikey": KEY, "Authorization": f"Bearer {KEY}", "Content-Type": "application/json"}
 
-# Cache de fornecedores isolado por empresa para evitar conflito de chaves
-company_caches = {
-    "Mar Brasil": {},
-    "DZM": {}
-}
+# Caches globais
+company_caches = {"Mar Brasil": {}, "DZM": {}}
+project_maps = {"Mar Brasil": {}, "DZM": {}}
 
 def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
@@ -24,6 +22,17 @@ def format_date(date_str):
     if not date_str: return None
     try: return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
     except: return None
+
+def load_project_map(name):
+    log(f"Carregando Mapa de Projetos para {name}...")
+    try:
+        resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?empresa_nome=eq.{name}&select=codigo_projeto,descricao_projeto", headers=HEADERS)
+        if resp.status_code == 200:
+            for item in resp.json():
+                project_maps[name][str(item["codigo_projeto"])] = item["descricao_projeto"]
+            log(f"  {len(project_maps[name])} projetos mapeados.")
+    except Exception as e:
+        log(f"Erro ao carregar projetos: {e}")
 
 def get_supplier_name(app_key, app_secret, client_id, empresa_nome):
     if not client_id: return "Fornecedor"
@@ -57,14 +66,16 @@ def get_omie_page(app_key, app_secret, pagina):
             "pagina": pagina,
             "registros_por_pagina": 100,
             "exibir_obs": "S",
-            "exibir_projetos": "S", # Importante para Mar Brasil
-            "filtrar_por_data_de": "01/01/2024", # Trazer todos os lancamentos
+            "filtrar_por_data_de": "01/01/2024",
             "filtrar_por_data_ate": datetime.now().strftime("%d/%m/%Y")
         }]
     }
     try:
         resp = requests.post(url, json=payload, timeout=30)
-        return resp.json()
+        if resp.status_code == 200: return resp.json()
+        else:
+            log(f"Erro API Omie: {resp.status_code} - {resp.text}")
+            return {}
     except: return {}
 
 def sync_company(key_env, secret_env, name):
@@ -72,30 +83,38 @@ def sync_company(key_env, secret_env, name):
     sec = os.getenv(secret_env)
     if not key or not sec: return
     
-    log(f"Iniciando Sincronização v.02.10 {name}...")
+    log(f"Iniciando Sincroniza  o v.02.11 {name}...")
+    load_project_map(name)
+    
+    # Limpar apenas se a API responder algo, para n o apagar o que j  temos se falhar
+    first_page = get_omie_page(key, sec, 1)
+    if not first_page.get("conta_pagar_cadastro"):
+        log(f"  Aviso: Nenhum dado recebido para {name}. Abortando limpeza.")
+        return
+
     requests.delete(f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}", headers=HEADERS)
     
     pagina = 1
     total_processed = 0
     while True:
-        data = get_omie_page(key, sec, pagina)
+        if pagina == 1: data = first_page
+        else: data = get_omie_page(key, sec, pagina)
+        
         records = data.get("conta_pagar_cadastro", [])
         if not records: break
         
         rows = []
         for r in records:
-            # 1. Fornecedor com Cache por Empresa
             fornecedor = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social")
             if not fornecedor or fornecedor == "Fornecedor":
                 fornecedor = get_supplier_name(key, sec, r.get("codigo_cliente_fornecedor"), name)
             
             r["nm_cliente"] = fornecedor
-            
-            # 2. Data de Pagamento = SEMPRE a Data de Previs o (Regra de Auditoria)
             dt_pagamento_final = format_date(r.get("data_previsao"))
             
-            # 3. Projetos
-            projeto = r.get("nome_projeto") or "Sem Projeto"
+            # Mapeamento de Projetos via ID
+            proj_id = str(r.get("codigo_projeto", ""))
+            projeto = project_maps[name].get(proj_id) or r.get("nome_projeto") or "Sem Projeto"
 
             dist = r.get("distribuicao", []) or [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
             for d in dist:
@@ -119,13 +138,13 @@ def sync_company(key_env, secret_env, name):
             requests.post(f"{SUPABASE_URL}/rest/v1/omie_raw", json=rows, headers=HEADERS)
         
         total_processed += len(records)
-        log(f"  {name}: Página {pagina} ok ({total_processed} títulos)")
+        log(f"  {name}: P gina {pagina} ok ({total_processed} t tulos)")
         
         if pagina >= data.get("total_de_paginas", 0): break
         pagina += 1
         time.sleep(0.05)
 
-log("=== SINCRONIZAÇÃO DE AUDITORIA v.02.10 (ISOLAMENTO TOTAL) ===")
+log("=== SINCRONIZA  O DE AUDITORIA v.02.11 (CORRE  O PROJETOS) ===")
 sync_company("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil")
 sync_company("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
-log("=== PROCESSO CONCLUÍDO ===")
+log("=== PROCESSO CONCLU DO ===")
