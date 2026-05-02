@@ -26,7 +26,7 @@ def format_date(date_str):
     except: return None
 
 def load_supplier_cache(app_key, app_secret, name):
-    log(f"Carregando Cadastro de Clientes/Fornecedores para {name}...")
+    log(f"Memorizando Fornecedores para {name}...")
     company_caches[name] = {}
     pagina = 1
     try:
@@ -38,7 +38,7 @@ def load_supplier_cache(app_key, app_secret, name):
                 "app_secret": app_secret,
                 "param": [{"pagina": pagina, "registros_por_pagina": 500}]
             }
-            resp = requests.post(url, json=payload, timeout=30)
+            resp = requests.post(url, json=payload, timeout=40)
             if resp.status_code == 200:
                 data = resp.json()
                 for c in data.get("clientes_cadastro", []):
@@ -47,8 +47,9 @@ def load_supplier_cache(app_key, app_secret, name):
                 if pagina >= data.get("total_de_paginas", 0): break
                 pagina += 1
             else: break
-    except: pass
-    log(f"  [OK] {len(company_caches[name])} fornecedores memorizados para {name}.")
+    except Exception as e:
+        log(f"  Aviso no Cache de {name}: {e}")
+    log(f"  [OK] {len(company_caches[name])} fornecedores memorizados.")
 
 def get_supplier_name_fallback(app_key, app_secret, client_id, empresa_nome):
     if not client_id: return "Fornecedor"
@@ -63,7 +64,7 @@ def get_supplier_name_fallback(app_key, app_secret, client_id, empresa_nome):
         "param": [{"codigo_cliente_omie": client_id}]
     }
     try:
-        resp = requests.post(url, json=payload, timeout=20)
+        resp = requests.post(url, json=payload, timeout=30)
         if resp.status_code == 200:
             data = resp.json()
             name = data.get("nome_fantasia") or data.get("razao_social") or "Fornecedor"
@@ -73,15 +74,19 @@ def get_supplier_name_fallback(app_key, app_secret, client_id, empresa_nome):
     return "Fornecedor"
 
 def load_project_map(name):
-    log(f"Carregando Mapa de Projetos para {name}...")
+    log(f"Mapeando Projetos para {name}...")
     project_maps[name] = {}
     try:
-        resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?empresa_nome=eq.{name}&select=codigo_projeto,descricao_projeto", headers=HEADERS)
+        # Usando params para garantir codifica  o correta (ex: Mar Brasil)
+        params = {"empresa_nome": f"eq.{name}", "select": "codigo_projeto,descricao_projeto"}
+        resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_projetos", headers=HEADERS, params=params)
         if resp.status_code == 200:
             for item in resp.json():
                 pid = str(item["codigo_projeto"]).strip()
                 project_maps[name][pid] = item["descricao_projeto"]
-    except: pass
+            log(f"  [OK] {len(project_maps[name])} projetos carregados.")
+    except Exception as e:
+        log(f"  Erro no Mapa de Projetos: {e}")
 
 def get_omie_page(app_key, app_secret, pagina):
     url = "https://app.omie.com.br/api/v1/financas/contapagar/"
@@ -93,13 +98,13 @@ def get_omie_page(app_key, app_secret, pagina):
             "pagina": pagina,
             "registros_por_pagina": 100,
             "exibir_obs": "S"
-            # Removendo filtros de data para garantir carga TOTAL
         }]
     }
-    try:
-        resp = requests.post(url, json=payload, timeout=40)
-        if resp.status_code == 200: return resp.json()
-    except: pass
+    for _ in range(2): # Tentar 2 vezes se falhar
+        try:
+            resp = requests.post(url, json=payload, timeout=50)
+            if resp.status_code == 200: return resp.json()
+        except: time.sleep(2)
     return {}
 
 def sync_company(key_env, secret_env, name):
@@ -107,39 +112,36 @@ def sync_company(key_env, secret_env, name):
     sec = os.getenv(secret_env)
     if not key or not sec: return
     
-    log(f"--- INICIANDO {name.upper()} v.02.15 (ULTRA) ---")
+    log(f"--- INICIANDO RESGATE {name.upper()} v.02.16 ---")
     load_project_map(name)
     load_supplier_cache(key, sec, name)
     
-    first_page = get_omie_page(key, sec, 1)
-    if not first_page.get("conta_pagar_cadastro"):
-        log(f"  [!] Alerta: Primeira p gina vazia ou erro na Omie para {name}.")
-        # Se for erro de conex o, n o limpamos o banco
-        if "faultstring" in first_page:
-            log(f"  Erro: {first_page['faultstring']}")
+    data = get_omie_page(key, sec, 1)
+    if not data.get("conta_pagar_cadastro"):
+        log(f"  [!] Alerta: Sem t tulos na primeira p gina de {name}. Verificando status...")
+        if "faultstring" in data:
+            log(f"  Erro Omie: {data['faultstring']}")
             return
-
+        # Se for apenas vazio mas sem erro, limpamos o banco (pois pode ser que n o tenha nada mesmo)
+    
     requests.delete(f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}", headers=HEADERS)
     
     pagina = 1
     total_processed = 0
     while True:
-        data = first_page if pagina == 1 else get_omie_page(key, sec, pagina)
+        if pagina > 1: data = get_omie_page(key, sec, pagina)
         records = data.get("conta_pagar_cadastro", [])
         if not records: break
         
         rows = []
         for r in records:
-            # Fornecedor com Fallback Inteligente
             fornecedor = get_supplier_name_fallback(key, sec, r.get("codigo_cliente_fornecedor"), name)
             r["nm_cliente"] = fornecedor
             
-            # Projetos
             pid = str(r.get("codigo_projeto", "")).strip()
             projeto = project_maps[name].get(pid) or r.get("nome_projeto") or "Sem Projeto"
             r["nome_projeto"] = projeto
             
-            # Data Pagamento = Previso
             dt_pagamento_final = format_date(r.get("data_previsao"))
             
             dist = r.get("distribuicao", []) or [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
@@ -170,9 +172,9 @@ def sync_company(key_env, secret_env, name):
         pagina += 1
         time.sleep(0.01)
     
-    log(f"  [SUCESSO] {name} finalizada com {total_processed} t tulos.")
+    log(f"  [OK] {name} finalizada com {total_processed} t tulos.")
 
-log("=== SINCRONIZA  O ULTRA v.02.15 ===")
+log("=== SINCRONIZA  O DE RESGATE v.02.16 ===")
 sync_company("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil")
 sync_company("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
-log("=== PROCESSO CONCLU DO ===")
+log("=== FINALIZADO v.02.16 ===")
