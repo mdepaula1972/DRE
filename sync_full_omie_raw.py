@@ -26,18 +26,21 @@ def format_date(date_str):
 def load_project_map(name):
     log(f"Carregando Mapa de Projetos para {name}...")
     try:
+        # Limpar cache anterior para garantir isolamento
+        project_maps[name] = {}
         resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?empresa_nome=eq.{name}&select=codigo_projeto,descricao_projeto", headers=HEADERS)
         if resp.status_code == 200:
             for item in resp.json():
-                project_maps[name][str(item["codigo_projeto"])] = item["descricao_projeto"]
-            log(f"  {len(project_maps[name])} projetos mapeados.")
+                pid = str(item["codigo_projeto"]).strip()
+                project_maps[name][pid] = item["descricao_projeto"]
+            log(f"  [OK] {len(project_maps[name])} projetos mapeados para {name}.")
     except Exception as e:
         log(f"Erro ao carregar projetos: {e}")
 
 def get_supplier_name(app_key, app_secret, client_id, empresa_nome):
     if not client_id: return "Fornecedor"
     cache = company_caches.get(empresa_nome, {})
-    if client_id in cache: return cache[client_id]
+    if str(client_id) in cache: return cache[str(client_id)]
     
     url = "https://app.omie.com.br/api/v1/geral/clientes/"
     payload = {
@@ -51,7 +54,7 @@ def get_supplier_name(app_key, app_secret, client_id, empresa_nome):
         if resp.status_code == 200:
             data = resp.json()
             name = data.get("nome_fantasia") or data.get("razao_social") or "Fornecedor"
-            cache[client_id] = name
+            cache[str(client_id)] = name
             return name
     except: pass
     return "Fornecedor"
@@ -73,23 +76,20 @@ def get_omie_page(app_key, app_secret, pagina):
     try:
         resp = requests.post(url, json=payload, timeout=30)
         if resp.status_code == 200: return resp.json()
-        else:
-            log(f"Erro API Omie: {resp.status_code} - {resp.text}")
-            return {}
-    except: return {}
+    except: pass
+    return {}
 
 def sync_company(key_env, secret_env, name):
     key = os.getenv(key_env)
     sec = os.getenv(secret_env)
     if not key or not sec: return
     
-    log(f"Iniciando Sincroniza  o v.02.11 {name}...")
+    log(f"--- INICIANDO {name.upper()} v.02.12 ---")
     load_project_map(name)
     
-    # Limpar apenas se a API responder algo, para n o apagar o que j  temos se falhar
     first_page = get_omie_page(key, sec, 1)
     if not first_page.get("conta_pagar_cadastro"):
-        log(f"  Aviso: Nenhum dado recebido para {name}. Abortando limpeza.")
+        log(f"  [!] Abortando: Nenhuma resposta da Omie para {name}.")
         return
 
     requests.delete(f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}", headers=HEADERS)
@@ -97,25 +97,31 @@ def sync_company(key_env, secret_env, name):
     pagina = 1
     total_processed = 0
     while True:
-        if pagina == 1: data = first_page
-        else: data = get_omie_page(key, sec, pagina)
-        
+        data = first_page if pagina == 1 else get_omie_page(key, sec, pagina)
         records = data.get("conta_pagar_cadastro", [])
         if not records: break
         
         rows = []
         for r in records:
+            # 1. Fornecedor
+            cid = r.get("codigo_cliente_fornecedor")
             fornecedor = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social")
             if not fornecedor or fornecedor == "Fornecedor":
-                fornecedor = get_supplier_name(key, sec, r.get("codigo_cliente_fornecedor"), name)
+                fornecedor = get_supplier_name(key, sec, cid, name)
             
+            # Injetar no raw_data para o front-end
             r["nm_cliente"] = fornecedor
-            dt_pagamento_final = format_date(r.get("data_previsao"))
             
-            # Mapeamento de Projetos via ID
-            proj_id = str(r.get("codigo_projeto", ""))
-            projeto = project_maps[name].get(proj_id) or r.get("nome_projeto") or "Sem Projeto"
-
+            # 2. Projetos
+            pid = str(r.get("codigo_projeto", "")).strip()
+            projeto = project_maps[name].get(pid) or r.get("nome_projeto") or "Sem Projeto"
+            
+            # Injetar no raw_data para o front-end
+            r["nome_projeto"] = projeto
+            
+            # 3. Data de Pagamento (Previso)
+            dt_previsao = format_date(r.get("data_previsao"))
+            
             dist = r.get("distribuicao", []) or [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
             for d in dist:
                 rows.append({
@@ -126,7 +132,7 @@ def sync_company(key_env, secret_env, name):
                     "valor_alocado": d.get("nValDep"),
                     "data_registro": format_date(r.get("data_entrada") or r.get("info", {}).get("dInc")),
                     "data_vencimento": format_date(r.get("data_vencimento")),
-                    "data_pagamento": dt_pagamento_final,
+                    "data_pagamento": dt_previsao,
                     "categoria_codigo": r.get("codigo_categoria"),
                     "categoria_nome": r.get("descricao_categoria") or r.get("codigo_categoria"),
                     "projeto_nome": projeto,
@@ -138,13 +144,13 @@ def sync_company(key_env, secret_env, name):
             requests.post(f"{SUPABASE_URL}/rest/v1/omie_raw", json=rows, headers=HEADERS)
         
         total_processed += len(records)
-        log(f"  {name}: P gina {pagina} ok ({total_processed} t tulos)")
+        log(f"  P gina {pagina}: {total_processed} t tulos processados.")
         
         if pagina >= data.get("total_de_paginas", 0): break
         pagina += 1
         time.sleep(0.05)
 
-log("=== SINCRONIZA  O DE AUDITORIA v.02.11 (CORRE  O PROJETOS) ===")
+log("=== INICIANDO SINCRONIZA  O v.02.12 ===")
 sync_company("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil")
 sync_company("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
-log("=== PROCESSO CONCLU DO ===")
+log("=== FINALIZADO v.02.12 ===")
