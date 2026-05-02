@@ -11,8 +11,11 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 KEY = os.getenv("SUPABASE_SERVICE_KEY")
 HEADERS = {"apikey": KEY, "Authorization": f"Bearer {KEY}", "Content-Type": "application/json"}
 
-# Cache global para evitar chamadas repetitivas de fornecedores
-supplier_cache = {}
+# Cache de fornecedores isolado por empresa para evitar conflito de chaves
+company_caches = {
+    "Mar Brasil": {},
+    "DZM": {}
+}
 
 def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
@@ -22,9 +25,10 @@ def format_date(date_str):
     try: return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
     except: return None
 
-def get_supplier_name(app_key, app_secret, client_id):
+def get_supplier_name(app_key, app_secret, client_id, empresa_nome):
     if not client_id: return "Fornecedor"
-    if client_id in supplier_cache: return supplier_cache[client_id]
+    cache = company_caches.get(empresa_nome, {})
+    if client_id in cache: return cache[client_id]
     
     url = "https://app.omie.com.br/api/v1/geral/clientes/"
     payload = {
@@ -38,7 +42,7 @@ def get_supplier_name(app_key, app_secret, client_id):
         if resp.status_code == 200:
             data = resp.json()
             name = data.get("nome_fantasia") or data.get("razao_social") or "Fornecedor"
-            supplier_cache[client_id] = name
+            cache[client_id] = name
             return name
     except: pass
     return "Fornecedor"
@@ -52,7 +56,10 @@ def get_omie_page(app_key, app_secret, pagina):
         "param": [{
             "pagina": pagina,
             "registros_por_pagina": 100,
-            "exibir_obs": "S"
+            "exibir_obs": "S",
+            "exibir_projetos": "S", # Importante para Mar Brasil
+            "filtrar_por_data_de": "01/01/2024", # Trazer todos os lancamentos
+            "filtrar_por_data_ate": datetime.now().strftime("%d/%m/%Y")
         }]
     }
     try:
@@ -65,7 +72,7 @@ def sync_company(key_env, secret_env, name):
     sec = os.getenv(secret_env)
     if not key or not sec: return
     
-    log(f"Iniciando Sincronização Inteligente {name}...")
+    log(f"Iniciando Sincronização v.02.10 {name}...")
     requests.delete(f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}", headers=HEADERS)
     
     pagina = 1
@@ -77,22 +84,18 @@ def sync_company(key_env, secret_env, name):
         
         rows = []
         for r in records:
-            # 1. Garantir o nome do fornecedor (usando cache para ser r pido)
-            # Se nm_cliente vier na listagem, usamos. Se n o, buscamos no cache/API.
+            # 1. Fornecedor com Cache por Empresa
             fornecedor = r.get("nm_cliente") or r.get("nome_cliente") or r.get("razao_social")
             if not fornecedor or fornecedor == "Fornecedor":
-                fornecedor = get_supplier_name(key, sec, r.get("codigo_cliente_fornecedor"))
+                fornecedor = get_supplier_name(key, sec, r.get("codigo_cliente_fornecedor"), name)
             
-            # Atualizar no objeto bruto para o front-end ler
             r["nm_cliente"] = fornecedor
             
-            # 2. Data de Pagamento = Data de Previs o (Regra de Auditoria solicitada)
-            # Priorizamos a Previs o conforme o usu rio refor ou
-            dt_previsao = format_date(r.get("data_previsao"))
-            dt_baixa = format_date(r.get("data_baixa"))
+            # 2. Data de Pagamento = SEMPRE a Data de Previs o (Regra de Auditoria)
+            dt_pagamento_final = format_date(r.get("data_previsao"))
             
-            # Se o status for PAGO, usamos a previs o como data de pagamento se for o caso
-            dt_pagamento_final = dt_previsao if r.get("status_titulo") == "PAGO" else dt_baixa
+            # 3. Projetos
+            projeto = r.get("nome_projeto") or "Sem Projeto"
 
             dist = r.get("distribuicao", []) or [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
             for d in dist:
@@ -107,7 +110,7 @@ def sync_company(key_env, secret_env, name):
                     "data_pagamento": dt_pagamento_final,
                     "categoria_codigo": r.get("codigo_categoria"),
                     "categoria_nome": r.get("descricao_categoria") or r.get("codigo_categoria"),
-                    "projeto_nome": r.get("nome_projeto") or "Sem Projeto",
+                    "projeto_nome": projeto,
                     "departamento_nome": d.get("cDesDep"),
                     "raw_data": r
                 })
@@ -122,7 +125,7 @@ def sync_company(key_env, secret_env, name):
         pagina += 1
         time.sleep(0.05)
 
-log("=== SINCRONIZAÇÃO DE AUDITORIA (FORNECEDOR + PREVISÃO) ===")
+log("=== SINCRONIZAÇÃO DE AUDITORIA v.02.10 (ISOLAMENTO TOTAL) ===")
 sync_company("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil")
 sync_company("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
 log("=== PROCESSO CONCLUÍDO ===")
