@@ -29,15 +29,15 @@ def load_supplier_cache(app_key, app_secret, name):
     log(f"Carregando Cadastro de Clientes/Fornecedores para {name}...")
     company_caches[name] = {}
     pagina = 1
-    while True:
-        url = "https://app.omie.com.br/api/v1/geral/clientes/"
-        payload = {
-            "call": "ListarClientes",
-            "app_key": app_key,
-            "app_secret": app_secret,
-            "param": [{"pagina": pagina, "registros_por_pagina": 500, "apenas_importado_api": "N"}]
-        }
-        try:
+    try:
+        while True:
+            url = "https://app.omie.com.br/api/v1/geral/clientes/"
+            payload = {
+                "call": "ListarClientes",
+                "app_key": app_key,
+                "app_secret": app_secret,
+                "param": [{"pagina": pagina, "registros_por_pagina": 500}]
+            }
             resp = requests.post(url, json=payload, timeout=30)
             if resp.status_code == 200:
                 data = resp.json()
@@ -47,8 +47,30 @@ def load_supplier_cache(app_key, app_secret, name):
                 if pagina >= data.get("total_de_paginas", 0): break
                 pagina += 1
             else: break
-        except: break
-    log(f"  [OK] {len(company_caches[name])} fornecedores memorizados.")
+    except: pass
+    log(f"  [OK] {len(company_caches[name])} fornecedores memorizados para {name}.")
+
+def get_supplier_name_fallback(app_key, app_secret, client_id, empresa_nome):
+    if not client_id: return "Fornecedor"
+    cid_str = str(client_id)
+    if cid_str in company_caches[empresa_nome]: return company_caches[empresa_nome][cid_str]
+    
+    url = "https://app.omie.com.br/api/v1/geral/clientes/"
+    payload = {
+        "call": "ConsultarCliente",
+        "app_key": app_key,
+        "app_secret": app_secret,
+        "param": [{"codigo_cliente_omie": client_id}]
+    }
+    try:
+        resp = requests.post(url, json=payload, timeout=20)
+        if resp.status_code == 200:
+            data = resp.json()
+            name = data.get("nome_fantasia") or data.get("razao_social") or "Fornecedor"
+            company_caches[empresa_nome][cid_str] = name
+            return name
+    except: pass
+    return "Fornecedor"
 
 def load_project_map(name):
     log(f"Carregando Mapa de Projetos para {name}...")
@@ -59,7 +81,6 @@ def load_project_map(name):
             for item in resp.json():
                 pid = str(item["codigo_projeto"]).strip()
                 project_maps[name][pid] = item["descricao_projeto"]
-            log(f"  [OK] {len(project_maps[name])} projetos mapeados.")
     except: pass
 
 def get_omie_page(app_key, app_secret, pagina):
@@ -71,13 +92,12 @@ def get_omie_page(app_key, app_secret, pagina):
         "param": [{
             "pagina": pagina,
             "registros_por_pagina": 100,
-            "exibir_obs": "S",
-            "filtrar_por_data_de": "01/01/2024",
-            "filtrar_por_data_ate": datetime.now().strftime("%d/%m/%Y")
+            "exibir_obs": "S"
+            # Removendo filtros de data para garantir carga TOTAL
         }]
     }
     try:
-        resp = requests.post(url, json=payload, timeout=30)
+        resp = requests.post(url, json=payload, timeout=40)
         if resp.status_code == 200: return resp.json()
     except: pass
     return {}
@@ -87,14 +107,17 @@ def sync_company(key_env, secret_env, name):
     sec = os.getenv(secret_env)
     if not key or not sec: return
     
-    log(f"--- INICIANDO {name.upper()} v.02.14 ---")
+    log(f"--- INICIANDO {name.upper()} v.02.15 (ULTRA) ---")
     load_project_map(name)
     load_supplier_cache(key, sec, name)
     
     first_page = get_omie_page(key, sec, 1)
     if not first_page.get("conta_pagar_cadastro"):
-        log(f"  [!] Abortando: Nenhuma resposta da Omie.")
-        return
+        log(f"  [!] Alerta: Primeira p gina vazia ou erro na Omie para {name}.")
+        # Se for erro de conex o, n o limpamos o banco
+        if "faultstring" in first_page:
+            log(f"  Erro: {first_page['faultstring']}")
+            return
 
     requests.delete(f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}", headers=HEADERS)
     
@@ -107,15 +130,16 @@ def sync_company(key_env, secret_env, name):
         
         rows = []
         for r in records:
-            # Busca instant nea no cache memorizado
-            cid = str(r.get("codigo_cliente_fornecedor"))
-            fornecedor = company_caches[name].get(cid) or r.get("nm_cliente") or r.get("nome_cliente") or "Fornecedor"
+            # Fornecedor com Fallback Inteligente
+            fornecedor = get_supplier_name_fallback(key, sec, r.get("codigo_cliente_fornecedor"), name)
             r["nm_cliente"] = fornecedor
             
+            # Projetos
             pid = str(r.get("codigo_projeto", "")).strip()
             projeto = project_maps[name].get(pid) or r.get("nome_projeto") or "Sem Projeto"
             r["nome_projeto"] = projeto
             
+            # Data Pagamento = Previso
             dt_pagamento_final = format_date(r.get("data_previsao"))
             
             dist = r.get("distribuicao", []) or [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
@@ -140,13 +164,15 @@ def sync_company(key_env, secret_env, name):
             requests.post(f"{SUPABASE_URL}/rest/v1/omie_raw", json=rows, headers=HEADERS)
         
         total_processed += len(records)
-        log(f"  [OK] P gina {pagina}: {total_processed} t tulos.")
+        if pagina % 5 == 0: log(f"  P gina {pagina}: {total_processed} t tulos...")
         
         if pagina >= data.get("total_de_paginas", 0): break
         pagina += 1
         time.sleep(0.01)
+    
+    log(f"  [SUCESSO] {name} finalizada com {total_processed} t tulos.")
 
-log("=== SINCRONIZA  O TURBO v.02.14 ===")
+log("=== SINCRONIZA  O ULTRA v.02.15 ===")
 sync_company("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil")
 sync_company("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
-log("=== FINALIZADO v.02.14 ===")
+log("=== PROCESSO CONCLU DO ===")
