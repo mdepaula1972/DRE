@@ -12,7 +12,7 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 KEY = os.getenv("SUPABASE_SERVICE_KEY")
 HEADERS = {"apikey": KEY, "Authorization": f"Bearer {KEY}", "Content-Type": "application/json"}
 
-# Caches globais isolados por empresa
+# Caches globais
 company_caches = {"Mar Brasil": {}, "DZM": {}}
 project_maps = {"Mar Brasil": {}, "DZM": {}}
 category_maps = {"Mar Brasil": {}, "DZM": {}}
@@ -30,16 +30,16 @@ def load_category_map(name):
     log(f"Mapeando Categorias para {name}...")
     category_maps[name] = {}
     try:
-        # Tenta carregar as categorias da empresa
-        params = {"empresa_nome": f"eq.{name}", "select": "codigo,descricao"}
+        # Colunas corretas identificadas na auditoria: codigo_categoria, descricao_categoria
+        params = {"empresa_nome": f"eq.{name}", "select": "codigo_categoria,descricao_categoria"}
         resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_categorias", headers=HEADERS, params=params)
         if resp.status_code == 200:
             for item in resp.json():
-                cid = str(item["codigo"]).strip()
-                category_maps[name][cid] = item["descricao"]
+                cid = str(item["codigo_categoria"]).strip()
+                category_maps[name][cid] = item["descricao_categoria"]
             log(f"  [OK] {len(category_maps[name])} categorias carregadas.")
     except Exception as e:
-        log(f"  Aviso nas Categorias: {e}")
+        log(f"  Erro nas Categorias: {e}")
 
 def load_project_map(name):
     log(f"Mapeando Projetos para {name}...")
@@ -107,7 +107,13 @@ def get_omie_page(app_key, app_secret, pagina):
         "call": "ListarContasPagar",
         "app_key": app_key,
         "app_secret": app_secret,
-        "param": [{"pagina": pagina, "registros_por_pagina": 100, "exibir_obs": "S"}]
+        "param": [{
+            "pagina": pagina,
+            "registros_por_pagina": 100,
+            "exibir_obs": "S",
+            "filtrar_por_data_de": "01/01/2020", # For ar carga profunda
+            "filtrar_por_data_ate": datetime.now().strftime("%d/%m/%Y")
+        }]
     }
     try:
         resp = requests.post(url, json=payload, timeout=50)
@@ -120,14 +126,17 @@ def sync_company(key_env, secret_env, name):
     sec = os.getenv(secret_env)
     if not key or not sec: return
     
-    log(f"--- SINCRONIZA  O FIDELIDADE {name.upper()} v.02.17 ---")
+    log(f"--- SINCRONIZA  O PROFUNDA {name.upper()} v.02.18 ---")
     load_category_map(name)
     load_project_map(name)
     load_supplier_cache(key, sec, name)
     
-    data = get_omie_page(key, sec, 1)
-    if not data.get("conta_pagar_cadastro"):
-        log(f"  [!] Alerta: Sem resposta inicial da Omie para {name}.")
+    first_data = get_omie_page(key, sec, 1)
+    total_records = first_data.get("total_de_registros", 0)
+    log(f"  Total de t tulos encontrados na Omie: {total_records}")
+    
+    if total_records == 0:
+        log(f"  [!] Alerta: Nenhum t tulo encontrado para {name}.")
         return
 
     requests.delete(f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}", headers=HEADERS)
@@ -135,7 +144,7 @@ def sync_company(key_env, secret_env, name):
     pagina = 1
     total_processed = 0
     while True:
-        if pagina > 1: data = get_omie_page(key, sec, pagina)
+        data = first_data if pagina == 1 else get_omie_page(key, sec, pagina)
         records = data.get("conta_pagar_cadastro", [])
         if not records: break
         
@@ -150,10 +159,10 @@ def sync_company(key_env, secret_env, name):
             projeto = project_maps[name].get(pid) or r.get("nome_projeto") or "Sem Projeto"
             r["nome_projeto"] = projeto
             
-            # 3. Categorias (NOVIDADE v.02.17)
+            # 3. Categorias (CORRE  O v.02.18)
             cat_id = str(r.get("codigo_categoria", "")).strip()
             categoria = category_maps[name].get(cat_id) or r.get("descricao_categoria") or cat_id or "Sem Categoria"
-            r["descricao_categoria"] = categoria # Injetar no raw_data para o Dashboard
+            r["descricao_categoria"] = categoria 
             
             # 4. Data Pagamento = Previso
             dt_pagamento_final = format_date(r.get("data_previsao"))
@@ -188,7 +197,7 @@ def sync_company(key_env, secret_env, name):
     
     log(f"  [OK] {name} finalizada com {total_processed} t tulos.")
 
-log("=== INICIANDO SINCRONIZA  O v.02.17 (FIDELIDADE TOTAL) ===")
+log("=== INICIANDO SINCRONIZA  O v.02.18 (CARGA PROFUNDA) ===")
 sync_company("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil")
 sync_company("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
-log("=== FINALIZADO v.02.17 ===")
+log("=== FINALIZADO v.02.18 ===")
