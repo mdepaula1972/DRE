@@ -17,9 +17,8 @@ def test_omie():
         'param': [{
             'pagina': 1,
             'registros_por_pagina': 10,
-            'filtrar_por_data_registro': 'S',
-            'filtrar_por_data_de': '01/02/2026',
-            'filtrar_por_data_ate': '28/02/2026'
+            'filtrar_por_registro_de': '01/02/2026',
+            'filtrar_por_registro_ate': '28/02/2026'
         }]
     }
     resp = requests.post(url, json=payload).json()
