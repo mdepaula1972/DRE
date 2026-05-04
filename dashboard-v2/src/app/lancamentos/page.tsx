@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { HeaderDashboard } from "@/components/layout/HeaderDashboard";
 import { StatCard } from "@/components/loans/StatCard";
+import { OmieImportPanel } from "@/components/lancamentos/OmieImportPanel";
 import { LancamentosFilterBar } from "@/components/lancamentos/LancamentosFilterBar";
 import { LancamentosTable } from "@/components/lancamentos/LancamentosTable";
 import { LancamentosService, formatCurrency } from "@/services/lancamentos.service";
@@ -316,12 +317,14 @@ export default function LancamentosPage() {
           </div>
         )}
 
+        <OmieImportPanel 
+          onImportComplete={fetchData}
+          onClear={handleClearData}
+          isClearingAll={isLoading}
+        />
+
         <LancamentosFilterBar
           onFilterChange={setActiveFilters}
-          onImport={handleImportSelection}
-          onClear={handleClearData}
-          isProcessing={isSyncing}
-          progress={progress}
           availableCategories={(() => {
             const base = activeFilters.empresa
               ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))

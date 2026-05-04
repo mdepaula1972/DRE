@@ -7,10 +7,6 @@ import { LancamentoFilterValues } from "@/types/lancamentos";
 interface Props {
   onFilterChange: (filters: LancamentoFilterValues) => void;
   onSyncMonth?: (monthYear: string) => void;
-  onImport?: (filters: LancamentoFilterValues) => void;
-  onClear?: () => void;
-  isProcessing?: boolean;
-  progress?: number;
   availableCategories: string[];
   availableProjects: string[];
   availableDepartments: string[];
@@ -19,10 +15,6 @@ interface Props {
 export function LancamentosFilterBar({ 
   onFilterChange, 
   onSyncMonth, 
-  onImport, 
-  onClear, 
-  isProcessing, 
-  progress = 0,
   availableCategories, 
   availableProjects, 
   availableDepartments 
@@ -67,42 +59,6 @@ export function LancamentosFilterBar({
         </div>
         
         <div className="flex items-center gap-2">
-          {isProcessing && (
-            <div className="flex flex-col items-end mr-4">
-              <span className="text-[10px] font-bold text-emerald-600 animate-pulse">Sincronizando... {progress}%</span>
-              <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
-                <div 
-                  className="h-full bg-emerald-500 transition-all duration-300" 
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          {onClear && (
-            <button
-              onClick={() => {
-                if(confirm("Tem certeza que deseja limpar TODOS os dados importados do Omie?")) onClear();
-              }}
-              disabled={isProcessing}
-              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-              title="Limpar todos os dados"
-            >
-              <X size={20} />
-            </button>
-          )}
-
-          {onImport && (
-            <button
-              onClick={() => onImport(filters)}
-              disabled={isProcessing}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
-            >
-              <Loader2 size={16} className={isProcessing ? "animate-spin" : "hidden"} />
-              <span>Importar Seleção</span>
-            </button>
-          )}
-
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${

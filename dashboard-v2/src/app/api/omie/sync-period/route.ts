@@ -141,6 +141,7 @@ export async function POST(req: Request) {
                 const isoBaixa = r.data_previsao ? r.data_previsao.split('/').reverse().join('-') : null;
 
                 const fornecedorNome = suppMap.get(String(r.codigo_cliente_fornecedor)) || 'Fornecedor';
+                r.nm_cliente = fornecedorNome; // Injeta no raw_data!
 
                 const dist = r.distribuicao || [{ cDesDep: 'Sem Departamento', nValDep: r.valor_documento }];
 
@@ -157,12 +158,14 @@ export async function POST(req: Request) {
                   categoria_nome: categoria,
                   projeto_nome: projeto,
                   departamento_nome: d.cDesDep,
-                  nm_cliente: fornecedorNome,
                   raw_data: r
                 }));
               });
 
-              await supabase.from('omie_raw').insert(rows);
+              const { error: insertError } = await supabase.from('omie_raw').insert(rows);
+              if (insertError) {
+                controller.enqueue(encoder.encode(`data: ERROR: Falha no Supabase: ${insertError.message}\n\n`));
+              }
             }
 
             const prog = 15 + Math.floor((pagina / totalPaginas) * 85);
