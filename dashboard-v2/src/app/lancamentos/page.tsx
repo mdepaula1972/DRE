@@ -134,8 +134,9 @@ export default function LancamentosPage() {
 
       // 4. Categoria
       if (filters.categoria && item.categoria_id !== filters.categoria) {
-        // Tentar buscar por nome amigável se o ID não bater
-        const catName = dimCategorias.get(item.categoria_id)?.descricao;
+        // Tentar buscar por nome amigável usando a chave composta (empresa-id)
+        const catKey = `${String(item.empresa || '').trim()}-${String(item.categoria_id)}`;
+        const catName = dimCategorias.get(catKey)?.descricao;
         if (catName !== filters.categoria) return false;
       }
 
