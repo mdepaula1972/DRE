@@ -73,11 +73,13 @@ export async function POST(req: Request) {
           };
 
           if (dateType === 'vencimento') {
-            paramFilter.filtrar_por_vencimento_de = brStart;
-            paramFilter.filtrar_por_vencimento_ate = brEnd;
+            paramFilter.filtrar_por_data_de = brStart;
+            paramFilter.filtrar_por_data_ate = brEnd;
+            // filtrar_por_data_tipo causa erro ou retorna 0 em algumas versões da API
           } else if (dateType === 'pagamento') {
-            paramFilter.filtrar_por_baixa_de = brStart;
-            paramFilter.filtrar_por_baixa_ate = brEnd;
+            // Se não houver tag específica para baixa, usamos a data do título
+            paramFilter.filtrar_por_data_de = brStart;
+            paramFilter.filtrar_por_data_ate = brEnd;
           } else {
             paramFilter.filtrar_por_registro_de = brStart;
             paramFilter.filtrar_por_registro_ate = brEnd;
