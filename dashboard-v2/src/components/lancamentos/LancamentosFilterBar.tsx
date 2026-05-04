@@ -1,18 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { Filter, X, Search } from "lucide-react";
+import { Filter, X, Search, Loader2 } from "lucide-react";
 import { LancamentoFilterValues } from "@/types/lancamentos";
 
 interface Props {
   onFilterChange: (filters: LancamentoFilterValues) => void;
   onSyncMonth?: (monthYear: string) => void;
+  onImport?: (filters: LancamentoFilterValues) => void;
+  onClear?: () => void;
+  isProcessing?: boolean;
+  progress?: number;
   availableCategories: string[];
   availableProjects: string[];
   availableDepartments: string[];
 }
 
-export function LancamentosFilterBar({ onFilterChange, onSyncMonth, availableCategories, availableProjects, availableDepartments }: Props) {
+export function LancamentosFilterBar({ 
+  onFilterChange, 
+  onSyncMonth, 
+  onImport, 
+  onClear, 
+  isProcessing, 
+  progress = 0,
+  availableCategories, 
+  availableProjects, 
+  availableDepartments 
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<LancamentoFilterValues>({
     dateBase: 'registro',
@@ -52,18 +66,56 @@ export function LancamentosFilterBar({ onFilterChange, onSyncMonth, availableCat
           />
         </div>
         
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`ml-4 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            isOpen ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-          }`}
-        >
-          <Filter size={16} />
-          <span>Filtros Detalhados</span>
-          {Object.keys(filters).length > 2 && !isOpen && (
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+        <div className="flex items-center gap-2">
+          {isProcessing && (
+            <div className="flex flex-col items-end mr-4">
+              <span className="text-[10px] font-bold text-emerald-600 animate-pulse">Sincronizando... {progress}%</span>
+              <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
+                <div 
+                  className="h-full bg-emerald-500 transition-all duration-300" 
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
           )}
-        </button>
+
+          {onClear && (
+            <button
+              onClick={() => {
+                if(confirm("Tem certeza que deseja limpar TODOS os dados importados do Omie?")) onClear();
+              }}
+              disabled={isProcessing}
+              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+              title="Limpar todos os dados"
+            >
+              <X size={20} />
+            </button>
+          )}
+
+          {onImport && (
+            <button
+              onClick={() => onImport(filters)}
+              disabled={isProcessing}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
+            >
+              <Loader2 size={16} className={isProcessing ? "animate-spin" : "hidden"} />
+              <span>Importar Seleção</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              isOpen ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            <Filter size={16} />
+            <span>Filtros</span>
+            {Object.keys(filters).length > 2 && !isOpen && (
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            )}
+          </button>
+        </div>
       </div>
 
       {isOpen && (

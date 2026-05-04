@@ -37,6 +37,10 @@ export class LancamentosService {
     return results;
   }
 
+  static async clearAll() {
+    return await supabase.from('omie_raw').delete().neq('id', 0); // Delete all
+  }
+
   static async getLancamentos(startDate: string = '2024-01-01'): Promise<{ 
     lancamentos: Lancamento[], 
     allocations: any[], 

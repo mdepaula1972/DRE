@@ -207,27 +207,75 @@ export default function LancamentosPage() {
     }
   };
 
-  const handleSyncMonth = async (monthYear: string) => {
-    // monthYear vem como "2024-05"
-    const [year, month] = monthYear.split('-');
+  const [progress, setProgress] = useState(0);
+
+  const handleImportSelection = async (filters: LancamentoFilterValues) => {
+    const [year, month] = (filters.month || '').split('-');
+    if (!year || !month) {
+      alert("Por favor, selecione um M s/Ano nos filtros para importar.");
+      return;
+    }
+
     setIsSyncing(true);
+    setProgress(0);
+
     try {
-      const res = await fetch('/api/omie/sync-period', {
+      const response = await fetch('/api/omie/sync-period', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ month: parseInt(month), year: parseInt(year) })
+        body: JSON.stringify({ 
+          month: parseInt(month), 
+          year: parseInt(year),
+          company: filters.empresa
+        })
       });
-      const json = await res.json();
-      if (json.status === 'success') {
-        alert(`✅ ${json.message}`);
-        await fetchData();
-      } else {
-        alert(`❌ Erro: ${json.message}`);
+
+      const reader = response.body?.getReader();
+      const decoder = new TextEncoder().encode('data: ');
+      const textDecoder = new TextDecoder();
+
+      if (!reader) return;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const text = textDecoder.decode(value);
+        const lines = text.split('\n\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: PROGRESS:')) {
+            const p = parseInt(line.replace('data: PROGRESS:', ''));
+            setProgress(p);
+          } else if (line.startsWith('data: DONE')) {
+            setProgress(100);
+            setTimeout(() => {
+              alert(`✅ Importa  o conclu da com sucesso!`);
+              fetchData();
+              setIsSyncing(false);
+              setProgress(0);
+            }, 500);
+          }
+        }
       }
     } catch (e: any) {
-      alert(`❌ Erro na sincronização de auditoria: ${e.message}`);
-    } finally {
+      alert(`❌ Erro na importa  o: ${e.message}`);
       setIsSyncing(false);
+      setProgress(0);
+    }
+  };
+
+  const handleClearData = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await LancamentosService.clearAll();
+      if (error) throw error;
+      alert("✅ Banco de dados limpo com sucesso!");
+      setAllLancamentos([]);
+    } catch (err: any) {
+      alert(`❌ Erro ao limpar banco: ${err.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -270,7 +318,10 @@ export default function LancamentosPage() {
 
         <LancamentosFilterBar 
           onFilterChange={setActiveFilters} 
-          onSyncMonth={handleSyncMonth}
+          onImport={handleImportSelection}
+          onClear={handleClearData}
+          isProcessing={isSyncing}
+          progress={progress}
           availableCategories={(() => {
             const base = activeFilters.empresa 
               ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))

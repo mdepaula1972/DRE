@@ -31,21 +31,23 @@ def load_category_map(name):
     log(f"Mapeando Categorias para {name}...")
     category_maps[name] = {}
     try:
-        params = {"empresa_nome": f"eq.{name}", "select": "codigo_categoria,descricao_categoria"}
-        resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_categorias", headers=HEADERS, params=params)
+        clean_name = name.strip()
+        url = f"{SUPABASE_URL}/rest/v1/omie_dim_categorias?empresa_nome=eq.{clean_name}&select=codigo_categoria,descricao_categoria"
+        resp = requests.get(url, headers=HEADERS)
         if resp.status_code == 200:
             for item in resp.json():
                 cid = str(item["codigo_categoria"]).strip()
                 category_maps[name][cid] = item["descricao_categoria"]
-            log(f"  [OK] {len(category_maps[name])} categorias carregadas.")
-    except: pass
+            log(f"  [OK] {len(category_maps[name])} categorias carregadas para {name}.")
+    except Exception as e:
+        log(f"  Erro nas Categorias: {e}")
 
 def load_project_map(name):
     log(f"Mapeando Projetos para {name}...")
     project_maps[name] = {}
     try:
-        params = {"empresa_nome": f"eq.{name}", "select": "codigo_projeto,descricao_projeto"}
-        resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_projetos", headers=HEADERS, params=params)
+        url = f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?empresa_nome=eq.{name.strip()}&select=codigo_projeto,descricao_projeto"
+        resp = requests.get(url, headers=HEADERS)
         if resp.status_code == 200:
             for item in resp.json():
                 pid = str(item["codigo_projeto"]).strip()
@@ -121,21 +123,23 @@ def get_omie_page(app_key, app_secret, pagina, start_date, end_date):
     except: pass
     return {}
 
-def sync_period(month, year):
-    # Definir o per odo (do dia 1 ao fim do m s)
+def sync_period(month, year, target_company=None):
     start_date = f"01/{month:02d}/{year}"
-    # Aproxima  o para o fim do m s
     if month == 12: end_date = f"31/12/{year}"
     else:
         last_day = (datetime(year, month + 1, 1) - timedelta(days=1)).day
         end_date = f"{last_day:02d}/{month:02d}/{year}"
     
-    log(f"=== INICIANDO AUDITORIA: {month:02d}/{year} ({start_date} at  {end_date}) ===")
+    log(f"=== INICIANDO SINCRONIZA  O SELETIVA: {month:02d}/{year} ({start_date} a {end_date}) ===")
     
-    companies = [
+    all_companies = [
         ("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil"),
         ("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
     ]
+    
+    companies = all_companies
+    if target_company:
+        companies = [c for c in all_companies if target_company.lower() in c[2].lower()]
     
     for key_env, secret_env, name in companies:
         key = os.getenv(key_env)
@@ -147,12 +151,10 @@ def sync_period(month, year):
         load_project_map(name)
         load_supplier_cache(key, sec, name)
         
-        # Limpeza cir rgica no Supabase para este per odo e empresa
-        # Filtramos por data_vencimento entre o per odo (formato YYYY-MM-DD no Supabase)
         iso_start = f"{year}-{month:02d}-01"
         iso_end = f"{year}-{month:02d}-{31 if month == 12 else (datetime(year, month + 1, 1) - timedelta(days=1)).day:02d}"
         
-        log(f"  Limpando registros de {iso_start} a {iso_end} no Supabase...")
+        log(f"  Limpando registros de {iso_start} a {iso_end} para {name}...")
         del_url = f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}&data_vencimento=gte.{iso_start}&data_vencimento=lte.{iso_end}"
         requests.delete(del_url, headers=HEADERS)
         
@@ -165,21 +167,17 @@ def sync_period(month, year):
             
             rows = []
             for r in records:
-                # Fornecedor
                 fornecedor = get_supplier_name_fallback(key, sec, r.get("codigo_cliente_fornecedor"), name)
                 r["nm_cliente"] = fornecedor
                 
-                # Projetos
                 pid = str(r.get("codigo_projeto", "")).strip()
                 projeto = project_maps[name].get(pid) or r.get("nome_projeto") or "Sem Projeto"
                 r["nome_projeto"] = projeto
                 
-                # Categorias
                 cat_id = str(r.get("codigo_categoria", "")).strip()
                 categoria = category_maps[name].get(cat_id) or r.get("descricao_categoria") or "Sem Categoria"
                 r["descricao_categoria"] = categoria 
                 
-                # Data Pagamento = Previso
                 dt_pagamento_final = format_date(r.get("data_previsao"))
                 
                 dist = r.get("distribuicao", []) or [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
@@ -204,23 +202,27 @@ def sync_period(month, year):
                 requests.post(f"{SUPABASE_URL}/rest/v1/omie_raw", json=rows, headers=HEADERS)
             
             total_processed += len(records)
-            if pagina % 2 == 0: log(f"  P gina {pagina}: {total_processed} t tulos...")
+            
+            # Sinalizador de Progresso para a UI
+            prog = int((pagina / (data.get("total_de_paginas", 1) or 1)) * 100)
+            print(f"PROGRESS:{min(prog, 100)}")
+            sys.stdout.flush()
             
             if pagina >= data.get("total_de_paginas", 0): break
             pagina += 1
-            time.sleep(0.05)
+            time.sleep(0.01)
         
-        log(f"  [OK] {name} finalizada com {total_processed} t tulos para {month:02d}/{year}.")
+        log(f"  [OK] {name} finalizada com {total_processed} t tulos.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Sincroniza  o Omie por Per odo (M s/Ano)")
+    parser = argparse.ArgumentParser(description="Sincroniza  o Omie por Sele  o")
     parser.add_argument("--month", type=int, help="M s (1-12)")
     parser.add_argument("--year", type=int, help="Ano (ex: 2024)")
+    parser.add_argument("--company", type=str, help="Empresa (Mar Brasil ou DZM)")
     args = parser.parse_args()
     
     if args.month and args.year:
-        sync_period(args.month, args.year)
+        sync_period(args.month, args.year, args.company)
     else:
-        # Se n o passar argumentos, sincroniza o m s atual por padr o
         now = datetime.now()
-        sync_period(now.month, now.year)
+        sync_period(now.month, now.year, args.company)
