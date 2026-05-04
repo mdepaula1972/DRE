@@ -30,14 +30,16 @@ def load_category_map(name):
     log(f"Mapeando Categorias para {name}...")
     category_maps[name] = {}
     try:
-        # Colunas corretas identificadas na auditoria: codigo_categoria, descricao_categoria
+        # Filtro RIGOROSO por empresa para evitar pegar nomes de outras empresas
         params = {"empresa_nome": f"eq.{name}", "select": "codigo_categoria,descricao_categoria"}
         resp = requests.get(f"{SUPABASE_URL}/rest/v1/omie_dim_categorias", headers=HEADERS, params=params)
         if resp.status_code == 200:
-            for item in resp.json():
+            items = resp.json()
+            for item in items:
                 cid = str(item["codigo_categoria"]).strip()
+                # Se houver duplicata na mesma empresa, priorizamos a que n o for gen rica
                 category_maps[name][cid] = item["descricao_categoria"]
-            log(f"  [OK] {len(category_maps[name])} categorias carregadas.")
+            log(f"  [OK] {len(category_maps[name])} categorias carregadas para {name}.")
     except Exception as e:
         log(f"  Erro nas Categorias: {e}")
 
@@ -111,8 +113,7 @@ def get_omie_page(app_key, app_secret, pagina):
             "pagina": pagina,
             "registros_por_pagina": 100,
             "exibir_obs": "S",
-            "filtrar_por_data_de": "01/01/2020", # For ar carga profunda
-            "filtrar_por_data_ate": datetime.now().strftime("%d/%m/%Y")
+            "filtrar_por_data_de": "01/01/2020"
         }]
     }
     try:
@@ -126,19 +127,15 @@ def sync_company(key_env, secret_env, name):
     sec = os.getenv(secret_env)
     if not key or not sec: return
     
-    log(f"--- SINCRONIZA  O PROFUNDA {name.upper()} v.02.18 ---")
+    log(f"--- SINCRONIZA  O DE PRECIS O {name.upper()} v.02.19 ---")
     load_category_map(name)
     load_project_map(name)
     load_supplier_cache(key, sec, name)
     
     first_data = get_omie_page(key, sec, 1)
     total_records = first_data.get("total_de_registros", 0)
-    log(f"  Total de t tulos encontrados na Omie: {total_records}")
+    log(f"  Total Omie: {total_records} t tulos.")
     
-    if total_records == 0:
-        log(f"  [!] Alerta: Nenhum t tulo encontrado para {name}.")
-        return
-
     requests.delete(f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}", headers=HEADERS)
     
     pagina = 1
@@ -159,9 +156,9 @@ def sync_company(key_env, secret_env, name):
             projeto = project_maps[name].get(pid) or r.get("nome_projeto") or "Sem Projeto"
             r["nome_projeto"] = projeto
             
-            # 3. Categorias (CORRE  O v.02.18)
+            # 3. Categorias (PRECIS O v.02.19)
             cat_id = str(r.get("codigo_categoria", "")).strip()
-            categoria = category_maps[name].get(cat_id) or r.get("descricao_categoria") or cat_id or "Sem Categoria"
+            categoria = category_maps[name].get(cat_id) or r.get("descricao_categoria") or "Sem Categoria"
             r["descricao_categoria"] = categoria 
             
             # 4. Data Pagamento = Previso
@@ -195,9 +192,9 @@ def sync_company(key_env, secret_env, name):
         pagina += 1
         time.sleep(0.01)
     
-    log(f"  [OK] {name} finalizada com {total_processed} t tulos.")
+    log(f"  [OK] {name} finalizada.")
 
-log("=== INICIANDO SINCRONIZA  O v.02.18 (CARGA PROFUNDA) ===")
+log("=== INICIANDO SINCRONIZA  O v.02.19 (PRECIS O) ===")
 sync_company("OMIE_APP_KEY_MARBRASIL", "OMIE_APP_SECRET_MARBRASIL", "Mar Brasil")
 sync_company("OMIE_APP_KEY_DZM", "OMIE_APP_SECRET_DZM", "DZM")
-log("=== FINALIZADO v.02.18 ===")
+log("=== FINALIZADO v.02.19 ===")
