@@ -16,8 +16,8 @@ export async function POST(req: Request) {
       args.push('--company', company);
     }
 
-    // Usando spawn para streaming de output
-    const pythonProcess = spawn('python', [scriptPath, ...args]);
+    // Usando spawn para streaming de output com modo -u (unbuffered)
+    const pythonProcess = spawn('python', ['-u', scriptPath, ...args]);
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({

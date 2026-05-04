@@ -19,8 +19,7 @@ project_maps = {"Mar Brasil": {}, "DZM": {}}
 category_maps = {"Mar Brasil": {}, "DZM": {}}
 
 def log(msg):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
-    sys.stdout.flush()
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
 
 def format_date(date_str):
     if not date_str: return None
@@ -28,36 +27,38 @@ def format_date(date_str):
     except: return None
 
 def load_category_map(name):
-    log(f"Mapeando Categorias para {name}...")
-    category_maps[name] = {}
+    name_clean = name.strip()
+    log(f"Mapeando Categorias para [{name_clean}]...")
+    category_maps[name_clean] = {}
     try:
-        clean_name = name.strip()
-        url = f"{SUPABASE_URL}/rest/v1/omie_dim_categorias?empresa_nome=eq.{clean_name}&select=codigo_categoria,descricao_categoria"
+        url = f"{SUPABASE_URL}/rest/v1/omie_dim_categorias?empresa_nome=eq.{name_clean}&select=codigo_categoria,descricao_categoria"
         resp = requests.get(url, headers=HEADERS)
         if resp.status_code == 200:
             for item in resp.json():
                 cid = str(item["codigo_categoria"]).strip()
-                category_maps[name][cid] = item["descricao_categoria"]
-            log(f"  [OK] {len(category_maps[name])} categorias carregadas para {name}.")
+                category_maps[name_clean][cid] = item["descricao_categoria"]
+            log(f"  [OK] {len(category_maps[name_clean])} categorias carregadas para {name_clean}.")
     except Exception as e:
         log(f"  Erro nas Categorias: {e}")
 
 def load_project_map(name):
-    log(f"Mapeando Projetos para {name}...")
-    project_maps[name] = {}
+    name_clean = name.strip()
+    log(f"Mapeando Projetos para [{name_clean}]...")
+    project_maps[name_clean] = {}
     try:
-        url = f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?empresa_nome=eq.{name.strip()}&select=codigo_projeto,descricao_projeto"
+        url = f"{SUPABASE_URL}/rest/v1/omie_dim_projetos?empresa_nome=eq.{name_clean}&select=codigo_projeto,descricao_projeto"
         resp = requests.get(url, headers=HEADERS)
         if resp.status_code == 200:
             for item in resp.json():
                 pid = str(item["codigo_projeto"]).strip()
-                project_maps[name][pid] = item["descricao_projeto"]
-            log(f"  [OK] {len(project_maps[name])} projetos carregados.")
+                project_maps[name_clean][pid] = item["descricao_projeto"]
+            log(f"  [OK] {len(project_maps[name_clean])} projetos carregados.")
     except: pass
 
 def load_supplier_cache(app_key, app_secret, name):
-    log(f"Memorizando Fornecedores para {name}...")
-    company_caches[name] = {}
+    name_clean = name.strip()
+    log(f"Memorizando Fornecedores para [{name_clean}]...")
+    company_caches[name_clean] = {}
     pagina = 1
     try:
         while True:
@@ -73,17 +74,18 @@ def load_supplier_cache(app_key, app_secret, name):
                 data = resp.json()
                 for c in data.get("clientes_cadastro", []):
                     cid = str(c.get("codigo_cliente_omie"))
-                    company_caches[name][cid] = c.get("nome_fantasia") or c.get("razao_social") or "Fornecedor"
+                    company_caches[name_clean][cid] = c.get("nome_fantasia") or c.get("razao_social") or "Fornecedor"
                 if pagina >= data.get("total_de_paginas", 0): break
                 pagina += 1
             else: break
     except: pass
-    log(f"  [OK] {len(company_caches[name])} fornecedores memorizados.")
+    log(f"  [OK] {len(company_caches[name_clean])} fornecedores memorizados.")
 
 def get_supplier_name_fallback(app_key, app_secret, client_id, empresa_nome):
     if not client_id: return "Fornecedor"
     cid_str = str(client_id)
-    if cid_str in company_caches[empresa_nome]: return company_caches[empresa_nome][cid_str]
+    name_clean = empresa_nome.strip()
+    if cid_str in company_caches[name_clean]: return company_caches[name_clean][cid_str]
     
     url = "https://app.omie.com.br/api/v1/geral/clientes/"
     payload = {
@@ -97,7 +99,7 @@ def get_supplier_name_fallback(app_key, app_secret, client_id, empresa_nome):
         if resp.status_code == 200:
             data = resp.json()
             name = data.get("nome_fantasia") or data.get("razao_social") or "Fornecedor"
-            company_caches[empresa_nome][cid_str] = name
+            company_caches[name_clean][cid_str] = name
             return name
     except: pass
     return "Fornecedor"
@@ -142,20 +144,21 @@ def sync_period(month, year, target_company=None):
         companies = [c for c in all_companies if target_company.lower() in c[2].lower()]
     
     for key_env, secret_env, name in companies:
+        name_clean = name.strip()
         key = os.getenv(key_env)
         sec = os.getenv(secret_env)
         if not key or not sec: continue
         
-        log(f"--- PROCESSANDO {name.upper()} ---")
-        load_category_map(name)
-        load_project_map(name)
-        load_supplier_cache(key, sec, name)
+        log(f"--- PROCESSANDO [{name_clean}] ---")
+        load_category_map(name_clean)
+        load_project_map(name_clean)
+        load_supplier_cache(key, sec, name_clean)
         
         iso_start = f"{year}-{month:02d}-01"
         iso_end = f"{year}-{month:02d}-{31 if month == 12 else (datetime(year, month + 1, 1) - timedelta(days=1)).day:02d}"
         
-        log(f"  Limpando registros de {iso_start} a {iso_end} para {name}...")
-        del_url = f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name}&data_vencimento=gte.{iso_start}&data_vencimento=lte.{iso_end}"
+        log(f"  Limpando registros de [{iso_start}] a [{iso_end}] para [{name_clean}]...")
+        del_url = f"{SUPABASE_URL}/rest/v1/omie_raw?empresa_nome=eq.{name_clean}&data_vencimento=gte.{iso_start}&data_vencimento=lte.{iso_end}"
         requests.delete(del_url, headers=HEADERS)
         
         pagina = 1
@@ -167,23 +170,29 @@ def sync_period(month, year, target_company=None):
             
             rows = []
             for r in records:
-                fornecedor = get_supplier_name_fallback(key, sec, r.get("codigo_cliente_fornecedor"), name)
+                fornecedor = get_supplier_name_fallback(key, sec, r.get("codigo_cliente_fornecedor"), name_clean)
                 r["nm_cliente"] = fornecedor
                 
                 pid = str(r.get("codigo_projeto", "")).strip()
-                projeto = project_maps[name].get(pid) or r.get("nome_projeto") or "Sem Projeto"
+                projeto = project_maps[name_clean].get(pid) or r.get("nome_projeto") or "Sem Projeto"
                 r["nome_projeto"] = projeto
                 
+                # DNA das Categorias: N O USAR FALLBACK DA OMIE
                 cat_id = str(r.get("codigo_categoria", "")).strip()
-                categoria = category_maps[name].get(cat_id) or r.get("descricao_categoria") or "Sem Categoria"
-                r["descricao_categoria"] = categoria 
+                cat_map = category_maps.get(name_clean, {})
+                categoria = cat_map.get(cat_id)
                 
+                if not categoria:
+                    # Se n o achou no mapa, marca para auditoria para expor o erro
+                    categoria = f"Auditar: {cat_id} ({r.get('descricao_categoria', 'Sem Nome')})"
+                
+                r["descricao_categoria"] = categoria 
                 dt_pagamento_final = format_date(r.get("data_previsao"))
                 
                 dist = r.get("distribuicao", []) or [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
                 for d in dist:
                     rows.append({
-                        "empresa_nome": name,
+                        "empresa_nome": name_clean,
                         "omie_id": r.get("codigo_lancamento_omie"),
                         "status": r.get("status_titulo"),
                         "valor_total": r.get("valor_documento"),
@@ -203,16 +212,15 @@ def sync_period(month, year, target_company=None):
             
             total_processed += len(records)
             
-            # Sinalizador de Progresso para a UI
+            # Sinalizador de Progresso com Flush For ado
             prog = int((pagina / (data.get("total_de_paginas", 1) or 1)) * 100)
-            print(f"PROGRESS:{min(prog, 100)}")
-            sys.stdout.flush()
+            print(f"PROGRESS:{min(prog, 100)}", flush=True)
             
             if pagina >= data.get("total_de_paginas", 0): break
             pagina += 1
             time.sleep(0.01)
         
-        log(f"  [OK] {name} finalizada com {total_processed} t tulos.")
+        log(f"  [OK] [{name_clean}] finalizada com {total_processed} t tulos.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sincroniza  o Omie por Sele  o")
