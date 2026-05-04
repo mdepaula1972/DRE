@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     console.log(`Executando Auditoria: ${command}`);
 
-    return new Promise((resolve) => {
+    return new Promise<NextResponse>((resolve) => {
       exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error(`Erro no script: ${error.message}`);
