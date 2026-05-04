@@ -61,6 +61,7 @@ export class LancamentosService {
         .from('omie_raw')
         .select('*')
         .gte('data_registro', startDate)
+        .neq('status', 'CANCELADO')
         .order('data_registro', { ascending: false })
         .range(from, from + limit - 1);
 

@@ -129,7 +129,9 @@ export async function POST(req: Request) {
                 }
               }
 
-              const rows = records.flatMap((r: any) => {
+              const rows = records
+                .filter((r: any) => r.status_titulo !== 'CANCELADO')
+                .flatMap((r: any) => {
                 const catId = String(r.codigo_categoria || '').trim();
                 const categoria = catMap.get(catId) || `Auditar: ${catId} (${r.descricao_categoria || 'Sem Nome'})`;
 
