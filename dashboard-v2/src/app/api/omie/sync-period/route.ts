@@ -20,7 +20,7 @@ export async function POST(req: Request) {
           // 1. Configurar Empresa
           const companyName = company || 'Mar Brasil';
           const isDZM = companyName.toUpperCase().includes('DZM');
-          
+
           const appKey = isDZM ? process.env.OMIE_APP_KEY_DZM : process.env.OMIE_APP_KEY_MARBRASIL;
           const appSecret = isDZM ? process.env.OMIE_APP_SECRET_DZM : process.env.OMIE_APP_SECRET_MARBRASIL;
 
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
             .from('omie_dim_categorias')
             .select('codigo_categoria,descricao_categoria')
             .eq('empresa_nome', companyName.trim());
-          
+
           const catMap = new Map((catData || []).map(c => [String(c.codigo_categoria).trim(), c.descricao_categoria]));
 
           // 3. Carregar Mapa de Projetos
@@ -44,25 +44,25 @@ export async function POST(req: Request) {
             .from('omie_dim_projetos')
             .select('codigo_projeto,descricao_projeto')
             .eq('empresa_nome', companyName.trim());
-          
+
           const projMap = new Map((projData || []).map(p => [String(p.codigo_projeto).trim(), p.descricao_projeto]));
 
           // 4. Limpar Per odo no Supabase (Delete Seletivo)
-          const isoStart = `${year}-${String(month).padStart(2,'0')}-01`;
+          const isoStart = `${year}-${String(month).padStart(2, '0')}-01`;
           const lastDay = new Date(year, month, 0).getDate();
-          const isoEnd = `${year}-${String(month).padStart(2,'0')}-${lastDay}`;
-          
+          const isoEnd = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
           await supabase
             .from('omie_raw')
             .delete()
             .eq('empresa_nome', companyName.trim())
-            .gte('data_vencimento', isoStart)
-            .lte('data_vencimento', isoEnd);
+            .gte('data_registro', isoStart)
+            .lte('data_registro', isoEnd);
 
           // 5. Buscar na Omie
           sendProgress(15);
-          const startDt = `01/${String(month).padStart(2,'0')}/${year}`;
-          const endDt = `${lastDay}/${String(month).padStart(2,'0')}/${year}`;
+          const startDt = `01/${String(month).padStart(2, '0')}/${year}`;
+          const endDt = `${lastDay}/${String(month).padStart(2, '0')}/${year}`;
 
           let pagina = 1;
           let totalPaginas = 1;
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
                   pagina,
                   registros_por_pagina: 100,
                   exibir_obs: "S",
-                  filtrar_por_vencimento: "S",
+                  filtrar_por_data_registro: "S",
                   filtrar_por_data_de: startDt,
                   filtrar_por_data_ate: endDt
                 }]
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
               const rows = records.flatMap((r: any) => {
                 const catId = String(r.codigo_categoria || '').trim();
                 const categoria = catMap.get(catId) || `Auditar: ${catId} (${r.descricao_categoria || 'Sem Nome'})`;
-                
+
                 const projId = String(r.codigo_projeto || '').trim();
                 const projeto = projMap.get(projId) || r.nome_projeto || 'Sem Projeto';
 
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
                 const isoBaixa = r.data_previsao ? r.data_previsao.split('/').reverse().join('-') : null;
 
                 const dist = r.distribuicao || [{ cDesDep: 'Sem Departamento', nValDep: r.valor_documento }];
-                
+
                 return dist.map((d: any) => ({
                   empresa_nome: companyName.trim(),
                   omie_id: r.codigo_lancamento_omie,

@@ -8,10 +8,10 @@ import { LancamentosTable } from "@/components/lancamentos/LancamentosTable";
 import { LancamentosService, formatCurrency } from "@/services/lancamentos.service";
 import { Lancamento, LancamentoFilterValues, LancamentoStats } from "@/types/lancamentos";
 import { APP_VERSION } from "@/version";
-import { 
-  Receipt, 
-  Clock, 
-  CheckCircle2, 
+import {
+  Receipt,
+  Clock,
+  CheckCircle2,
   Loader2,
   AlertCircle
 } from "lucide-react";
@@ -24,15 +24,15 @@ export default function LancamentosPage() {
   const [dimDRE, setDimDRE] = useState<Map<string, string>>(new Map());
   const [dimProjetos, setDimProjetos] = useState<Map<string, string>>(new Map());
   const [dimCategorias, setDimCategorias] = useState<Map<string, any>>(new Map());
-  
+
   const [stats, setStats] = useState<LancamentoStats>({ totalSaidaMes: 0, totalAberto: 0, totalPago: 0 });
   const [activeFilters, setActiveFilters] = useState<LancamentoFilterValues>({ dateBase: 'registro' });
   const [isSyncing, setIsSyncing] = useState(false);
-  
+
   // Pagination Config
   const [pageSize, setPageSize] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // Loading states
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,19 +66,19 @@ export default function LancamentosPage() {
 
   const applyFilters = (base: Lancamento[], filters: LancamentoFilterValues) => {
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
 
     let result = base.filter(item => {
       // 1. Empresa - Filtro robusto para evitar mistura de dados entre DZM e Mar Brasil
       if (filters.empresa) {
         const itemEmpresa = (item.empresa || '').toUpperCase().trim();
         const filterEmpresa = filters.empresa.toUpperCase().trim();
-        
+
         // Se o filtro for Mar Brasil, o item deve conter Mar Brasil e NÃO conter DZM (por segurança)
         if (filterEmpresa === 'MAR BRASIL' && (!itemEmpresa.includes('MAR BRASIL') || itemEmpresa.includes('DZM'))) return false;
         // Se o filtro for DZM, o item deve conter DZM e NÃO conter Mar Brasil
         if (filterEmpresa === 'DZM' && (!itemEmpresa.includes('DZM') || itemEmpresa.includes('MAR BRASIL'))) return false;
-        
+
         // Fallback genérico para outros casos futuros
         if (filterEmpresa !== 'MAR BRASIL' && filterEmpresa !== 'DZM' && !itemEmpresa.includes(filterEmpresa)) return false;
       }
@@ -108,9 +108,9 @@ export default function LancamentosPage() {
       item._dataLabel = dataRefStr;
       if (dataRefStr && dataRefStr !== '---') {
         const p = dataRefStr.includes('/') ? dataRefStr.split('/') : dataRefStr.split('-');
-        item._dataSort = p[0].length === 4 
-          ? new Date(Number(p[0]), Number(p[1])-1, Number(p[2].slice(0,2)))
-          : new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
+        item._dataSort = p[0].length === 4
+          ? new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2].slice(0, 2)))
+          : new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
       } else {
         item._dataSort = new Date(0);
       }
@@ -174,11 +174,11 @@ export default function LancamentosPage() {
 
   const computeStats = (items: Lancamento[]) => {
     let totalOut = 0, totalPaid = 0, totalPending = 0;
-    
+
     items.forEach(item => {
       const val = item.valor || 0;
       totalOut += val;
-      
+
       const statusRaw = (item.status_titulo || '').toUpperCase();
       if (statusRaw.includes('PAGO')) {
         totalPaid += val;
@@ -223,8 +223,8 @@ export default function LancamentosPage() {
       const response = await fetch('/api/omie/sync-period', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          month: parseInt(month), 
+        body: JSON.stringify({
+          month: parseInt(month),
           year: parseInt(year),
           company: filters.empresa
         })
@@ -282,7 +282,7 @@ export default function LancamentosPage() {
   return (
     <main className="min-h-screen bg-slate-50 pb-12">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        
+
         {/* Usamos o HeaderDashboard mas substituímos o onCreateEmployee pelo Update Dashboard que queremos aqui */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
           <div>
@@ -297,7 +297,7 @@ export default function LancamentosPage() {
               </span>
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3 w-full md:w-auto">
             {/* O botão antigo foi removido para dar lugar à sincronização por período v.02.20 */}
           </div>
@@ -307,7 +307,7 @@ export default function LancamentosPage() {
           <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700 animate-in fade-in">
             <AlertCircle size={20} />
             <span className="text-sm font-medium">{error}</span>
-            <button 
+            <button
               onClick={fetchData}
               className="ml-auto text-xs font-bold bg-white px-3 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-100 transition-colors"
             >
@@ -316,26 +316,26 @@ export default function LancamentosPage() {
           </div>
         )}
 
-        <LancamentosFilterBar 
-          onFilterChange={setActiveFilters} 
+        <LancamentosFilterBar
+          onFilterChange={setActiveFilters}
           onImport={handleImportSelection}
           onClear={handleClearData}
           isProcessing={isSyncing}
           progress={progress}
           availableCategories={(() => {
-            const base = activeFilters.empresa 
+            const base = activeFilters.empresa
               ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
               : allLancamentos;
             return Array.from(new Set(base.map(l => dimCategorias.get(l.categoria_id)?.descricao).filter(Boolean))).sort();
           })()}
           availableProjects={(() => {
-            const base = activeFilters.empresa 
+            const base = activeFilters.empresa
               ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
               : allLancamentos;
             return Array.from(new Set(base.flatMap(l => l._projetos || []).filter(Boolean))).sort();
           })()}
           availableDepartments={(() => {
-            const base = activeFilters.empresa 
+            const base = activeFilters.empresa
               ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
               : allLancamentos;
             return Array.from(new Set(base.flatMap(l => l._departamentos || []).filter(Boolean))).sort();
@@ -343,21 +343,21 @@ export default function LancamentosPage() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <StatCard 
+          <StatCard
             title="Total Filtrado"
             value={formatCurrency(stats.totalSaidaMes)}
             icon={<Receipt size={24} />}
             color="blue"
             description="Todos os registros listados"
           />
-          <StatCard 
+          <StatCard
             title="Total em Aberto / Atrasado"
             value={formatCurrency(stats.totalAberto)}
             icon={<Clock size={24} />}
             color="amber"
             description="Aguardando liquidação"
           />
-          <StatCard 
+          <StatCard
             title="Total Pago"
             value={formatCurrency(stats.totalPago)}
             icon={<CheckCircle2 size={24} />}
@@ -382,7 +382,7 @@ export default function LancamentosPage() {
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
                   <span>Itens por página:</span>
-                  <select 
+                  <select
                     value={pageSize}
                     onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
                     className="bg-white border border-slate-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-emerald-500/20"
@@ -398,9 +398,9 @@ export default function LancamentosPage() {
                 </span>
               </div>
             </div>
-            
-            <LancamentosTable 
-              lancamentos={paginatedLancamentos} 
+
+            <LancamentosTable
+              lancamentos={paginatedLancamentos}
               allocations={allocations}
               dimDRE={dimDRE}
               dimProjetos={dimProjetos}
@@ -410,7 +410,7 @@ export default function LancamentosPage() {
             {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-slate-200">
-                <button 
+                <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="px-4 py-2 text-sm font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
@@ -420,7 +420,7 @@ export default function LancamentosPage() {
                 <div className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl">
                   {currentPage} / {totalPages}
                 </div>
-                <button 
+                <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 text-sm font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"

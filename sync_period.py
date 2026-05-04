@@ -114,7 +114,7 @@ def get_omie_page(app_key, app_secret, pagina, start_date, end_date):
             "pagina": pagina,
             "registros_por_pagina": 100,
             "exibir_obs": "S",
-            "filtrar_por_vencimento": "S",
+            "filtrar_por_data_registro": "S",
             "filtrar_por_data_de": start_date,
             "filtrar_por_data_ate": end_date
         }]
