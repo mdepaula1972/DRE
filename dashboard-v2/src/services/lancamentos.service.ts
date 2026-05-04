@@ -87,7 +87,8 @@ export class LancamentosService {
 
     const dimCategorias = new Map<string, any>();
     (catData.data || []).forEach(c => {
-      dimCategorias.set(String(c.codigo_categoria), {
+      const key = `${String(c.empresa_nome || '').trim()}-${String(c.codigo_categoria)}`;
+      dimCategorias.set(key, {
         descricao: c.descricao_categoria,
         codigo_dre: String(c.codigo_conta_dre || '')
       });
@@ -95,7 +96,8 @@ export class LancamentosService {
 
     const dimProjetos = new Map<string, string>();
     (projData.data || []).forEach(p => {
-      dimProjetos.set(String(p.codigo_projeto), p.descricao_projeto);
+      const key = `${String(p.empresa_nome || '').trim()}-${String(p.codigo_projeto)}`;
+      dimProjetos.set(key, p.descricao_projeto);
     });
 
     const dimDRE = new Map<string, string>();

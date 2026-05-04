@@ -61,7 +61,7 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
             {lancamentos.map((item) => {
               const isExpanded = expandedIds.has(item.id_global);
               const status = getStatusInfo(item);
-              const catInfo = dimCategorias.get(item.categoria_id);
+              const catInfo = dimCategorias.get(`${String(item.empresa || '').trim()}-${String(item.categoria_id)}`);
               const catName = catInfo?.descricao || item.categoria_id;
 
               // Row Data prep

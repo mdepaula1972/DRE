@@ -329,7 +329,7 @@ export default function LancamentosPage() {
             const base = activeFilters.empresa
               ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
               : allLancamentos;
-            return Array.from(new Set(base.map(l => dimCategorias.get(l.categoria_id)?.descricao).filter(Boolean))).sort();
+            return Array.from(new Set(base.map(l => dimCategorias.get(`${String(l.empresa || '').trim()}-${String(l.categoria_id)}`)?.descricao).filter(Boolean))).sort() as string[];
           })()}
           availableProjects={(() => {
             const base = activeFilters.empresa
