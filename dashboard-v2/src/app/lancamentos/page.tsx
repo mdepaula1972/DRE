@@ -207,6 +207,30 @@ export default function LancamentosPage() {
     }
   };
 
+  const handleSyncMonth = async (monthYear: string) => {
+    // monthYear vem como "2024-05"
+    const [year, month] = monthYear.split('-');
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/omie/sync-period', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ month: parseInt(month), year: parseInt(year) })
+      });
+      const json = await res.json();
+      if (json.status === 'success') {
+        alert(`✅ ${json.message}`);
+        await fetchData();
+      } else {
+        alert(`❌ Erro: ${json.message}`);
+      }
+    } catch (e: any) {
+      alert(`❌ Erro na sincronização de auditoria: ${e.message}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 pb-12">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -227,14 +251,7 @@ export default function LancamentosPage() {
           </div>
           
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <button 
-              onClick={triggerOmieSync}
-              disabled={isSyncing}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all disabled:opacity-75 disabled:cursor-wait"
-            >
-              {isSyncing ? <Loader2 size={18} className="animate-spin" /> : <Clock size={18} />}
-              {isSyncing ? "Sincronizando..." : "Sincronizar Últimos 7 Dias (Omie)"}
-            </button>
+            {/* O botão antigo foi removido para dar lugar à sincronização por período v.02.20 */}
           </div>
         </div>
 
@@ -253,6 +270,7 @@ export default function LancamentosPage() {
 
         <LancamentosFilterBar 
           onFilterChange={setActiveFilters} 
+          onSyncMonth={handleSyncMonth}
           availableCategories={(() => {
             const base = activeFilters.empresa 
               ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))

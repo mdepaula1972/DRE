@@ -6,12 +6,13 @@ import { LancamentoFilterValues } from "@/types/lancamentos";
 
 interface Props {
   onFilterChange: (filters: LancamentoFilterValues) => void;
+  onSyncMonth?: (monthYear: string) => void;
   availableCategories: string[];
   availableProjects: string[];
   availableDepartments: string[];
 }
 
-export function LancamentosFilterBar({ onFilterChange, availableCategories, availableProjects, availableDepartments }: Props) {
+export function LancamentosFilterBar({ onFilterChange, onSyncMonth, availableCategories, availableProjects, availableDepartments }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<LancamentoFilterValues>({
     dateBase: 'registro',
@@ -191,6 +192,14 @@ export function LancamentosFilterBar({ onFilterChange, availableCategories, avai
             >
               <X size={16} /> Limpar
             </button>
+            {filters.month && onSyncMonth && (
+              <button
+                onClick={() => onSyncMonth(filters.month!)}
+                className="mr-auto px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-bold shadow-md transition-all flex items-center gap-2"
+              >
+                Sincronizar {filters.month} na Omie
+              </button>
+            )}
             <button
               onClick={handleApply}
               className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow-md shadow-emerald-600/20 transition-all"
