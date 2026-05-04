@@ -91,17 +91,23 @@ export default function LancamentosPage() {
       else dataRefStr = item.data_entrada || item.data_pagamento || '';
 
       if (!dataRefStr || dataRefStr === '---') {
-        if (filters.month) return false;
+        if (filters.startDate || filters.endDate) return false;
       } else {
-        if (filters.month) {
-          const parts = dataRefStr.includes('/') ? dataRefStr.split('/') : dataRefStr.split('-');
-          if (parts.length === 3) {
-            let itemMonth = '';
-            if (parts[0].length === 4) itemMonth = `${parts[0]}-${parts[1].padStart(2, '0')}`;
-            else itemMonth = `${parts[2]}-${parts[1].padStart(2, '0')}`;
+        // Aproveitar o _dataSort que calcularemos abaixo ou calcular aqui
+        const p = dataRefStr.includes('/') ? dataRefStr.split('/') : dataRefStr.split('-');
+        const itemDate = p[0].length === 4
+          ? new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2].slice(0, 2)))
+          : new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
+        
+        itemDate.setHours(0,0,0,0);
 
-            if (itemMonth !== filters.month) return false;
-          }
+        if (filters.startDate) {
+          const start = new Date(filters.startDate + 'T00:00:00');
+          if (itemDate < start) return false;
+        }
+        if (filters.endDate) {
+          const end = new Date(filters.endDate + 'T00:00:00');
+          if (itemDate > end) return false;
         }
       }
 

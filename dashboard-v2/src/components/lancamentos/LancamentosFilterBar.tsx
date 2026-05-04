@@ -20,8 +20,16 @@ export function LancamentosFilterBar({
   availableDepartments 
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [filters, setFilters] = useState<LancamentoFilterValues>({
-    dateBase: 'registro',
+  const [filters, setFilters] = useState<LancamentoFilterValues>(() => {
+    const d = new Date();
+    const firstDay = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+    const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
+    
+    return {
+      dateBase: 'registro',
+      startDate: firstDay,
+      endDate: lastDay
+    };
   });
 
   const handleChange = (key: keyof LancamentoFilterValues, value: any) => {
@@ -35,7 +43,15 @@ export function LancamentosFilterBar({
   };
 
   const handleClear = () => {
-    const defaultFilters: LancamentoFilterValues = { dateBase: 'registro' };
+    const d = new Date();
+    const firstDay = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+    const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
+
+    const defaultFilters: LancamentoFilterValues = { 
+      dateBase: 'registro',
+      startDate: firstDay,
+      endDate: lastDay
+    };
     setFilters(defaultFilters);
     onFilterChange(defaultFilters);
   };
@@ -67,7 +83,7 @@ export function LancamentosFilterBar({
           >
             <Filter size={16} />
             <span>Filtros</span>
-            {Object.keys(filters).length > 2 && !isOpen && (
+            {Object.keys(filters).length > 3 && !isOpen && (
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
             )}
           </button>
@@ -76,7 +92,7 @@ export function LancamentosFilterBar({
 
       {isOpen && (
         <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-xl border border-slate-200 p-5 origin-top animate-in fade-in slide-in-from-top-4 duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             
             {/* Empresa */}
             <div>
@@ -106,14 +122,25 @@ export function LancamentosFilterBar({
               </select>
             </div>
 
-            {/* Mês / Ano */}
+            {/* Data Inicial */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Mês/Ano</label>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">De</label>
               <input
-                type="month"
+                type="date"
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
-                value={filters.month || ""}
-                onChange={(e) => handleChange("month", e.target.value)}
+                value={filters.startDate || ""}
+                onChange={(e) => handleChange("startDate", e.target.value)}
+              />
+            </div>
+
+            {/* Data Final */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Até</label>
+              <input
+                type="date"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+                value={filters.endDate || ""}
+                onChange={(e) => handleChange("endDate", e.target.value)}
               />
             </div>
 

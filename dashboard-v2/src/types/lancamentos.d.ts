@@ -29,7 +29,9 @@ export interface Lancamento {
 export interface LancamentoFilterValues {
   empresa?: string;
   dateBase?: 'registro' | 'vencimento' | 'pagamento';
-  month?: string; // YYYY-MM
+  month?: string; // YYYY-MM (Legado)
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
   status?: string; // PAGO, ABERTO, ATRASADO
   source?: string; // CP, MOV
   search?: string;
