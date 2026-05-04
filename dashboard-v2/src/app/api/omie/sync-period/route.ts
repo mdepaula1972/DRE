@@ -3,11 +3,29 @@ import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   try {
-    const { month, year, company } = await req.json();
+    const reqData = await req.json();
+    
+    // Support new flex dates or fallback to old month/year
+    let { startDate, endDate, dateType, company, month, year } = reqData;
+    dateType = dateType || 'registro';
 
-    if (!month || !year) {
-      return NextResponse.json({ status: 'error', message: 'M s e Ano s o obrigat rios.' }, { status: 400 });
+    if (!startDate || !endDate) {
+      if (!month || !year) {
+        return NextResponse.json({ status: 'error', message: 'Faltam par metros de data.' }, { status: 400 });
+      }
+      const lastDay = new Date(year, month, 0).getDate();
+      startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+      endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
     }
+
+    // Converta YYYY-MM-DD para DD/MM/YYYY para a API da Omie
+    const formatDateToBR = (isoStr: string) => {
+      const [y, m, d] = isoStr.split('-');
+      return `${d}/${m}/${y}`;
+    };
+
+    const brStart = formatDateToBR(startDate);
+    const brEnd = formatDateToBR(endDate);
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -47,22 +65,23 @@ export async function POST(req: Request) {
 
           const projMap = new Map((projData || []).map(p => [String(p.codigo_projeto).trim(), p.descricao_projeto]));
 
-          // 4. Limpar Per odo no Supabase (Delete Seletivo)
-          const isoStart = `${year}-${String(month).padStart(2, '0')}-01`;
-          const lastDay = new Date(year, month, 0).getDate();
-          const isoEnd = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
-
-          await supabase
-            .from('omie_raw')
-            .delete()
-            .eq('empresa_nome', companyName.trim())
-            .gte('data_registro', isoStart)
-            .lte('data_registro', isoEnd);
-
-          // 5. Buscar na Omie
+          // 4. Parâmetros de Busca Dinâmicos para Omie
           sendProgress(15);
-          const startDt = `01/${String(month).padStart(2, '0')}/${year}`;
-          const endDt = `${lastDay}/${String(month).padStart(2, '0')}/${year}`;
+          const paramFilter: any = {
+            registros_por_pagina: 100,
+            exibir_obs: "S"
+          };
+
+          if (dateType === 'vencimento') {
+            paramFilter.filtrar_por_vencimento_de = brStart;
+            paramFilter.filtrar_por_vencimento_ate = brEnd;
+          } else if (dateType === 'pagamento') {
+            paramFilter.filtrar_por_baixa_de = brStart;
+            paramFilter.filtrar_por_baixa_ate = brEnd;
+          } else {
+            paramFilter.filtrar_por_registro_de = brStart;
+            paramFilter.filtrar_por_registro_ate = brEnd;
+          }
 
           let pagina = 1;
           let totalPaginas = 1;
@@ -77,10 +96,7 @@ export async function POST(req: Request) {
                 app_secret: appSecret,
                 param: [{
                   pagina,
-                  registros_por_pagina: 100,
-                  exibir_obs: "S",
-                  filtrar_por_registro_de: startDt,
-                  filtrar_por_registro_ate: endDt
+                  ...paramFilter
                 }]
               })
             });
@@ -164,6 +180,18 @@ export async function POST(req: Request) {
                 }));
               });
 
+              const uniqueOmieIds = Array.from(new Set(rows.map((r: any) => r.omie_id)));
+
+              // 1. Apaga APENAS os IDs que vieram nesta página (Upsert Real sem sobreposição)
+              if (uniqueOmieIds.length > 0) {
+                await supabase
+                  .from('omie_raw')
+                  .delete()
+                  .eq('empresa_nome', companyName.trim())
+                  .in('omie_id', uniqueOmieIds);
+              }
+
+              // 2. Insere os atualizados
               const { error: insertError } = await supabase.from('omie_raw').insert(rows);
               if (insertError) {
                 controller.enqueue(encoder.encode(`data: ERROR: Falha no Supabase: ${insertError.message}\n\n`));

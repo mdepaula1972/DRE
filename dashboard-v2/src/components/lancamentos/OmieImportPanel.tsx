@@ -11,10 +11,12 @@ interface Props {
 
 export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Props) {
   const [empresa, setEmpresa] = useState("DZM");
-  const [month, setMonth] = useState(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  });
+  
+  // Default to today
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [dateType, setDateType] = useState("registro"); // registro | vencimento | pagamento
+
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logMsg, setLogMsg] = useState("");
@@ -22,7 +24,6 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
   const [isOpen, setIsOpen] = useState(false);
 
   const handleImport = async () => {
-    const [year, mon] = month.split("-");
     setIsImporting(true);
     setProgress(0);
     setLogMsg("Conectando ao Omie...");
@@ -33,8 +34,9 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          month: parseInt(mon),
-          year: parseInt(year),
+          startDate,
+          endDate,
+          dateType,
           company: empresa,
         }),
       });
@@ -73,8 +75,11 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
     }
   };
 
-  const [year, mon] = month.split("-");
-  const monthLabel = new Date(parseInt(year), parseInt(mon) - 1).toLocaleString("pt-BR", { month: "long", year: "numeric" });
+  const formatDateLabel = (dateStr: string) => {
+    if (!dateStr) return "";
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}`;
+  };
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 overflow-hidden relative z-30">
@@ -87,8 +92,8 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
             <Download className="text-emerald-600" size={18} />
           </div>
           <div className="text-left">
-            <p className="text-sm font-bold text-slate-800">Importar do Omie</p>
-            <p className="text-xs text-slate-400">Selecione empresa e período para importar dados</p>
+            <p className="text-sm font-bold text-slate-800">Importar do Omie (Avançado)</p>
+            <p className="text-xs text-slate-400">Auditoria flexível dia a dia sem sobreposição</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -100,7 +105,7 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
 
       {isOpen && (
         <div className="border-t border-slate-100 px-5 py-4 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                 Empresa
@@ -109,22 +114,52 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
                 value={empresa}
                 onChange={(e) => setEmpresa(e.target.value)}
                 disabled={isImporting}
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm font-medium outline-none focus:border-emerald-500 transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm font-medium outline-none focus:border-emerald-500 transition-all"
               >
                 <option value="Mar Brasil">Mar Brasil</option>
                 <option value="DZM">DZM</option>
               </select>
             </div>
+            
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5" title="Define a data base na Omie (Registro/Inclusão, Vencimento ou Pagamento)">
+                Base da Data
+              </label>
+              <select
+                value={dateType}
+                onChange={(e) => setDateType(e.target.value)}
+                disabled={isImporting}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm font-medium outline-none focus:border-emerald-500 transition-all"
+              >
+                <option value="registro">Data de Registro/Inclusão</option>
+                <option value="vencimento">Data de Vencimento</option>
+                <option value="pagamento">Data de Pagamento</option>
+              </select>
+            </div>
+
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Mês / Ano
+                Data Inicial (De)
               </label>
               <input
-                type="month"
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 disabled={isImporting}
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm font-medium outline-none focus:border-emerald-500 transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm font-medium outline-none focus:border-emerald-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                Data Final (Até)
+              </label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                disabled={isImporting}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm font-medium outline-none focus:border-emerald-500 transition-all"
               />
             </div>
           </div>
@@ -167,9 +202,9 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
             >
               {isImporting ? (
-                <><Loader2 size={16} className="animate-spin" /> Importando {empresa} — {monthLabel}...</>
+                <><Loader2 size={16} className="animate-spin" /> Importando {empresa}...</>
               ) : (
-                <><Download size={16} /> Importar {empresa} — {monthLabel}</>
+                <><Download size={16} /> Fazer Upsert ({formatDateLabel(startDate)} a {formatDateLabel(endDate)})</>
               )}
             </button>
           </div>
