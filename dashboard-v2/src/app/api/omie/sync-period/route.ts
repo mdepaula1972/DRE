@@ -90,6 +90,45 @@ export async function POST(req: Request) {
             const records = omieData.conta_pagar_cadastro || [];
 
             if (records.length > 0) {
+              // 5.1 Resolver nomes dos Fornecedores desta página
+              const uniqueSupplierIds = [...new Set(records.map((r: any) => r.codigo_cliente_fornecedor).filter(Boolean))];
+              const suppMap = new Map();
+
+              if (uniqueSupplierIds.length > 0) {
+                // Tenta pegar do Supabase primeiro (rápido)
+                const { data: suppData } = await supabase
+                  .from('omie_dim_fornecedores')
+                  .select('codigo_cliente_omie, nome_fantasia, razao_social')
+                  .eq('empresa_nome', companyName.trim())
+                  .in('codigo_cliente_omie', uniqueSupplierIds);
+                  
+                (suppData || []).forEach(s => {
+                  suppMap.set(String(s.codigo_cliente_omie), s.nome_fantasia || s.razao_social || 'Fornecedor');
+                });
+
+                // Se houver algum faltando (novo), busca na Omie
+                const missingSuppliers = uniqueSupplierIds.filter(id => !suppMap.has(String(id)));
+                for (const id of missingSuppliers) {
+                  try {
+                    const resSupp = await fetch('https://app.omie.com.br/api/v1/geral/clientes/', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        call: 'ConsultarCliente',
+                        app_key: appKey,
+                        app_secret: appSecret,
+                        param: [{ codigo_cliente_omie: id }]
+                      })
+                    });
+                    const dataSupp = await resSupp.json();
+                    const name = dataSupp.nome_fantasia || dataSupp.razao_social || 'Fornecedor';
+                    suppMap.set(String(id), name);
+                  } catch {
+                    suppMap.set(String(id), 'Fornecedor');
+                  }
+                }
+              }
+
               const rows = records.flatMap((r: any) => {
                 const catId = String(r.codigo_categoria || '').trim();
                 const categoria = catMap.get(catId) || `Auditar: ${catId} (${r.descricao_categoria || 'Sem Nome'})`;
@@ -100,6 +139,8 @@ export async function POST(req: Request) {
                 const isoReg = r.data_entrada ? r.data_entrada.split('/').reverse().join('-') : null;
                 const isoVenc = r.data_vencimento ? r.data_vencimento.split('/').reverse().join('-') : null;
                 const isoBaixa = r.data_previsao ? r.data_previsao.split('/').reverse().join('-') : null;
+
+                const fornecedorNome = suppMap.get(String(r.codigo_cliente_fornecedor)) || 'Fornecedor';
 
                 const dist = r.distribuicao || [{ cDesDep: 'Sem Departamento', nValDep: r.valor_documento }];
 
@@ -116,6 +157,7 @@ export async function POST(req: Request) {
                   categoria_nome: categoria,
                   projeto_nome: projeto,
                   departamento_nome: d.cDesDep,
+                  nm_cliente: fornecedorNome,
                   raw_data: r
                 }));
               });
