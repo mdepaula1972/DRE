@@ -1,23 +1,25 @@
 export interface Lancamento {
+  id: number;
   id_global: string;
   fonte: 'CP' | 'MOV';
-  empresa: string;
-  empresa_id?: string;
-  fornecedor: string;
-  valor: number;
-  categoria_id: string;
+  empresa_nome: string;
+  omie_id: number;
+  status: string;
+  valor_total: number;
+  valor_alocado: number;
+  data_registro: string;
+  data_vencimento: string;
+  data_pagamento: string;
+  categoria_codigo: string;
+  categoria_nome: string;
+  fornecedor_nome: string;
+  projeto_nome?: string;
+  departamento_nome?: string;
+  raw_data?: any;
+  sync_at?: string;
   
-  // Detalhes extras
-  codigo_lancamento_omie?: string;
-  codigo_movimento_cc?: string;
-  codigo_projeto?: string;
-  data_emissao?: string;
-  data_entrada?: string;
-  data_previsao?: string;
-  data_vencimento?: string;
-  data_pagamento?: string;
-  status_titulo?: string;
-  observacao?: string;
+  // Detalhes extras legados/compatibilidade
+  status_titulo?: string; // Mapeado do status
   
   // Computed na runtime
   _dataSort?: Date;

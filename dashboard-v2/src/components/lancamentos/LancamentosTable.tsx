@@ -61,11 +61,11 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
             {lancamentos.map((item) => {
               const isExpanded = expandedIds.has(item.id_global);
               const status = getStatusInfo(item);
-              const catInfo = dimCategorias.get(`${String(item.empresa || '').trim()}-${String(item.categoria_id)}`);
-              const catName = catInfo?.descricao || item.categoria_id;
+              const catInfo = dimCategorias.get(`${String(item.empresa_nome || '').trim()}-${String(item.categoria_codigo)}`);
+              const catName = item.categoria_nome || catInfo?.descricao || item.categoria_codigo;
 
               // Row Data prep
-              const itemAllocs = allocations.filter(a => String(a.codigo_lancamento_omie) === String(item.codigo_lancamento_omie));
+              const itemAllocs = allocations.filter(a => String(a.codigo_lancamento_omie) === String(item.omie_id));
               const hasAlloc = itemAllocs.length > 0;
               
               let dreText = 'Não vinculado';
@@ -75,7 +75,7 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                 dreText = dimDRE.get(catInfo.codigo_dre) || `Cód: ${catInfo.codigo_dre}`;
               }
 
-              const projText = (hasAlloc && itemAllocs[0].descricao_projeto) || 
+              const projText = item.projeto_nome || (hasAlloc && itemAllocs[0].descricao_projeto) || 
                                (item._projetos && item._projetos.length > 0 ? item._projetos[0] : 'Nenhum');
 
               return (
@@ -91,11 +91,11 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                       {formatDateBR(item._dataLabel)}
                     </td>
                     <td className="px-5 py-3">
-                      <span className="font-bold text-slate-700 text-xs">{item.empresa}</span>
+                      <span className="font-bold text-slate-700 text-xs">{item.empresa_nome}</span>
                     </td>
                     <td className="px-5 py-3">
-                      <div className="font-semibold text-slate-900 truncate max-w-[250px]" title={item.fornecedor}>
-                        {item.fornecedor}
+                      <div className="font-semibold text-slate-900 truncate max-w-[250px]" title={item.fornecedor_nome}>
+                        {item.fornecedor_nome}
                       </div>
                     </td>
                     <td className="px-5 py-3 text-right">

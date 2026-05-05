@@ -28,14 +28,14 @@ export async function POST(req: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         const sendProgress = (p: number) => {
-          controller.enqueue(encoder.encode(`data: PROGRESS:${p}\n\n`));
+          controller.enqueue(encoder.encode(`data: PROGRESS:${Math.round(p)}\n\n`));
         };
         const sendLog = (msg: string) => {
           controller.enqueue(encoder.encode(`data: LOG: ${msg}\n\n`));
         };
 
         try {
-          const companyName = company || 'Mar Brasil';
+          const companyName = (company || 'Mar Brasil').trim();
           const isDZM = companyName.toUpperCase().includes('DZM');
 
           const appKey = isDZM ? process.env.OMIE_APP_KEY_DZM : process.env.OMIE_APP_KEY_MARBRASIL;
@@ -47,8 +47,8 @@ export async function POST(req: Request) {
             return;
           }
 
-          // 1. Carregar Mapeamentos (Categorias e Projetos)
-          sendLog("Carregando mapeamentos da Omie...");
+          // 1. Carregar Mapeamentos
+          sendLog("Carregando categorias e projetos...");
           const catMap = new Map();
           let catPage = 1;
           while(true) {
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
             }).then(r => r.json());
             const cats = resCat.categoria_cadastro || [];
             cats.forEach((c: any) => catMap.set(String(c.codigo).trim(), c.descricao));
-            if (catPage >= resCat.total_de_paginas) break;
+            if (catPage >= resCat.total_de_paginas || catPage > 10) break;
             catPage++;
           }
 
@@ -79,6 +79,9 @@ export async function POST(req: Request) {
           }).then(r => r.json());
           (resProj.projeto_cadastro || []).forEach((p: any) => projMap.set(String(p.codigo).trim(), p.nome));
 
+          // Cache de Fornecedores para evitar milhares de chamadas
+          const supplierCache = new Map();
+
           // --- FUNÇÃO AUXILIAR DE SYNC CP ---
           const syncCP = async (filterParams: any, label: string, startProgress: number, endProgress: number) => {
             sendLog(`Fase CP: Buscando por ${label}...`);
@@ -91,14 +94,39 @@ export async function POST(req: Request) {
                 body: JSON.stringify({
                   call: 'ListarContasPagar',
                   app_key: appKey, app_secret: appSecret,
-                  param: [{ pagina, registros_por_pagina: 100, ...filterParams }]
+                  param: [{ pagina, registros_por_pagina: 50, ...filterParams }]
                 })
               }).then(r => r.json());
 
-              totalPaginas = resCP.total_de_paginas || 1;
+              totalPaginas = resCP.total_de_paginas || 0;
               const records = resCP.conta_pagar_cadastro || [];
 
               if (records.length > 0) {
+                // Resolver Fornecedores desta página
+                const idsParaBuscar = records.map((r: any) => r.codigo_cliente_fornecedor).filter((id: any) => id && !supplierCache.has(id));
+                if (idsParaBuscar.length > 0) {
+                  // Busca rápida no Supabase primeiro
+                  const { data: cachedSupps } = await supabase.from('omie_dim_fornecedores').select('codigo_cliente_omie, nome_fantasia').in('codigo_cliente_omie', idsParaBuscar);
+                  (cachedSupps || []).forEach(s => supplierCache.set(s.codigo_cliente_omie, s.nome_fantasia));
+                  
+                  // Se ainda faltar, busca na Omie (apenas o primeiro de cada página pra não travar)
+                  const aindaFaltam = idsParaBuscar.filter(id => !supplierCache.has(id));
+                  for (const id of aindaFaltam.slice(0, 5)) {
+                    try {
+                      const resSupp = await fetch('https://app.omie.com.br/api/v1/geral/clientes/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          call: 'ConsultarCliente',
+                          app_key: appKey, app_secret: appSecret,
+                          param: [{ codigo_cliente_omie: id }]
+                        })
+                      }).then(r => r.json());
+                      supplierCache.set(id, resSupp.nome_fantasia || resSupp.razao_social || 'Fornecedor');
+                    } catch { supplierCache.set(id, 'Fornecedor'); }
+                  }
+                }
+
                 const rows = records
                   .filter((r: any) => r.status_titulo !== 'CANCELADO')
                   .flatMap((r: any) => {
@@ -106,6 +134,7 @@ export async function POST(req: Request) {
                     const categoria = catMap.get(catId) || `Auditar: ${catId} (${r.descricao_categoria || 'Sem Nome'})`;
                     const projId = String(r.codigo_projeto || '').trim();
                     const projeto = projMap.get(projId) || r.nome_projeto || 'Sem Projeto';
+                    const fornecedor = supplierCache.get(r.codigo_cliente_fornecedor) || r.nm_cliente || 'Fornecedor';
 
                     const isoReg = r.data_entrada ? r.data_entrada.split('/').reverse().join('-') : null;
                     const isoVenc = r.data_vencimento ? r.data_vencimento.split('/').reverse().join('-') : null;
@@ -114,9 +143,9 @@ export async function POST(req: Request) {
                     const dist = r.distribuicao || [{ cDesDep: 'Sem Departamento', nValDep: r.valor_documento }];
 
                     return dist.map((d: any) => ({
-                      empresa_nome: companyName.trim(),
+                      empresa_nome: companyName,
                       omie_id: r.codigo_lancamento_omie,
-                      id_global: `cp_${r.codigo_lancamento_omie}`,
+                      id_global: `cp_${r.codigo_lancamento_omie}_${d.cDesDep || 'SD'}`,
                       status: r.status_titulo,
                       valor_total: r.valor_documento,
                       valor_alocado: d.nValDep,
@@ -126,6 +155,7 @@ export async function POST(req: Request) {
                       categoria_codigo: catId,
                       categoria_nome: categoria,
                       projeto_nome: projeto,
+                      fornecedor_nome: fornecedor,
                       departamento_nome: d.cDesDep || 'Sem Departamento',
                       raw_data: r,
                       fonte: 'CP'
@@ -133,23 +163,23 @@ export async function POST(req: Request) {
                   });
 
                 if (rows.length > 0) {
-                  const uniqueIds = [...new Set(rows.map((r: any) => r.omie_id))];
-                  await supabase.from('omie_raw').delete().eq('empresa_nome', companyName.trim()).in('omie_id', uniqueIds).eq('fonte', 'CP');
+                  const uniqueGlobalIds = rows.map((r: any) => r.id_global);
+                  await supabase.from('omie_raw').delete().in('id_global', uniqueGlobalIds);
                   await supabase.from('omie_raw').insert(rows);
                 }
               }
-              sendProgress(startProgress + (pagina / totalPaginas) * (endProgress - startProgress));
+              sendProgress(startProgress + (pagina / Math.max(1, totalPaginas)) * (endProgress - startProgress));
               pagina++;
             }
           };
 
-          // Executar as 3 Camadas de CP
-          await syncCP({ filtrar_por_registro_de: brStart, filtrar_por_registro_ate: brEnd }, "Data de Registro", 5, 25);
-          await syncCP({ filtrar_por_data_de: brStart, filtrar_por_data_ate: brEnd }, "Data de Vencimento", 25, 45);
-          await syncCP({ filtrar_por_data_liquidacao_de: brStart, filtrar_por_data_liquidacao_ate: brEnd }, "Data de Pagamento", 45, 65);
+          // Executar Camadas de CP (Tripla Passagem)
+          await syncCP({ filtrar_por_registro_de: brStart, filtrar_por_registro_ate: brEnd }, "Registro", 5, 25);
+          await syncCP({ filtrar_por_data_de: brStart, filtrar_por_data_ate: brEnd }, "Vencimento", 25, 45);
+          await syncCP({ filtrar_por_data_liquidacao_de: brStart, filtrar_por_data_liquidacao_ate: brEnd }, "Pagamento", 45, 65);
 
-          // --- FASE 2: MOVIMENTOS DE CONTA CORRENTE (MOV) ---
-          sendLog("Fase MOV: Sincronizando movimentos bancários...");
+          // --- FASE 2: MOVIMENTOS (MOV) ---
+          sendLog("Fase MOV: Sincronizando extrato...");
           let movPage = 1;
           let movTotalPaginas = 1;
           while (movPage <= movTotalPaginas) {
@@ -163,7 +193,7 @@ export async function POST(req: Request) {
               })
             }).then(r => r.json());
 
-            movTotalPaginas = resMOV.nTotPaginas || 1;
+            movTotalPaginas = resMOV.nTotPaginas || 0;
             const movRecords = resMOV.movimentos || [];
 
             if (movRecords.length > 0) {
@@ -176,21 +206,19 @@ export async function POST(req: Request) {
                   const isoVenc = m.detalhes.dDtVenc ? m.detalhes.dDtVenc.split('/').reverse().join('-') : null;
                   const isoPgto = m.detalhes.dDtPagamento ? m.detalhes.dDtPagamento.split('/').reverse().join('-') : null;
                   
-                  // Garantir data_registro se vier nulo da Omie (usar pagamento como fallback)
-                  const finalReg = isoReg || isoPgto || isoVenc;
-
                   return {
-                    empresa_nome: companyName.trim(),
+                    empresa_nome: companyName,
                     omie_id: m.detalhes.nCodMovCC,
                     id_global: `mov_${m.detalhes.nCodMovCC}`,
                     status: 'PAGO',
                     valor_total: m.detalhes.nValor,
                     valor_alocado: m.detalhes.nValor,
-                    data_registro: finalReg,
+                    data_registro: isoReg || isoPgto || isoVenc,
                     data_vencimento: isoVenc,
                     data_pagamento: isoPgto,
                     categoria_codigo: catId,
                     categoria_nome: categoria,
+                    fornecedor_nome: m.detalhes.cDesMov || m.detalhes.cFavorecido || 'Banco / Tarifa',
                     projeto_nome: m.detalhes.cDesProjeto || 'Sem Projeto',
                     departamento_nome: m.detalhes.cDesDep || 'Sem Departamento',
                     raw_data: m,
@@ -199,17 +227,17 @@ export async function POST(req: Request) {
                 });
 
               if (movRows.length > 0) {
-                const uniqueMovIds = [...new Set(movRows.map((r: any) => r.omie_id))];
-                await supabase.from('omie_raw').delete().eq('empresa_nome', companyName.trim()).in('omie_id', uniqueMovIds).eq('fonte', 'MOV');
+                const uniqueMovIds = movRows.map((r: any) => r.id_global);
+                await supabase.from('omie_raw').delete().in('id_global', uniqueMovIds);
                 await supabase.from('omie_raw').insert(movRows);
               }
             }
-            sendProgress(65 + (movPage / movTotalPaginas) * 35);
+            sendProgress(65 + (movPage / Math.max(1, movTotalPaginas)) * 35);
             movPage++;
           }
 
           sendProgress(100);
-          controller.enqueue(encoder.encode(`data: DONE: Sincronização Completa (360º).\n\n`));
+          controller.enqueue(encoder.encode(`data: DONE: Sincronização Completa.\n\n`));
           controller.close();
         } catch (err: any) {
           controller.enqueue(encoder.encode(`data: ERROR: ${err.message}\n\n`));

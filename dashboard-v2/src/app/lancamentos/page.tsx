@@ -28,7 +28,6 @@ export default function LancamentosPage() {
 
   const [stats, setStats] = useState<LancamentoStats>({ totalSaidaMes: 0, totalAberto: 0, totalPago: 0 });
   const [activeFilters, setActiveFilters] = useState<LancamentoFilterValues>({ dateBase: 'registro' });
-  const [isSyncing, setIsSyncing] = useState(false);
 
   // Pagination Config
   const [pageSize, setPageSize] = useState(50);
@@ -50,18 +49,25 @@ export default function LancamentosPage() {
     setError(null);
     setIsLoading(true);
     try {
-      // By default fetch from 2025-06-01. We could make this dynamic, but aligning with legacy.
+      // Sincronizando com a carga histórica 2024
       const data = await LancamentosService.getLancamentos('2024-01-01');
       setAllLancamentos(data.lancamentos);
       setAllocations(data.allocations);
       setDimDRE(data.dimDRE);
       setDimProjetos(data.dimProjetos);
       setDimCategorias(data.dimCategorias);
-    } catch (err) {
-      console.error('Erro ao carregar Lançamentos:', err);
-      setError('Falha ao carregar registros. O banco de dados pode estar inacessível.');
+    } catch (err: any) {
+      setError(err.message || "Erro ao carregar dados.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleClearData = async () => {
+    if (confirm("Deseja realmente limpar todos os dados da plataforma?")) {
+      setIsLoading(true);
+      await LancamentosService.clearAll();
+      await fetchData();
     }
   };
 
@@ -70,30 +76,24 @@ export default function LancamentosPage() {
     today.setHours(0, 0, 0, 0);
 
     let result = base.filter(item => {
-      // 1. Empresa - Filtro robusto para evitar mistura de dados entre DZM e Mar Brasil
+      // 1. Empresa
       if (filters.empresa) {
-        const itemEmpresa = (item.empresa || '').toUpperCase().trim();
+        const itemEmpresa = (item.empresa_nome || '').toUpperCase().trim();
         const filterEmpresa = filters.empresa.toUpperCase().trim();
-
-        // Se o filtro for Mar Brasil, o item deve conter Mar Brasil e NÃO conter DZM (por segurança)
-        if (filterEmpresa === 'MAR BRASIL' && (!itemEmpresa.includes('MAR BRASIL') || itemEmpresa.includes('DZM'))) return false;
-        // Se o filtro for DZM, o item deve conter DZM e NÃO conter Mar Brasil
+        if (filterEmpresa === 'MAR BRASIL' && !itemEmpresa.includes('MAR BRASIL')) return false;
         if (filterEmpresa === 'DZM' && (!itemEmpresa.includes('DZM') || itemEmpresa.includes('MAR BRASIL'))) return false;
-
-        // Fallback genérico para outros casos futuros
         if (filterEmpresa !== 'MAR BRASIL' && filterEmpresa !== 'DZM' && !itemEmpresa.includes(filterEmpresa)) return false;
       }
 
-      // 2. Data Base / Mês
+      // 2. Data Base
       let dataRefStr = '';
       if (filters.dateBase === 'vencimento') dataRefStr = item.data_vencimento || '';
       else if (filters.dateBase === 'pagamento') dataRefStr = item.data_pagamento || '';
-      else dataRefStr = item.data_entrada || item.data_pagamento || '';
+      else dataRefStr = item.data_registro || item.data_pagamento || '';
 
       if (!dataRefStr || dataRefStr === '---') {
         if (filters.startDate || filters.endDate) return false;
       } else {
-        // Aproveitar o _dataSort que calcularemos abaixo ou calcular aqui
         const p = dataRefStr.includes('/') ? dataRefStr.split('/') : dataRefStr.split('-');
         const itemDate = p[0].length === 4
           ? new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2].slice(0, 2)))
@@ -111,7 +111,6 @@ export default function LancamentosPage() {
         }
       }
 
-      // Propriedades internas úteis pra ordenação
       item._dataLabel = dataRefStr;
       if (dataRefStr && dataRefStr !== '---') {
         const p = dataRefStr.includes('/') ? dataRefStr.split('/') : dataRefStr.split('-');
@@ -122,10 +121,9 @@ export default function LancamentosPage() {
         item._dataSort = new Date(0);
       }
 
-      // 3. Status — Confiar no status_titulo do Omie/Supabase como fonte de verdade
-      const statusRaw = (item.status_titulo || '').toUpperCase();
+      // 3. Status
+      const statusRaw = (item.status || '').toUpperCase();
       const isPaid = statusRaw.includes('PAGO');
-      // Omie pode gravar "ATRASADO" diretamente, ou pode ter "A VENCER" para vencidas não atualizadas
       const dtVenc = item.data_vencimento ? new Date(item.data_vencimento + 'T12:00:00') : new Date('2099-01-01');
       const isOverdue = !isPaid && (statusRaw === 'ATRASADO' || (dtVenc < today && !!item.data_vencimento && item.data_vencimento !== '---'));
 
@@ -135,190 +133,73 @@ export default function LancamentosPage() {
         if (filters.status === 'ATRASADO' && !isOverdue) return false;
       }
 
-      // 4. Origem
+      // 4. Fonte
       if (filters.source && item.fonte !== filters.source) return false;
 
-      // 4. Categoria
-      if (filters.categoria && item.categoria_id !== filters.categoria) {
-        // Tentar buscar por nome amigável usando a chave composta (empresa-id)
-        const catKey = `${String(item.empresa || '').trim()}-${String(item.categoria_id)}`;
-        const catName = dimCategorias.get(catKey)?.descricao;
+      // 5. Categoria
+      if (filters.categoria && item.categoria_codigo !== filters.categoria) {
+        const catKey = `${String(item.empresa_nome || '').trim()}-${String(item.categoria_codigo)}`;
+        const catName = item.categoria_nome || dimCategorias.get(catKey)?.descricao;
         if (catName !== filters.categoria) return false;
       }
 
-      // 5. Projeto
-      if (filters.projeto) {
-        const hasProj = item._projetos?.includes(filters.projeto);
-        if (!hasProj) return false;
-      }
+      // 6. Projeto
+      if (filters.projeto && item.projeto_nome !== filters.projeto) return false;
 
-      // 6. Departamento
-      if (filters.departamento) {
-        const hasDep = item._departamentos?.includes(filters.departamento);
-        if (!hasDep) return false;
-      }
-
-      // 7. Search Text
+      // 7. Search
       if (filters.search) {
         const term = filters.search.toLowerCase();
-        if (!item.fornecedor.toLowerCase().includes(term) && !item.observacao?.toLowerCase().includes(term)) {
-          return false;
-        }
+        if (!item.fornecedor_nome?.toLowerCase().includes(term) && !item.raw_data?.observacao?.toLowerCase().includes(term)) return false;
       }
 
       return true;
     });
 
-    // Ordenar do mais novo pro mais velho
     result.sort((a, b) => (b._dataSort?.getTime() || 0) - (a._dataSort?.getTime() || 0));
-
     setFilteredLancamentos(result);
-    setCurrentPage(1); // Reset page on filter change
+    setCurrentPage(1);
     computeStats(result);
+  };
+
+  const computeStats = (items: Lancamento[]) => {
+    let totalOut = 0, totalPaid = 0, totalPending = 0;
+    items.forEach(item => {
+      const val = item.valor_alocado || 0;
+      totalOut += val;
+      const isPaid = (item.status || '').toUpperCase().includes('PAGO');
+      if (isPaid) totalPaid += val;
+      else totalPending += val;
+    });
+    setStats({ totalSaidaMes: totalOut, totalAberto: totalPending, totalPago: totalPaid });
   };
 
   const totalPages = Math.ceil(filteredLancamentos.length / pageSize) || 1;
   const paginatedLancamentos = filteredLancamentos.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const computeStats = (items: Lancamento[]) => {
-    let totalOut = 0, totalPaid = 0, totalPending = 0;
-
-    items.forEach(item => {
-      const val = item.valor || 0;
-      totalOut += val;
-
-      const statusRaw = (item.status_titulo || '').toUpperCase();
-      if (statusRaw.includes('PAGO')) {
-        totalPaid += val;
-      } else {
-        totalPending += val;
-      }
-    });
-
-    setStats({ totalSaidaMes: totalOut, totalAberto: totalPending, totalPago: totalPaid });
-  };
-
-  const triggerOmieSync = async () => {
-    setIsSyncing(true);
-    try {
-      const res = await fetch('/api/omie/sync', { method: 'POST' });
-      const json = await res.json();
-      const msg = json.message || 'Sincronização concluída.';
-      const errMsg = json.errors?.length > 0 ? `\n\nAvisos:\n${json.errors.join('\n')}` : '';
-      alert(`✅ ${msg}${errMsg}`);
-      // Reload data from Supabase after sync
-      await fetchData();
-    } catch (e: any) {
-      alert(`❌ Erro na sincronização: ${e.message}`);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  const [progress, setProgress] = useState(0);
-
-  const handleImportSelection = async (filters: LancamentoFilterValues) => {
-    const [year, month] = (filters.month || '').split('-');
-    if (!year || !month) {
-      alert("Por favor, selecione um M s/Ano nos filtros para importar.");
-      return;
-    }
-
-    setIsSyncing(true);
-    setProgress(0);
-
-    try {
-      const response = await fetch('/api/omie/sync-period', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          month: parseInt(month),
-          year: parseInt(year),
-          company: filters.empresa
-        })
-      });
-
-      const reader = response.body?.getReader();
-      const decoder = new TextEncoder().encode('data: ');
-      const textDecoder = new TextDecoder();
-
-      if (!reader) return;
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        const text = textDecoder.decode(value);
-        const lines = text.split('\n\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: PROGRESS:')) {
-            const p = parseInt(line.replace('data: PROGRESS:', ''));
-            setProgress(p);
-          } else if (line.startsWith('data: DONE')) {
-            setProgress(100);
-            setTimeout(() => {
-              alert(`✅ Importa  o conclu da com sucesso!`);
-              fetchData();
-              setIsSyncing(false);
-              setProgress(0);
-            }, 500);
-          }
-        }
-      }
-    } catch (e: any) {
-      alert(`❌ Erro na importa  o: ${e.message}`);
-      setIsSyncing(false);
-      setProgress(0);
-    }
-  };
-
-  const handleClearData = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await LancamentosService.clearAll();
-      if (error) throw error;
-      alert("✅ Banco de dados limpo com sucesso!");
-      setAllLancamentos([]);
-    } catch (err: any) {
-      alert(`❌ Erro ao limpar banco: ${err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <main className="min-h-screen bg-slate-50 pb-12">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <HeaderDashboard />
 
-        {/* Usamos o HeaderDashboard mas substituímos o onCreateEmployee pelo Update Dashboard que queremos aqui */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 md:p-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-              <Receipt className="text-emerald-600" size={28} />
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
               Lançamentos Financeiros
             </h1>
-            <p className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-2">
-              Gestão de Competência e Caixa Integrada ao Omie
-              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 uppercase tracking-widest">
+            <p className="text-sm text-slate-500 font-medium mt-1">
+              Gestão Integrada Omie (Motor 360º Ativo)
+              <span className="ml-2 text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
                 {APP_VERSION}
               </span>
             </p>
           </div>
-
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            {/* O botão antigo foi removido para dar lugar à sincronização por período v.02.20 */}
-          </div>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700 animate-in fade-in">
+          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700">
             <AlertCircle size={20} />
             <span className="text-sm font-medium">{error}</span>
-            <button
-              onClick={fetchData}
-              className="ml-auto text-xs font-bold bg-white px-3 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-100 transition-colors"
-            >
+            <button onClick={fetchData} className="ml-auto text-xs font-bold bg-white px-3 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-100 transition-colors">
               Tentar novamente
             </button>
           </div>
@@ -334,46 +215,28 @@ export default function LancamentosPage() {
           onFilterChange={setActiveFilters}
           availableCategories={(() => {
             const base = activeFilters.empresa
-              ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
+              ? allLancamentos.filter(l => (l.empresa_nome || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
               : allLancamentos;
-            return Array.from(new Set(base.map(l => dimCategorias.get(`${String(l.empresa || '').trim()}-${String(l.categoria_id)}`)?.descricao).filter(Boolean))).sort() as string[];
+            return Array.from(new Set(base.map(l => l.categoria_nome).filter(Boolean))).sort() as string[];
           })()}
           availableProjects={(() => {
             const base = activeFilters.empresa
-              ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
+              ? allLancamentos.filter(l => (l.empresa_nome || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
               : allLancamentos;
-            return Array.from(new Set(base.flatMap(l => l._projetos || []).filter(Boolean))).sort();
+            return Array.from(new Set(base.map(l => l.projeto_nome).filter(Boolean))).sort() as string[];
           })()}
           availableDepartments={(() => {
             const base = activeFilters.empresa
-              ? allLancamentos.filter(l => (l.empresa || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
+              ? allLancamentos.filter(l => (l.empresa_nome || '').toUpperCase().includes(activeFilters.empresa!.toUpperCase()))
               : allLancamentos;
-            return Array.from(new Set(base.flatMap(l => l._departamentos || []).filter(Boolean))).sort();
+            return Array.from(new Set(base.map(l => l.departamento_nome).filter(Boolean))).sort() as string[];
           })()}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <StatCard
-            title="Total Filtrado"
-            value={formatCurrency(stats.totalSaidaMes)}
-            icon={<Receipt size={24} />}
-            color="blue"
-            description="Todos os registros listados"
-          />
-          <StatCard
-            title="Total em Aberto / Atrasado"
-            value={formatCurrency(stats.totalAberto)}
-            icon={<Clock size={24} />}
-            color="amber"
-            description="Aguardando liquidação"
-          />
-          <StatCard
-            title="Total Pago"
-            value={formatCurrency(stats.totalPago)}
-            icon={<CheckCircle2 size={24} />}
-            color="emerald"
-            description="Confirmado em caixa"
-          />
+          <StatCard title="Total Filtrado" value={formatCurrency(stats.totalSaidaMes)} icon={<Receipt size={24} />} color="blue" />
+          <StatCard title="Em Aberto" value={formatCurrency(stats.totalAberto)} icon={<Clock size={24} />} color="amber" />
+          <StatCard title="Total Pago" value={formatCurrency(stats.totalPago)} icon={<CheckCircle2 size={24} />} color="emerald" />
         </div>
 
         {isLoading ? (
@@ -385,72 +248,24 @@ export default function LancamentosPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex justify-between items-end px-2">
-              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">
-                Resultados (Página {currentPage} de {totalPages})
-              </span>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                  <span>Itens por página:</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-                    className="bg-white border border-slate-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  >
-                    <option value={10}>10</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                    <option value={500}>500</option>
-                  </select>
-                </div>
-                <span className="px-3 py-1 bg-slate-200/50 text-slate-600 text-xs font-bold rounded-lg border border-slate-200">
-                  {filteredLancamentos.length} registros totais
-                </span>
-              </div>
-            </div>
-
-            <LancamentosTable
-              lancamentos={paginatedLancamentos}
+            <LancamentosTable 
+              lancamentos={paginatedLancamentos} 
               allocations={allocations}
               dimDRE={dimDRE}
               dimProjetos={dimProjetos}
               dimCategorias={dimCategorias}
             />
-
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-slate-200">
-                <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 text-sm font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  Anterior
-                </button>
-                <div className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl">
-                  {currentPage} / {totalPages}
-                </div>
-                <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 text-sm font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  Próxima
-                </button>
-              </div>
-            )}
+            
+            <div className="flex items-center justify-between px-2">
+               <span className="text-xs font-bold text-slate-400 uppercase">Página {currentPage} de {totalPages}</span>
+               <div className="flex gap-2">
+                 <button disabled={currentPage === 1} onClick={() => setCurrentPage(c => c - 1)} className="px-4 py-2 text-xs font-bold bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50">Anterior</button>
+                 <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(c => c + 1)} className="px-4 py-2 text-xs font-bold bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50">Próxima</button>
+               </div>
+            </div>
           </div>
         )}
-
-        <footer className="mt-12 pt-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 pb-8">
-          <p className="text-xs text-slate-400">
-            © 2026 Mar Brasil - Dashboard Financeiro Integrado
-          </p>
-          <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 px-3 py-1 rounded-full text-slate-500">
-            Versão {APP_VERSION}
-          </span>
-        </footer>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
