@@ -136,24 +136,18 @@ export class LancamentosService {
                                'Fornecedor';
 
         groupedMap.set(item.omie_id, {
-          id_global: `raw_${item.omie_id}`,
-          fonte: 'CP',
+          ...item,
+          // Legacy Aliases
           empresa: item.empresa_nome,
           fornecedor: fornecedorNome,
           valor: parseFloat(item.valor_total),
           categoria_id: item.categoria_codigo,
-          codigo_projeto: String(item.projeto_codigo || raw.codigo_projeto || ''),
-          codigo_lancamento_omie: item.omie_id,
-          data_emissao: raw.data_emissao,
-          data_entrada: item.data_registro,
-          data_previsao: item.data_vencimento,
-          data_vencimento: item.data_vencimento,
-          data_pagamento: item.data_pagamento,
           status_titulo: item.status,
-          observacao: raw.observacao || '',
+          
+          // Computed
           _dataLabel: item.data_registro,
-          _departamentos: [item.departamento_nome],
-          _projetos: [item.projeto_nome]
+          _departamentos: [item.departamento_nome].filter(Boolean),
+          _projetos: [item.projeto_nome].filter(Boolean)
         } as Lancamento);
       } else {
         const existing = groupedMap.get(item.omie_id);
