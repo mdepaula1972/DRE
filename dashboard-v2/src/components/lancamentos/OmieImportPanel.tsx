@@ -15,7 +15,6 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
   // Default to today
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [dateType, setDateType] = useState("registro"); // registro | vencimento | pagamento
 
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -36,7 +35,6 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
         body: JSON.stringify({
           startDate,
           endDate,
-          dateType,
           company: empresa,
         }),
       });
@@ -121,22 +119,6 @@ export function OmieImportPanel({ onImportComplete, onClear, isClearingAll }: Pr
               </select>
             </div>
             
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5" title="Define a data base na Omie (Registro/Inclusão, Vencimento ou Pagamento)">
-                Base da Data
-              </label>
-              <select
-                value={dateType}
-                onChange={(e) => setDateType(e.target.value)}
-                disabled={isImporting}
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm font-medium outline-none focus:border-emerald-500 transition-all"
-              >
-                <option value="registro">Data de Registro/Inclusão</option>
-                <option value="vencimento">Data de Vencimento</option>
-                <option value="pagamento">Data de Pagamento</option>
-              </select>
-            </div>
-
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                 Data Inicial (De)
