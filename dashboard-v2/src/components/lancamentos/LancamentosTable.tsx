@@ -204,9 +204,11 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Identificação Sistêmica</span>
                               </div>
                               <div className="bg-white p-3 rounded-lg border border-slate-200 text-xs font-mono text-slate-600">
-                                {item.codigo_lancamento_omie && <div className="mb-1">OMIE: {item.codigo_lancamento_omie}</div>}
-                                {item.codigo_movimento_cc && <div className="mb-1">MOV_CC: {item.codigo_movimento_cc}</div>}
-                                {!item.codigo_lancamento_omie && !item.codigo_movimento_cc && <div>ID Indisponível</div>}
+                                {item.omie_id ? (
+                                  <div className="mb-1">{item.fonte === 'CP' ? 'OMIE' : 'MOV_CC'}: {item.omie_id}</div>
+                                ) : (
+                                  <div>ID Indisponível</div>
+                                )}
                               </div>
                             </div>
                             
@@ -216,7 +218,7 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Observação</span>
                               </div>
                               <div className="bg-white p-3 rounded-lg border border-slate-200 text-xs text-slate-600 min-h-[60px]">
-                                {item.observacao || <span className="italic text-slate-400">Nenhuma observação registrada.</span>}
+                                {item.raw_data?.observacao || <span className="italic text-slate-400">Nenhuma observação registrada.</span>}
                               </div>
                             </div>
                           </div>
