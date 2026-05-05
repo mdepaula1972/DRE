@@ -133,7 +133,7 @@ export async function POST(req: Request) {
                   });
 
                 if (rows.length > 0) {
-                  const uniqueIds = [...new Set(rows.map(r => r.omie_id))];
+                  const uniqueIds = [...new Set(rows.map((r: any) => r.omie_id))];
                   await supabase.from('omie_raw').delete().eq('empresa_nome', companyName.trim()).in('omie_id', uniqueIds).eq('fonte', 'CP');
                   await supabase.from('omie_raw').insert(rows);
                 }
@@ -199,7 +199,7 @@ export async function POST(req: Request) {
                 });
 
               if (movRows.length > 0) {
-                const uniqueMovIds = [...new Set(movRows.map(r => r.omie_id))];
+                const uniqueMovIds = [...new Set(movRows.map((r: any) => r.omie_id))];
                 await supabase.from('omie_raw').delete().eq('empresa_nome', companyName.trim()).in('omie_id', uniqueMovIds).eq('fonte', 'MOV');
                 await supabase.from('omie_raw').insert(movRows);
               }
