@@ -110,7 +110,7 @@ export async function POST(req: Request) {
                   (cachedSupps || []).forEach(s => supplierCache.set(s.codigo_cliente_omie, s.nome_fantasia));
                   
                   // Se ainda faltar, busca na Omie (apenas o primeiro de cada página pra não travar)
-                  const aindaFaltam = idsParaBuscar.filter(id => !supplierCache.has(id));
+                  const aindaFaltam = idsParaBuscar.filter((id: any) => !supplierCache.has(id));
                   for (const id of aindaFaltam.slice(0, 5)) {
                     try {
                       const resSupp = await fetch('https://app.omie.com.br/api/v1/geral/clientes/', {
