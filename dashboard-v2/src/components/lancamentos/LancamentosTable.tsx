@@ -99,7 +99,7 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                       </div>
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <span className="font-bold text-slate-900">{formatCurrency(item.valor)}</span>
+                      <span className="font-bold text-slate-900">{formatCurrency(item.valor_alocado)}</span>
                     </td>
                     <td className="px-5 py-3">
                       <span className="inline-block px-2 py-1 bg-slate-100 border border-slate-200 text-slate-600 text-[10px] rounded leading-none truncate max-w-[150px]" title={catName}>

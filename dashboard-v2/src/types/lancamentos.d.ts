@@ -18,8 +18,12 @@ export interface Lancamento {
   raw_data?: any;
   sync_at?: string;
   
-  // Detalhes extras legados/compatibilidade
-  status_titulo?: string; // Mapeado do status
+  // LEGACY ALIASES (Para compatibilidade com componentes antigos)
+  empresa?: string;
+  fornecedor?: string;
+  valor?: number;
+  categoria_id?: string;
+  status_titulo?: string;
   
   // Computed na runtime
   _dataSort?: Date;

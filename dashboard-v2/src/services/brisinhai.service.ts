@@ -20,7 +20,7 @@ export class BrisinhaiService {
           const totalValor = Object.values(valueObj).reduce((sum, v) => sum + (Number(v) || 0), 0);
           return { nome, valor: totalValor };
         })
-        .filter(item => item.valor > 0)
+        .filter((item: any) => (item.valor_alocado || item.valor_total) > 0)
         .sort((a, b) => b.valor - a.valor)
         .slice(0, 3);
 

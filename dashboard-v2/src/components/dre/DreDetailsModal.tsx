@@ -145,7 +145,7 @@ export function DreDetailsModal({
                 {data.map((item, idx) => (
                   <tr key={idx} className="hover:bg-amber-50/30 transition-colors">
                     <td className="px-6 py-3 font-medium text-slate-700">{item.name}</td>
-                    <td className="px-6 py-3 text-right font-mono text-slate-600">{formatValue(item.valor)}</td>
+                    <td className="px-6 py-3 text-right font-mono text-slate-600">{formatValue(item.valor_alocado || item.valor_total)}</td>
                   </tr>
                 ))}
               </tbody>
