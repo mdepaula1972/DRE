@@ -1,5 +1,5 @@
 export interface Lancamento {
-  id: number;
+  id: string;
   id_global: string;
   fonte: 'CP' | 'MOV';
   empresa_nome: string;

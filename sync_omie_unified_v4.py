@@ -118,37 +118,49 @@ class OmieSync:
         sign = -1 if tipo == "PAGAR" else 1
         for r in records:
             omie_id = r.get("codigo_lancamento_omie")
+            status = r.get("status_titulo")
+            
+            # Data de Pagamento: Baixa > Liquidação > Previsão (se PAGO)
+            dt_baixa = format_date_iso_to_iso(r.get("data_baixa") or r.get("data_liquidacao"))
+            dt_previsao = format_date_iso_to_iso(r.get("data_previsao"))
+            
+            data_pagamento = dt_baixa
+            if not data_pagamento and status == "PAGO":
+                data_pagamento = dt_previsao # Conforme regra do usuário: previsao vira pagamento na liquidação
+            
             raw_dist = r.get("distribuicao", [])
-            # Fallback se não houver rateio
             if not raw_dist:
                 raw_dist = [{"cDesDep": "Sem Departamento", "nValDep": r.get("valor_documento")}]
             
+            # Cliente/Fornecedor Fallback
+            cliente_forn = self.forn_map.get(str(r.get("codigo_cliente_fornecedor")))
+            if not cliente_forn:
+                cliente_forn = r.get("nm_cliente") or r.get("cnab_integracao_bancaria", {}).get("nome_transferencia") or "N/D"
+
             for d in raw_dist:
                 rows.append({
                     "empresa_nome": self.empresa_nome,
                     "omie_id": omie_id,
                     "tipo_registro": tipo,
-                    "status": r.get("status_titulo"),
+                    "status": status,
                     "valor_total": float(r.get("valor_documento") or 0) * sign,
                     "valor_alocado": float(d.get("nValDep") or 0) * sign,
                     "data_emissao": format_date_iso_to_iso(r.get("data_emissao")),
                     "data_registro": format_date_iso_to_iso(r.get("info", {}).get("dInc")),
                     "data_vencimento": format_date_iso_to_iso(r.get("data_vencimento")),
-                    "data_previsao": format_date_iso_to_iso(r.get("data_previsao")),
-                    "data_pagamento": format_date_iso_to_iso(r.get("data_baixa") or r.get("data_liquidacao")),
+                    "data_previsao": dt_previsao,
+                    "data_pagamento": data_pagamento,
                     "categoria_codigo": r.get("codigo_categoria"),
                     "categoria_nome": self.cat_map.get(str(r.get("codigo_categoria")), r.get("descricao_categoria")),
                     "projeto_nome": self.proj_map.get(str(r.get("codigo_projeto")), r.get("nome_projeto") or "Sem Projeto"),
                     "departamento_nome": d.get("cDesDep"),
-                    "cliente_fornecedor": self.forn_map.get(str(r.get("codigo_cliente_fornecedor")), r.get("nm_cliente") or "N/D"),
+                    "cliente_fornecedor": cliente_forn,
                     "numero_documento": r.get("numero_documento"),
                     "raw_data": r
                 })
         return rows
 
     def fetch_movimentos(self, start_date):
-        # Tipos de movimentos interessantes: CC (Conta Corrente), CP (Contas Pagar), CR (Contas Receber)
-        # Vamos usar ListarMovimentos
         records = []
         pagina = 1
         while True:
@@ -173,36 +185,30 @@ class OmieSync:
             det = r.get("detalhes", {})
             res = r.get("resumo", {})
             
-            n_cod_titulo = det.get("nCodTitulo", 0)
+            valor = float(res.get("nValLiquido") or 0)
+            sign = 1 if det.get("cTipo") == "E" else -1
             
-            # Se tiver título, ignoramos na inserção de nova linha (será tratado via atualização de data_pagamento no CP/CR)
-            # a menos que queiramos rastrear movimentos avulsos.
-            if n_cod_titulo == 0:
-                # Movimento Avulso
-                valor = float(res.get("nValLiquido") or 0)
-                # No Omie Movimentos, cTipo 'E' (Entrada) ou 'S' (Saída)
-                sign = 1 if det.get("cTipo") == "E" else -1
-                
-                rows.append({
-                    "empresa_nome": self.empresa_nome,
-                    "omie_id": det.get("nCodMovCC"),
-                    "tipo_registro": "MOVIMENTO",
-                    "status": "PAGO",
-                    "valor_total": valor * sign,
-                    "valor_alocado": valor * sign,
-                    "data_emissao": format_date_iso_to_iso(det.get("dDtEmissao")),
-                    "data_registro": format_date_iso_to_iso(r.get("info", {}).get("dInc")),
-                    "data_vencimento": format_date_iso_to_iso(det.get("dDtVenc")),
-                    "data_previsao": format_date_iso_to_iso(det.get("dDtPagto")),
-                    "data_pagamento": format_date_iso_to_iso(det.get("dDtPagto")),
-                    "categoria_codigo": det.get("cCodCateg"),
-                    "categoria_nome": self.cat_map.get(str(det.get("cCodCateg")), "Sem Categoria"),
-                    "projeto_nome": self.proj_map.get(str(det.get("nCodProjeto")), "Sem Projeto"),
-                    "departamento_nome": "Principal",
-                    "cliente_fornecedor": det.get("cNomeCliente") or "N/D",
-                    "numero_documento": det.get("cNumDocFiscal"),
-                    "raw_data": r
-                })
+            # Mesmo que tenha título, vamos incluir como MOVIMENTO para garantir a visão do extrato
+            rows.append({
+                "empresa_nome": self.empresa_nome,
+                "omie_id": det.get("nCodMovCC"),
+                "tipo_registro": "MOVIMENTO",
+                "status": "PAGO",
+                "valor_total": valor * sign,
+                "valor_alocado": valor * sign,
+                "data_emissao": format_date_iso_to_iso(det.get("dDtEmissao")),
+                "data_registro": format_date_iso_to_iso(r.get("info", {}).get("dInc")),
+                "data_vencimento": format_date_iso_to_iso(det.get("dDtVenc")),
+                "data_previsao": format_date_iso_to_iso(det.get("dDtPagto")),
+                "data_pagamento": format_date_iso_to_iso(det.get("dDtPagto")),
+                "categoria_codigo": det.get("cCodCateg"),
+                "categoria_nome": self.cat_map.get(str(det.get("cCodCateg")), "Sem Categoria"),
+                "projeto_nome": self.proj_map.get(str(det.get("nCodProjeto")), "Sem Projeto"),
+                "departamento_nome": "Principal",
+                "cliente_fornecedor": det.get("cNomeCliente") or "N/D",
+                "numero_documento": det.get("cNumDocFiscal"),
+                "raw_data": r
+            })
         return rows
 
 def push_to_supabase(rows):

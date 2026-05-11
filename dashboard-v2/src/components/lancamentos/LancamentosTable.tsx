@@ -65,7 +65,8 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
           </thead>
           <tbody className="divide-y divide-slate-100">
             {lancamentos.map((item) => {
-              const isExpanded = expandedIds.has(item.id_global);
+              const rowId = String(item.id || item.id_global || item.omie_id);
+              const isExpanded = expandedIds.has(rowId);
               const status = getStatusInfo(item);
               const catInfo = dimCategorias.get(`${String(item.empresa_nome || '').trim()}-${String(item.categoria_codigo)}`);
               const catName = item.categoria_nome || catInfo?.descricao || item.categoria_codigo;
@@ -85,7 +86,7 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                                (item._projetos && item._projetos.length > 0 ? item._projetos[0] : 'Nenhum');
 
               return (
-                <React.Fragment key={item.id_global}>
+                <React.Fragment key={rowId}>
                   <tr className={`hover:bg-slate-50/50 transition-colors ${isExpanded ? 'bg-slate-50/30' : ''} ${!item.selecionado ? 'opacity-50 grayscale-[0.5]' : ''}`}>
                     <td className="px-5 py-3">
                       <div className="flex justify-center">
@@ -135,7 +136,7 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                     </td>
                     <td className="px-5 py-3 text-center">
                       <button 
-                        onClick={() => toggleExpand(item.id_global)}
+                        onClick={() => toggleExpand(rowId)}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
                           isExpanded 
                             ? 'bg-slate-100 border-slate-300 text-slate-800' 
