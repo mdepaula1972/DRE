@@ -11,9 +11,10 @@ interface Props {
   dimDRE: Map<string, string>;
   dimProjetos: Map<string, string>;
   dimCategorias: Map<string, any>;
+  onToggleSelection: (id: string, currentStatus: boolean) => void;
 }
 
-export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos, dimCategorias }: Props) {
+export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos, dimCategorias, onToggleSelection }: Props) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const toggleExpand = (id: string) => {
@@ -47,13 +48,18 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
         <table className="w-full text-sm text-left">
           <thead className="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
             <tr>
+              <th className="px-5 py-4 w-10">
+                <div className="flex justify-center">
+                  <div className="w-4 h-4 border border-slate-300 rounded" />
+                </div>
+              </th>
               <th className="px-5 py-4 w-32">Status</th>
               <th className="px-5 py-4">Data Ref.</th>
               <th className="px-5 py-4">Empresa</th>
               <th className="px-5 py-4 w-[280px]">Fornecedor/Beneficiário</th>
               <th className="px-5 py-4 text-right">Valor</th>
               <th className="px-5 py-4">Categoria</th>
-              <th className="px-5 py-4 text-center">Fonte</th>
+              <th className="px-5 py-4 text-center">Tipo</th>
               <th className="px-5 py-4 text-center w-24">Ações</th>
             </tr>
           </thead>
@@ -80,7 +86,17 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
 
               return (
                 <React.Fragment key={item.id_global}>
-                  <tr className={`hover:bg-slate-50/50 transition-colors ${isExpanded ? 'bg-slate-50/30' : ''}`}>
+                  <tr className={`hover:bg-slate-50/50 transition-colors ${isExpanded ? 'bg-slate-50/30' : ''} ${!item.selecionado ? 'opacity-50 grayscale-[0.5]' : ''}`}>
+                    <td className="px-5 py-3">
+                      <div className="flex justify-center">
+                        <input 
+                          type="checkbox" 
+                          checked={item.selecionado} 
+                          onChange={() => onToggleSelection(item.id_global || String(item.id), !!item.selecionado)}
+                          className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        />
+                      </div>
+                    </td>
                     <td className="px-5 py-3">
                       <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${status.bg}`}>
                         <div className={`w-2 h-2 rounded-full ${status.color}`} />
@@ -99,7 +115,9 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                       </div>
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <span className="font-bold text-slate-900">{formatCurrency(item.valor_alocado)}</span>
+                      <span className={`font-black ${item.valor_alocado > 0 ? 'text-emerald-600' : 'text-slate-900'}`}>
+                        {item.valor_alocado > 0 ? '+' : ''}{formatCurrency(item.valor_alocado)}
+                      </span>
                     </td>
                     <td className="px-5 py-3">
                       <span className="inline-block px-2 py-1 bg-slate-100 border border-slate-200 text-slate-600 text-[10px] rounded leading-none truncate max-w-[150px]" title={catName}>
@@ -108,9 +126,11 @@ export function LancamentosTable({ lancamentos, allocations, dimDRE, dimProjetos
                     </td>
                     <td className="px-5 py-3 text-center">
                       <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider ${
-                        item.fonte === 'CP' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-purple-50 text-purple-600 border border-purple-100'
+                        item.tipo_registro === 'RECEBER' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
+                        item.tipo_registro === 'MOVIMENTO' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                        'bg-slate-50 text-slate-600 border border-slate-100'
                       }`}>
-                        {item.fonte}
+                        {item.tipo_registro || item.fonte}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-center">

@@ -9,8 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.100.1",
     "@google/generative-ai": "^0.21.0",
+    "@supabase/supabase-js": "^2.100.1",
+    "axios": "^1.16.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dom-to-image-more": "^3.7.2",

@@ -27,7 +27,7 @@ export function LancamentosFilterBar({
     
     return {
       dateBase: 'registro',
-      startDate: firstDay,
+      startDate: '2025-01-01',
       endDate: lastDay
     };
   });
@@ -49,7 +49,7 @@ export function LancamentosFilterBar({
 
     const defaultFilters: LancamentoFilterValues = { 
       dateBase: 'registro',
-      startDate: firstDay,
+      startDate: '2025-01-01',
       endDate: lastDay
     };
     setFilters(defaultFilters);
@@ -116,8 +116,10 @@ export function LancamentosFilterBar({
                 value={filters.dateBase || "registro"}
                 onChange={(e) => handleChange("dateBase", e.target.value as any)}
               >
-                <option value="registro">Competência (Registro)</option>
+                <option value="registro">Data de Registro</option>
+                <option value="emissao">Data de Emissão</option>
                 <option value="vencimento">Data de Vencimento</option>
+                <option value="previsao">Data de Previsão</option>
                 <option value="pagamento">Data de Pagamento</option>
               </select>
             </div>
@@ -209,12 +211,13 @@ export function LancamentosFilterBar({
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Origem</label>
               <select
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
-                value={filters.source || ""}
-                onChange={(e) => handleChange("source", e.target.value)}
+                value={filters.tipo_registro || ""}
+                onChange={(e) => handleChange("tipo_registro", e.target.value)}
               >
-                <option value="">Todas Origens</option>
-                <option value="CP">Contas a Pagar</option>
-                <option value="MOV">Movimentos Saída</option>
+                <option value="">Todos os Tipos</option>
+                <option value="PAGAR">Contas a Pagar</option>
+                <option value="RECEBER">Contas a Receber</option>
+                <option value="MOVIMENTO">Movimentação Direta</option>
               </select>
             </div>
 

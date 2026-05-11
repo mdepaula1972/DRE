@@ -37,8 +37,21 @@ export class LancamentosService {
     return results;
   }
 
+  static async toggleSelection(id: string, currentStatus: boolean) {
+    const { error } = await supabase
+      .from('omie_financas_unificado')
+      .update({ selecionado: !currentStatus })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Erro ao atualizar seleção:', error);
+      throw error;
+    }
+    return !currentStatus;
+  }
+
   static async clearAll() {
-    return await supabase.from('omie_raw').delete().neq('id', 0); // Delete all
+    return await supabase.from('omie_financas_unificado').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
   }
 
   static async getLancamentos(startDate: string = '2024-01-01'): Promise<{ 
@@ -58,7 +71,7 @@ export class LancamentosService {
 
     while (hasMore) {
       const { data, error } = await supabase
-        .from('omie_raw')
+        .from('omie_financas_unificado')
         .select('*')
         .gte('data_registro', startDate)
         .neq('status', 'CANCELADO')

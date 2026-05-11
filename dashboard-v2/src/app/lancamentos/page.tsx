@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { HeaderDashboard } from "@/components/layout/HeaderDashboard";
+import { HeaderFinanceiro } from "@/components/layout/HeaderFinanceiro";
 import { StatCard } from "@/components/loans/StatCard";
 import { OmieImportPanel } from "@/components/lancamentos/OmieImportPanel";
 import { LancamentosFilterBar } from "@/components/lancamentos/LancamentosFilterBar";
@@ -49,8 +49,8 @@ export default function LancamentosPage() {
     setError(null);
     setIsLoading(true);
     try {
-      // Sincronizando com a carga histórica 2024
-      const data = await LancamentosService.getLancamentos('2024-01-01');
+      // Sincronizando com a carga histórica 2025
+      const data = await LancamentosService.getLancamentos('2025-01-01');
       setAllLancamentos(data.lancamentos);
       setAllocations(data.allocations);
       setDimDRE(data.dimDRE);
@@ -68,6 +68,20 @@ export default function LancamentosPage() {
       setIsLoading(true);
       await LancamentosService.clearAll();
       await fetchData();
+    }
+  };
+
+  const handleToggleSelection = async (id: string, currentStatus: boolean) => {
+    try {
+      await LancamentosService.toggleSelection(id, currentStatus);
+      // Update local state for immediate feedback
+      setAllLancamentos(prev => prev.map(item => 
+        (item.id_global === id || String(item.id) === id) 
+          ? { ...item, selecionado: !currentStatus } 
+          : item
+      ));
+    } catch (err: any) {
+      alert("Erro ao atualizar seleção.");
     }
   };
 
@@ -89,7 +103,9 @@ export default function LancamentosPage() {
       let dataRefStr = '';
       if (filters.dateBase === 'vencimento') dataRefStr = item.data_vencimento || '';
       else if (filters.dateBase === 'pagamento') dataRefStr = item.data_pagamento || '';
-      else dataRefStr = item.data_registro || item.data_pagamento || '';
+      else if (filters.dateBase === 'emissao') dataRefStr = item.data_emissao || '';
+      else if (filters.dateBase === 'previsao') dataRefStr = item.data_previsao || '';
+      else dataRefStr = item.data_registro || '';
 
       if (!dataRefStr || dataRefStr === '---') {
         if (filters.startDate || filters.endDate) return false;
@@ -133,8 +149,8 @@ export default function LancamentosPage() {
         if (filters.status === 'ATRASADO' && !isOverdue) return false;
       }
 
-      // 4. Fonte
-      if (filters.source && item.fonte !== filters.source) return false;
+      // 4. Tipo de Registro
+      if (filters.tipo_registro && item.tipo_registro !== filters.tipo_registro) return false;
 
       // 5. Categoria
       if (filters.categoria && item.categoria_codigo !== filters.categoria) {
@@ -162,15 +178,19 @@ export default function LancamentosPage() {
   };
 
   const computeStats = (items: Lancamento[]) => {
-    let totalOut = 0, totalPaid = 0, totalPending = 0;
+    let totalIn = 0, totalOut = 0, totalSelectedCount = 0;
     items.forEach(item => {
       const val = item.valor_alocado || 0;
-      totalOut += val;
-      const isPaid = (item.status || '').toUpperCase().includes('PAGO');
-      if (isPaid) totalPaid += val;
-      else totalPending += val;
+      if (val > 0) totalIn += val;
+      else totalOut += Math.abs(val);
+      
+      if (item.selecionado) totalSelectedCount++;
     });
-    setStats({ totalSaidaMes: totalOut, totalAberto: totalPending, totalPago: totalPaid });
+    setStats({ 
+      totalSaidaMes: totalOut, // Saídas
+      totalAberto: totalIn,    // Entradas (reusing field for now or I should update interface)
+      totalPago: totalSelectedCount // Number of selected items
+    });
   };
 
   const totalPages = Math.ceil(filteredLancamentos.length / pageSize) || 1;
@@ -178,7 +198,9 @@ export default function LancamentosPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <HeaderDashboard />
+      <div className="max-w-[1600px] w-full mx-auto px-4 md:px-8 mt-6">
+        <HeaderFinanceiro />
+      </div>
 
       <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -233,10 +255,11 @@ export default function LancamentosPage() {
           })()}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <StatCard title="Total Filtrado" value={formatCurrency(stats.totalSaidaMes)} icon={<Receipt size={24} />} color="blue" />
-          <StatCard title="Em Aberto" value={formatCurrency(stats.totalAberto)} icon={<Clock size={24} />} color="amber" />
-          <StatCard title="Total Pago" value={formatCurrency(stats.totalPago)} icon={<CheckCircle2 size={24} />} color="emerald" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <StatCard title="Total Entradas" value={formatCurrency(stats.totalAberto)} icon={<CheckCircle2 size={24} />} color="emerald" />
+          <StatCard title="Total Saídas" value={formatCurrency(stats.totalSaidaMes)} icon={<Receipt size={24} />} color="red" />
+          <StatCard title="Saldo Período" value={formatCurrency(stats.totalAberto - stats.totalSaidaMes)} icon={<AlertCircle size={24} />} color={ (stats.totalAberto - stats.totalSaidaMes) >= 0 ? 'blue' : 'amber' } />
+          <StatCard title="Itens Selecionados" value={String(stats.totalPago)} icon={<Clock size={24} />} color="slate" />
         </div>
 
         {isLoading ? (
@@ -254,6 +277,7 @@ export default function LancamentosPage() {
               dimDRE={dimDRE}
               dimProjetos={dimProjetos}
               dimCategorias={dimCategorias}
+              onToggleSelection={handleToggleSelection}
             />
             
             <div className="flex items-center justify-between px-2">
