@@ -137,6 +137,12 @@ class OmieSync:
             if not cliente_forn:
                 cliente_forn = r.get("nm_cliente") or r.get("cnab_integracao_bancaria", {}).get("nome_transferencia") or "N/D"
 
+            dt_emissao = format_date_iso_to_iso(r.get("data_emissao"))
+            dt_inc = format_date_iso_to_iso(r.get("info", {}).get("dInc"))
+            
+            # Data de Registro (Competência): Emissão > Inclusão
+            data_registro = dt_emissao or dt_inc
+
             for d in raw_dist:
                 rows.append({
                     "empresa_nome": self.empresa_nome,
@@ -145,8 +151,8 @@ class OmieSync:
                     "status": status,
                     "valor_total": float(r.get("valor_documento") or 0) * sign,
                     "valor_alocado": float(d.get("nValDep") or 0) * sign,
-                    "data_emissao": format_date_iso_to_iso(r.get("data_emissao")),
-                    "data_registro": format_date_iso_to_iso(r.get("info", {}).get("dInc")),
+                    "data_emissao": dt_emissao,
+                    "data_registro": data_registro,
                     "data_vencimento": format_date_iso_to_iso(r.get("data_vencimento")),
                     "data_previsao": dt_previsao,
                     "data_pagamento": data_pagamento,
