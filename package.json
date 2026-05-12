@@ -6,7 +6,7 @@
         "node": "20.x"
     },
     "scripts": {
-        "build": "cd dashboard-v2 && npm install && npm run build"
+        "build": "cd dashboard-v2 && npm install && npm run build && cp -r .next ../.next && cp -r public ../public"
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.95.3",
