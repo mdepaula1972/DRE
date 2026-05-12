@@ -138,10 +138,10 @@ class OmieSync:
                 cliente_forn = r.get("nm_cliente") or r.get("cnab_integracao_bancaria", {}).get("nome_transferencia") or "N/D"
 
             dt_emissao = format_date_iso_to_iso(r.get("data_emissao"))
-            dt_inc = format_date_iso_to_iso(r.get("info", {}).get("dInc"))
+            dt_entrada = format_date_iso_to_iso(r.get("data_entrada"))
             
-            # Data de Registro (Competência): Emissão > Inclusão
-            data_registro = dt_emissao or dt_inc
+            # Data de Registro (Competência): Entrada (conforme imagem) > Emissão
+            data_registro = dt_entrada or dt_emissao
 
             for d in raw_dist:
                 rows.append({
