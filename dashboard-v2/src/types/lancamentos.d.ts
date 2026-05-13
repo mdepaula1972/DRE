@@ -15,6 +15,7 @@ export interface Lancamento {
   categoria_codigo: string;
   categoria_nome: string;
   fornecedor_nome: string;
+  cliente_fornecedor?: string; // Nome real da coluna no Supabase (omie_financas_unificado)
   projeto_nome?: string;
   departamento_nome?: string;
   tipo_registro: 'PAGAR' | 'RECEBER' | 'MOVIMENTO';

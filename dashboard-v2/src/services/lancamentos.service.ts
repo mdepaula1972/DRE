@@ -139,17 +139,29 @@ export class LancamentosService {
 
       // Agrupar para a linha principal da tabela
       if (!groupedMap.has(item.omie_id)) {
-        // Busca robusta de fornecedor no raw_data
+        // Busca robusta de fornecedor cobrindo todas as origens de dados:
+        // - omie_financas_unificado: coluna "cliente_fornecedor" (sync_omie_unified_v4.py)
+        // - omie_financas_unificado: campo "fornecedor_nome_transferencia" (omie_supabase_ingest.py)
+        // - raw_data CP: nm_cliente, nome_fantasia, razao_social (campos Omie diretos)
+        // - raw_data MOV: detalhes.cNomeCliente (estrutura aninhada)
         const raw = item.raw_data || {};
-        const fornecedorNome = raw.nm_cliente || 
-                               raw.nome_cliente || 
+        const rawDet = raw.detalhes || {};
+        const fornecedorNome = item.cliente_fornecedor ||
+                               (item as any).fornecedor_nome_transferencia ||
+                               raw.nm_cliente || 
+                               raw.nome_cliente ||
                                raw.razao_social || 
-                               raw.nome_fantasia || 
-                               item.fornecedor_nome || // Caso eu adicione esta coluna
-                               'Fornecedor';
+                               raw.nome_fantasia ||
+                               rawDet.cNomeCliente ||
+                               raw.cNomeCliente ||
+                               item.fornecedor_nome ||
+                               '---';
+
 
         groupedMap.set(item.omie_id, {
           ...item,
+          // Garante que fornecedor_nome (campo do tipo Lancamento) é preenchido
+          fornecedor_nome: fornecedorNome,
           // Legacy Aliases
           empresa: item.empresa_nome,
           fornecedor: fornecedorNome,
