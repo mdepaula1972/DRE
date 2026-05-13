@@ -92,11 +92,12 @@ export class LancamentosService {
       }
     }
 
-    // 2. Buscar Dimensões para compatibilidade com o componente Legado
-    const [catData, projData, dreData] = await Promise.all([
+    // 2. Buscar Dimensões (incluindo fornecedores para resolver nomes)
+    const [catData, projData, dreData, fornData] = await Promise.all([
       supabase.from('omie_dim_categorias').select('*'),
       supabase.from('omie_dim_projetos').select('*'),
-      supabase.from('omie_dim_dre').select('*')
+      supabase.from('omie_dim_dre').select('*'),
+      supabase.from('omie_dim_fornecedores').select('codigo_cliente_omie,nome_fantasia,razao_social')
     ]);
 
     const dimCategorias = new Map<string, any>();
@@ -119,6 +120,13 @@ export class LancamentosService {
       dimDRE.set(String(d.codigo_conta_dre), d.descricao_conta_dre);
     });
 
+    // Mapa de fornecedores: codigo_cliente_omie -> nome
+    const fornMap = new Map<string, string>();
+    (fornData.data || []).forEach(f => {
+      const nome = f.nome_fantasia || f.razao_social || '';
+      if (nome) fornMap.set(String(f.codigo_cliente_omie), nome);
+    });
+
     // 3. Processar Lançamentos (Agrupando por omie_id para a tabela principal)
     const groupedMap = new Map<number, Lancamento>();
     const allocations: any[] = [];
@@ -139,14 +147,20 @@ export class LancamentosService {
 
       // Agrupar para a linha principal da tabela
       if (!groupedMap.has(item.omie_id)) {
-        // Busca robusta de fornecedor cobrindo todas as origens de dados:
-        // - omie_financas_unificado: coluna "cliente_fornecedor" (sync_omie_unified_v4.py)
-        // - omie_financas_unificado: campo "fornecedor_nome_transferencia" (omie_supabase_ingest.py)
-        // - raw_data CP: nm_cliente, nome_fantasia, razao_social (campos Omie diretos)
-        // - raw_data MOV: detalhes.cNomeCliente (estrutura aninhada)
+        // Busca robusta de fornecedor - prioridade:
+        // 1. omie_dim_fornecedores (via codigo_cliente_fornecedor no raw_data) ← fonte oficial
+        // 2. cliente_fornecedor (coluna direta da tabela, quando preenchido)
+        // 3. fornecedor_nome_transferencia (campo do omie_supabase_ingest)
+        // 4. Campos do raw_data (CP: nm_cliente / MOV: detalhes.cNomeCliente)
         const raw = item.raw_data || {};
         const rawDet = raw.detalhes || {};
-        const fornecedorNome = item.cliente_fornecedor ||
+        const codigoCF = String(raw.codigo_cliente_fornecedor || rawDet.nCodCliente || '');
+        const nomeFromDim = codigoCF ? fornMap.get(codigoCF) : undefined;
+        
+        const clienteFornDB = item.cliente_fornecedor === 'N/D' ? undefined : item.cliente_fornecedor;
+        
+        const fornecedorNome = nomeFromDim ||
+                               clienteFornDB ||
                                (item as any).fornecedor_nome_transferencia ||
                                raw.nm_cliente || 
                                raw.nome_cliente ||
