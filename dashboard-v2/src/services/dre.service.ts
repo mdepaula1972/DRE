@@ -22,17 +22,22 @@ export class DreService {
    */
   static parseCSV(file: File): Promise<any[]> {
     return new Promise((resolve, reject) => {
+      // Try ISO-8859-1 with semicolon delimiter first (standard Brazilian CSV export format)
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         encoding: "ISO-8859-1",
+        delimiter: ";",
         complete: (results) => {
           const headerCount = results.meta.fields ? results.meta.fields.length : 0;
-          if ((results.errors.length > 0 && results.data.length === 0) || headerCount <= 1) {
+          // A valid DRE CSV must have at least 3 columns (Empresa, Projeto, Categoria)
+          if ((results.errors.length > 0 && results.data.length === 0) || headerCount < 3) {
+            // Fallback: try UTF-8 with semicolon
             Papa.parse(file, {
               header: true,
               skipEmptyLines: true,
               encoding: "UTF-8",
+              delimiter: ";",
               complete: (utfResults) => resolve(utfResults.data),
               error: (err) => reject(err)
             });
