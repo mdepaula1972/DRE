@@ -10,7 +10,58 @@ import {
 
 const MESES_ORDEM = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-// A estrutura DRE agora é carregada dinamicamente via JSON (ex: dre-padrao.json)
+// Estrutura DRE inlinada — elimina dependência de fetch em produção
+export const DEFAULT_DRE_ESTRUTURA: DreStructureItem[] = [
+  { titulo: 'Receita Bruta de Vendas', tipo: 'linha', categorias: ['Receita Bruta de Vendas'] },
+  { titulo: 'Receitas Indiretas', tipo: 'linha', categorias: ['Receitas Indiretas'] },
+  { titulo: 'Total Entradas Operacionais', tipo: 'card', var: 'total_entradas' },
+  { titulo: '', tipo: 'divisor' },
+  { titulo: 'Outras Receitas', tipo: 'linha', categorias: ['Outras Receitas'] },
+  { titulo: 'Receitas Financeiras', tipo: 'linha', categorias: ['Receitas Financeiras'] },
+  { titulo: 'Honorários', tipo: 'linha', categorias: ['Honorários'] },
+  { titulo: 'Juros e Devoluções', tipo: 'linha', categorias: ['Juros e devoluções'] },
+  { titulo: 'Recuperação de Despesas Variáveis', tipo: 'linha', categorias: ['Recuperação de Despesas Variáveis'] },
+  { titulo: 'Outras Entradas', tipo: 'card', var: 'outras_entradas' },
+  { titulo: '', tipo: 'divisor' },
+  { titulo: 'Impostos', tipo: 'linha', categorias: ['Impostos'] },
+  { titulo: 'Provisão IRPJ e CSSL Trimestral', tipo: 'linha', categorias: ['Provisão - IRPJ e CSSL Trimestral'] },
+  { titulo: 'Total de Impostos', tipo: 'card', var: 'total_impostos' },
+  { titulo: '', tipo: 'divisor' },
+  { titulo: 'Credenciado Operacional', tipo: 'linha', categorias: ['Credenciado Operacional', 'Adiantamento - Credenciado Operacional'] },
+  { titulo: 'Terceirização de Mão de Obra', tipo: 'linha', categorias: ['Terceirização de Mão de Obra'] },
+  { titulo: 'CLTs', tipo: 'linha', categorias: ['Despesas com Pessoal'] },
+  { titulo: 'Custo dos Serviços Prestados', tipo: 'linha', categorias: ['Custo dos Serviços Prestados'] },
+  { titulo: 'Preventiva - B2G', tipo: 'linha', categorias: ['Preventiva - B2G', 'Manutenção Preventiva'] },
+  { titulo: 'Corretiva - B2G', tipo: 'linha', categorias: ['Corretiva - B2G', 'Manutenção Corretiva'] },
+  { titulo: 'Outros Custos', tipo: 'linha', categorias: ['Outros Custos'] },
+  { titulo: 'Total Custos Operacionais', tipo: 'card', var: 'total_custos' },
+  { titulo: '', tipo: 'divisor' },
+  { titulo: 'Credenciado Administrativo', tipo: 'linha', categorias: ['Credenciado Administrativo', 'Adiantamento - Credenciado Administrativo'] },
+  { titulo: 'Credenciado TI', tipo: 'linha', categorias: ['Credenciado TI', 'Adiantamento - Credenciado TI'] },
+  { titulo: 'Despesas Administrativas', tipo: 'linha', categorias: ['Despesas Administrativas'] },
+  { titulo: 'Despesas de Vendas e Marketing', tipo: 'linha', categorias: ['Despesas de Vendas e Marketing'] },
+  { titulo: 'Despesas Financeiras', tipo: 'linha', categorias: ['Despesas Financeiras'] },
+  { titulo: 'Outros Tributos', tipo: 'linha', categorias: ['Outros Tributos'] },
+  { titulo: 'Despesas Eventuais', tipo: 'linha', categorias: ['Jurídico'] },
+  { titulo: 'Despesas Variáveis', tipo: 'linha', categorias: ['Despesas Variáveis'] },
+  { titulo: 'Intermediação de Negócios', tipo: 'hidden', categorias: ['Intermediação de Negócios'] },
+  { titulo: 'Total Despesas Rateadas', tipo: 'card', var: 'total_despesas' },
+  { titulo: '', tipo: 'divisor' },
+  { titulo: 'Consórcios a contemplar', tipo: 'linha', categorias: ['Consórcios - a contemplar'] },
+  { titulo: 'Serviços', tipo: 'linha_calc', formula: 'servicos_menos_consorcios', categorias: ['Serviços'] },
+  { titulo: 'Ativos', tipo: 'linha', categorias: ['Ativos'] },
+  { titulo: 'Total Investimentos', tipo: 'card', var: 'total_investimentos' },
+  { titulo: '', tipo: 'divisor' },
+  { titulo: 'Total Saídas', tipo: 'card', var: 'total_saidas' },
+  { titulo: 'Fluxo de Caixa Livre FCL', tipo: 'card', var: 'fcl' },
+  { titulo: 'Lucro s/ Receita Operacional', tipo: 'card_percentual', var: 'perc_lucro' },
+  { titulo: 'FCL s/ Receita Operacional', tipo: 'card_percentual', var: 'perc_fcl' },
+  { titulo: 'Distribuição de Dividendos', tipo: 'card', var: 'dividendos', categorias: ['Distribuição de Dividendos', 'Dividendos'] },
+  { titulo: 'Pessoal', tipo: 'card', var: 'pessoal', categorias: ['Despesas com Pessoal', 'Credenciado Administrativo', 'Adiantamento - Credenciado Administrativo', 'Credenciado TI', 'Adiantamento - Credenciado TI', 'Credenciado Operacional', 'Adiantamento - Credenciado Operacional'] },
+  { titulo: 'Corretiva', tipo: 'card', var: 'corretiva', categorias: ['Corretiva - B2G', 'Manutenção Corretiva'] },
+  { titulo: 'Preventiva', tipo: 'card', var: 'preventiva', categorias: ['Preventiva - B2G', 'Manutenção Preventiva'] },
+];
+
 
 const normalizeMes = (mes: string) => mes.trim().charAt(0).toUpperCase() + mes.trim().slice(1).toLowerCase();
 const toTitleCase = (str: string) => str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
