@@ -1,11 +1,11 @@
 import Papa from 'papaparse';
-import { 
-  DreRow, 
-  DreFilters, 
+import {
+  DreRow,
+  DreFilters,
   DreSimulationParams,
-  DreCalculatedResult, 
-  DreMetadata, 
-  DreStructureItem 
+  DreCalculatedResult,
+  DreMetadata,
+  DreStructureItem
 } from '@/types/dre';
 
 const MESES_ORDEM = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -122,8 +122,8 @@ export class DreService {
    * Processa os filtros, totaliza as categorias e executa a DRE estrutural baseada no legado
    */
   static calculate(
-    data: DreRow[], 
-    metadata: DreMetadata, 
+    data: DreRow[],
+    metadata: DreMetadata,
     estrutura: DreStructureItem[],
     filters: DreFilters,
     simulationParams?: DreSimulationParams
@@ -239,7 +239,7 @@ export class DreService {
           const s = getCatMonthly('Serviços', col);
           const c = getCatMonthly('Consórcios - a contemplar', col);
           valoresMensal[item.titulo][col] = s >= c ? s - c : 0;
-          
+
           let rowsForMonth: DreRow[] = [];
           if (s >= c) {
             if (catSourceRows['Serviços'] && catSourceRows['Serviços'][col]) rowsForMonth.push(...catSourceRows['Serviços'][col]);
@@ -258,9 +258,9 @@ export class DreService {
 
     const outrasEntradas = getVal("Outras Receitas") + getVal("Receitas Financeiras") + getVal("Honorários") + getVal("Juros e Devoluções") + getVal("Recuperação de Despesas Variáveis");
     const totalImpostos = getVal("Impostos") + getVal("Provisão IRPJ e CSSL Trimestral");
-    
+
     const totalCustos = getCatTotal("Credenciado Operacional") + getCatTotal("Adiantamento - Credenciado Operacional") +
-      getVal("Terceirização de Mão de Obra") + getVal("CLTs") + getVal("Custo dos Serviços Prestados") + 
+      getVal("Terceirização de Mão de Obra") + getVal("CLTs") + getVal("Custo dos Serviços Prestados") +
       getVal("Preventiva - B2G") + getVal("Corretiva - B2G") + getVal("Outros Custos");
 
     const totalDespesas = getVal("Credenciado Administrativo") + getVal("Credenciado TI") +
@@ -273,7 +273,7 @@ export class DreService {
 
     const resultado = totalEntradas + getVal("Ativos") + outrasEntradas - totalSaidas;
     const fcl = resultado - getVal("Ativos");
-    
+
     // Novo: Equipamentos
     const totalEquipamentos = getCatTotal("Equipamentos");
 
@@ -290,7 +290,7 @@ export class DreService {
 
     const percLucro = totalEntradas !== 0 ? (resultado / totalEntradas * 100) : 0;
     const percFcl = totalEntradas !== 0 ? (fcl / totalEntradas * 100) : 0;
-    
+
     valoresTotal["Lucro s/ Receita Operacional"] = percLucro;
     valoresTotal["FCL s/ Receita Operacional"] = percFcl;
 
@@ -300,7 +300,7 @@ export class DreService {
       const key = Object.keys(catSourceRows).find(k => k.trim().toLowerCase() === cat.trim().toLowerCase());
       return key && catSourceRows[key] && catSourceRows[key][col] ? catSourceRows[key][col] : [];
     };
-    
+
     valoresMensal["Total Entradas Operacionais"] = {};
     valoresMensal["Outras Entradas"] = {};
     valoresMensal["Total de Impostos"] = {};
@@ -311,7 +311,7 @@ export class DreService {
     valoresMensal["Fluxo de Caixa Livre FCL"] = {};
     valoresMensal["Lucro s/ Receita Operacional"] = {};
     valoresMensal["FCL s/ Receita Operacional"] = {};
-    
+
     sourceRows["Total Entradas Operacionais"] = {};
     sourceRows["Outras Entradas"] = {};
     sourceRows["Total de Impostos"] = {};
@@ -331,7 +331,7 @@ export class DreService {
       const outrasEnt = getValMensal("Outras Receitas", col) + getValMensal("Receitas Financeiras", col) + getValMensal("Honorários", col) + getValMensal("Juros e Devoluções", col) + getValMensal("Recuperação de Despesas Variáveis", col);
       valoresMensal["Outras Entradas"][col] = outrasEnt;
       sourceRows["Outras Entradas"][col] = [
-        ...getSourceRowsMensal("Outras Receitas", col), ...getSourceRowsMensal("Receitas Financeiras", col), 
+        ...getSourceRowsMensal("Outras Receitas", col), ...getSourceRowsMensal("Receitas Financeiras", col),
         ...getSourceRowsMensal("Honorários", col), ...getSourceRowsMensal("Juros e Devoluções", col), ...getSourceRowsMensal("Recuperação de Despesas Variáveis", col)
       ];
 
@@ -340,7 +340,7 @@ export class DreService {
       sourceRows["Total de Impostos"][col] = [...getSourceRowsMensal("Impostos", col), ...getSourceRowsMensal("Provisão IRPJ e CSSL Trimestral", col)];
 
       const totCust = getCatMonthly("Credenciado Operacional", col) + getCatMonthly("Adiantamento - Credenciado Operacional", col) +
-        getValMensal("Terceirização de Mão de Obra", col) + getValMensal("CLTs", col) + getValMensal("Custo dos Serviços Prestados", col) + 
+        getValMensal("Terceirização de Mão de Obra", col) + getValMensal("CLTs", col) + getValMensal("Custo dos Serviços Prestados", col) +
         getValMensal("Preventiva - B2G", col) + getValMensal("Corretiva - B2G", col) + getValMensal("Outros Custos", col);
       valoresMensal["Total Custos Operacionais"][col] = totCust;
       sourceRows["Total Custos Operacionais"][col] = [
@@ -375,10 +375,10 @@ export class DreService {
         ...sourceRows["Total Despesas Rateadas"][col],
         ...sourceRows["Total Investimentos"][col]
       ];
-      
+
       const resCol = totEnt + getCatMonthly("Ativos", col) + outrasEnt - totSai;
       const fclCol = resCol - getCatMonthly("Ativos", col);
-      
+
       valoresMensal["Fluxo de Caixa Livre FCL"][col] = fclCol;
       sourceRows["Fluxo de Caixa Livre FCL"][col] = [
         ...sourceRows["Total Entradas Operacionais"][col],

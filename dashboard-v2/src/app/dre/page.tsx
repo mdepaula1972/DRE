@@ -23,7 +23,7 @@ export default function DrePage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
-  
+
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -32,7 +32,7 @@ export default function DrePage() {
   const [modalTitle, setModalTitle] = useState("");
   const [modalData, setModalData] = useState<Record<string, number>>({});
   const [modalSourceRows, setModalSourceRows] = useState<Record<string, DreRow[]>>({});
-  
+
   // Simulator state
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [showTable, setShowTable] = useState(false);
@@ -66,13 +66,13 @@ export default function DrePage() {
     setIsUploading(true);
     try {
       setFileName(file.name);
-      
+
       // Layer 1: Parse
       const parsed = await DreService.parseCSV(file);
-      
+
       // Layer 2: Normalize
       const { data, metadata: newMetadata } = DreService.normalizeData(parsed);
-      
+
       if (data.length === 0) {
         alert("Nenhuma linha válida encontrada no CSV.");
         return;
@@ -80,7 +80,7 @@ export default function DrePage() {
 
       setRawData(data);
       setMetadata(newMetadata);
-      
+
       // Reset filters when a new file is uploaded
       setFilters({
         empresas: [],
@@ -88,7 +88,7 @@ export default function DrePage() {
         projetos: [],
         categorias: []
       });
-      
+
       setLastUpdate(new Date().toLocaleTimeString());
     } catch (error: any) {
       alert("Erro ao processar arquivo: " + error.message);
@@ -128,9 +128,9 @@ export default function DrePage() {
 
   const handleConfirmExport = async (selections: ExportSelections) => {
     setIsExportingPdf(true);
-    
+
     let aiText: string | undefined;
-    
+
     const empresa = filters.empresas.length === 1 ? filters.empresas[0] : (filters.empresas.length > 1 ? "Varias" : "Global");
     const periodo = filters.periodos.length > 0 ? `${filters.periodos[0]}...` : "Completo";
 
@@ -149,7 +149,7 @@ export default function DrePage() {
     try {
       // Chamada para o NOVO gerador nativo
       await ExportPdfService.buildNativePdf(results!, selections, empresa, periodo, aiText);
-      
+
       setIsExportModalOpen(false);
     } catch (error: any) {
       alert("Falha ao gerar o PDF. Erro: " + (error?.message || String(error)));
@@ -172,7 +172,7 @@ export default function DrePage() {
   return (
     <main className="min-h-screen bg-slate-50 flex">
       {/* Sidebar - Fixa */}
-      <DreSidebar 
+      <DreSidebar
         metadata={metadata}
         rawData={rawData}
         filters={filters}
@@ -184,11 +184,11 @@ export default function DrePage() {
 
       {/* Conteúdo Principal + Painel Direito */}
       <div className="flex-1 flex overflow-hidden">
-        
+
         {/* Coluna Central: Dashboard */}
         <div id="dre-dashboard-content" className={`flex-1 overflow-y-auto p-6 md:p-8 transition-all duration-300 ${isExportingPdf ? 'opacity-50' : ''}`}>
           <div className="max-w-7xl mx-auto">
-            <DreHeader 
+            <DreHeader
               lastUpdate={lastUpdate}
               onExportPDF={handleOpenExportModal}
               onTogglePrivacy={() => setIsPrivacyMode(!isPrivacyMode)}
@@ -201,17 +201,17 @@ export default function DrePage() {
               <SmartAlerts alerts={alerts} />
 
               {/* Leitura Rápida */}
-              <DreKpiCards 
-                results={results} 
-                isPrivacyMode={isPrivacyMode} 
+              <DreKpiCards
+                results={results}
+                isPrivacyMode={isPrivacyMode}
                 onCardClick={handleOpenDetails}
               />
 
               {/* Análise Visual (Gráficos) */}
               {results && (
-                <DreCharts 
-                  results={results} 
-                  isPrivacyMode={isPrivacyMode} 
+                <DreCharts
+                  results={results}
+                  isPrivacyMode={isPrivacyMode}
                 />
               )}
 
@@ -227,21 +227,20 @@ export default function DrePage() {
                       Detalhamento Completo (Tabela DRE)
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-slate-400 group-hover:text-slate-600 transition-colors">
-                      {showTable ? <><ChevronUp size={15}/> Ocultar</> : <><ChevronDown size={15}/> Exibir</>}
+                      {showTable ? <><ChevronUp size={15} /> Ocultar</> : <><ChevronDown size={15} /> Exibir</>}
                     </div>
                   </button>
-                  <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
-                    showTable ? 'max-h-[9999px] opacity-100 mt-4' : 'max-h-0 opacity-0'
-                  }`}>
-                    <DreTable 
-                      results={results} 
-                      isPrivacyMode={isPrivacyMode} 
+                  <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showTable ? 'max-h-[9999px] opacity-100 mt-4' : 'max-h-0 opacity-0'
+                    }`}>
+                    <DreTable
+                      results={results}
+                      isPrivacyMode={isPrivacyMode}
                       onRowClick={handleOpenDetails}
                     />
                   </div>
                 </div>
               )}
-              
+
               {!results && !isUploading && (
                 <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center flex flex-col items-center justify-center min-h-[400px]">
                   <p className="text-slate-500 font-medium mb-2">Aguardando dados</p>
@@ -255,7 +254,7 @@ export default function DrePage() {
         {/* Coluna Direita: Simulador (Side Panel Persistente) */}
         {isSimulatorOpen && (
           <div className="w-full md:w-[450px] flex-shrink-0 border-l border-slate-200 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.03)] h-screen overflow-hidden animate-in slide-in-from-right duration-300 z-40">
-            <DreSimulator 
+            <DreSimulator
               isOpen={isSimulatorOpen}
               onClose={() => setIsSimulatorOpen(false)}
               params={simParams}
@@ -269,7 +268,7 @@ export default function DrePage() {
         )}
       </div>
 
-      <DreDetailsModal 
+      <DreDetailsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={modalTitle}
@@ -278,7 +277,7 @@ export default function DrePage() {
         isPrivacyMode={isPrivacyMode}
       />
 
-      <DreExportModal 
+      <DreExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         onExport={handleConfirmExport}
@@ -288,8 +287,8 @@ export default function DrePage() {
 
       {/* Off-screen renderer for high-quality PDF charts */}
       {results && (
-        <DrePrintCharts 
-          results={results} 
+        <DrePrintCharts
+          results={results}
           selections={{
             includeEvolution: true,
             includeWaterfall: true,
@@ -297,7 +296,7 @@ export default function DrePage() {
             includeAiAnalysis: false,
             includeKpis: false,
             includeTable: false
-          }} 
+          }}
         />
       )}
     </main>
