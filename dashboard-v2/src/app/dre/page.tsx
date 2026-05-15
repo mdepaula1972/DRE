@@ -9,7 +9,7 @@ import { DreTable } from '@/components/dre/DreTable';
 import { DreDetailsModal } from '@/components/dre/DreDetailsModal';
 import { SmartAlerts } from '@/components/dre/SmartAlerts';
 import { DreSimulator } from '@/components/dre/DreSimulator';
-import { DreService } from '@/services/dre.service';
+import { DreService, DEFAULT_DRE_ESTRUTURA } from '@/services/dre.service';
 import { DreAlertsService } from '@/services/dre-alerts.service';
 import { ExportPdfService } from '@/services/exportPdf.service';
 import { BrisinhaiService } from '@/services/brisinhai.service';
@@ -44,7 +44,7 @@ export default function DrePage() {
 
   const [rawData, setRawData] = useState<DreRow[]>([]);
   const [metadata, setMetadata] = useState<DreMetadata | null>(null);
-  const [estrutura, setEstrutura] = useState<DreStructureItem[] | null>(null);
+  const [estrutura, setEstrutura] = useState<DreStructureItem[] | null>(DEFAULT_DRE_ESTRUTURA);
   const [filters, setFilters] = useState<DreFilters>({
     empresas: [],
     periodos: [],
@@ -52,14 +52,14 @@ export default function DrePage() {
     categorias: []
   });
 
-  // Load JSON Template on mount
+  // Tenta sobrescrever com template remoto (se disponível), mas não bloqueia o cálculo
   React.useEffect(() => {
     fetch('/templates/dre-padrao.json')
-      .then(res => res.json())
+      .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
       .then((data: DreTemplateDefinition) => {
         setEstrutura(data.estrutura);
       })
-      .catch(err => console.error("Erro ao carregar template DRE:", err));
+      .catch(err => console.warn("Template remoto indisponível, usando padrão embutido:", err));
   }, []);
 
   const handleFileUpload = async (file: File) => {
