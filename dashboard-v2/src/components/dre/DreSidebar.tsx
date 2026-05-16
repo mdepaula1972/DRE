@@ -100,19 +100,13 @@ export function DreSidebar({
   return (
     <aside className="w-72 flex-shrink-0 bg-slate-900 text-slate-300 min-h-[calc(100vh-4rem)] p-5 flex flex-col rounded-2xl shadow-xl">
       {/* Logo Area (Monetization / White-label) */}
-      <div className="mb-8 flex flex-col items-center justify-center p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
-        {/* Usando o logo nativo da pasta public da Mar Brasil */}
-        <div className="relative w-32 h-12 mb-2">
-          <Image 
-            src="/mar-brasil-logo.png" 
-            alt="Logo Empresa" 
-            fill
-            className="object-contain"
-            priority
-          />
+      <div className="mb-8 flex flex-col items-center justify-center p-6 bg-slate-800/30 rounded-xl border border-slate-700/50">
+        <div className="w-12 h-12 bg-emerald-500 rounded-xl mb-3 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <Filter size={24} className="text-white" />
         </div>
         <div className="flex flex-col text-center">
-          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">DRE Analítico V1</span>
+          <span className="text-lg font-black text-white tracking-tight">DRE <span className="text-emerald-500">Pro</span></span>
+          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">SaaS Edition</span>
         </div>
       </div>
 
