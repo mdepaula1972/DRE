@@ -1,0 +1,323 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { X, Wallet, ArrowUpRight, History, CreditCard, Clock, CheckCircle, RotateCcw, Loader2, PlusCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Employee, Contract } from "@/types/loans";
+import { LoansService, formatCurrency, formatDate } from "@/services/loans.service";
+import { PDFService } from "@/services/pdf.service";
+import { useDataMode } from "@/contexts/DataModeContext";
+import { ContractCard } from "./ContractCard";
+
+interface SideDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  employeeId?: string;
+  onDataChanged?: () => void;
+  onAddNewLoan?: () => void; // NOVO: prop para abrir o modal de criação
+}
+
+export function SideDrawer({ isOpen, onClose, employeeId, onDataChanged, onAddNewLoan }: SideDrawerProps) {
+  const { isTestMode } = useDataMode();
+  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && employeeId) {
+      fetchEmployeeData(employeeId);
+    }
+  }, [isOpen, employeeId, isTestMode]);
+
+  const fetchEmployeeData = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const [empData, contractsData] = await Promise.all([
+        LoansService.getEmployeeDetails(id, isTestMode),
+        LoansService.getEmployeeContracts(id, isTestMode)
+      ]);
+      
+      setEmployee(empData);
+      setContracts(contractsData);
+      setFilteredContracts(contractsData);
+      setStatusFilter('all');
+    } catch (err) {
+      console.error('Erro ao carregar dados:', err);
+      setError('Falha ao carregar dados do colaborador');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStatusFilter = (status: string) => {
+    setStatusFilter(status);
+    if (status === 'all') {
+      setFilteredContracts(contracts);
+    } else {
+      setFilteredContracts(contracts.filter(c => c.status === status));
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  };
+
+  const handleAction = async (actionName: string, actionFn: Promise<void>) => {
+    if (!employeeId) return;
+    setIsLoading(true);
+    try {
+      await actionFn;
+      await fetchEmployeeData(employeeId); // Refresh interior do Drawer
+      if (onDataChanged) {
+        onDataChanged(); // Propaga pro Pai (Dashboard) recarregar
+      }
+    } catch (err: any) {
+      console.error(`Erro ao ${actionName}:`, err);
+      setError(`Falha na ação: ${err.message}`);
+      setIsLoading(false);
+    }
+  };
+
+  const onLiquidar = (contractId: string) => {
+    handleAction('liquidar', LoansService.liquidateContract(contractId, isTestMode));
+  };
+
+  const onPostergar = (contractId: string) => {
+    handleAction('postergar', LoansService.postponeContract(contractId, isTestMode));
+  };
+
+  const onAntecipar = (contractId: string) => {
+    const qtyStr = window.prompt('Quantas parcelas o colaborador quer antecipar agora?', '1');
+    if (qtyStr !== null) {
+      const qty = parseInt(qtyStr);
+      if (!isNaN(qty) && qty > 0) {
+        handleAction('antecipar', LoansService.anticipateInstallment(contractId, qty, isTestMode));
+      } else {
+        alert('Número de parcelas inválido.');
+      }
+    }
+  };
+
+  const onReverter = (contractId: string) => {
+    handleAction('reverter', LoansService.revertContractOffsets(contractId, isTestMode));
+  };
+
+  const onDeletar = (contractId: string) => {
+    if (window.confirm('Tem certeza que deseja APAGAR este contrato? Todas as transações serão perdidas permanentemente.')) {
+      handleAction('excluir', LoansService.deleteContract(contractId, isTestMode));
+    }
+  };
+
+  const handleGenerateTermForContract = async (contract: any) => {
+    try {
+      if (!employee) return;
+      
+      let finalContract = { ...contract };
+      
+      if (!finalContract.requestDate && !finalContract.request_date) {
+        const todayBR = new Date().toLocaleDateString('pt-BR');
+        const userDate = window.prompt(
+          "⚠️ ATENÇÃO JURÍDICA: Este contrato antigo não possui a 'Data da Tomada' (assinatura) formalizada.\n" +
+          "Evite usar a data de admissão.\n\n" +
+          "Digite a data correta da assinatura deste empréstimo no formato DD/MM/AAAA:", 
+          todayBR
+        );
+        
+        if (!userDate) return; // Cancela se o usuário fechar
+        
+        const parts = userDate.split('/');
+        if (parts.length === 3) {
+            finalContract.requestDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        } else {
+            alert("Formato inválido. Gerando com a data informada ou data atual da máquina.");
+            finalContract.requestDate = new Date().toISOString().split('T')[0];
+        }
+      }
+
+      await PDFService.generateDebtTermPDF(finalContract, employee, isTestMode);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao montar PDF.");
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50"
+          />
+          
+          {/* Drawer */}
+          <motion.div 
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-slate-950 shadow-2xl z-50 overflow-y-auto"
+          >
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
+                  {employee ? getInitials(employee.name) : '?'}
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+                    {employee?.name ?? 'Carregando...'}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400">{employee?.company ?? ''}</span>
+                    <span className="w-1 h-1 rounded-full bg-slate-300" />
+                    <span className="text-[10px] font-bold text-emerald-600">{employee?.linkType ?? ''}</span>
+                  </div>
+                </div>
+              </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={onAddNewLoan}
+                    className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all shadow-sm flex items-center gap-2 text-xs font-bold"
+                    title="Novo Empréstimo"
+                  >
+                    <PlusCircle size={16} />
+                    <span>Novo</span>
+                  </button>
+                  <button 
+                    onClick={onClose}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-all text-slate-400 hover:text-red-500"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+            </div>
+
+            {isLoading ? (
+              <div className="p-8 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="p-6 text-center text-red-600 text-sm">
+                {error}
+              </div>
+            ) : (
+            <div className="p-6 space-y-8">
+              {/* Resumo Financeiro */}
+              {employee ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Total Tomado</p>
+                  <p className="text-lg font-black text-slate-900 tabular-nums">{formatCurrency(employee.totalTaken)}</p>
+                </div>
+                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                  <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Total Já Recebido</p>
+                  <p className="text-lg font-black text-emerald-600 tabular-nums">{formatCurrency(employee.totalReceived)}</p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl border border-red-100">
+                  <p className="text-[10px] font-bold text-red-600 uppercase mb-1">Saldo Devedor</p>
+                  <p className="text-lg font-black text-red-600 tabular-nums">{formatCurrency(employee.balance)}</p>
+                </div>
+                <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                  <p className="text-[10px] font-bold text-amber-600 uppercase mb-1">Remuneração</p>
+                  <p className="text-lg font-black text-amber-600 tabular-nums">{formatCurrency(employee.remuneration)}</p>
+                </div>
+              </div>
+              ) : (
+                <div className="text-center text-slate-400 text-sm py-4">Dados não disponíveis</div>
+              )}
+
+              {/* Contratos */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
+                    <CreditCard size={14} className="text-emerald-600" />
+                    Contratos ({filteredContracts.length})
+                  </h3>
+                  
+                  {/* Filtro de Status */}
+                  <div className="flex items-center gap-2">
+                    <select 
+                      value={statusFilter}
+                      onChange={(e) => handleStatusFilter(e.target.value)}
+                      className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+                    >
+                      <option value="all">Todos</option>
+                      <option value="ATIVO">Ativos</option>
+                      <option value="LIQUIDADO">Liquidados</option>
+                      <option value="ATRASADO">Atrasados</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {filteredContracts.length === 0 ? (
+                  <p className="text-sm text-slate-400 text-center py-4">Nenhum contrato encontrado</p>
+                ) : (
+                  filteredContracts.map(contract => (
+                    <ContractCard
+                      key={contract.id}
+                      contract={{
+                        id: contract.id,
+                        operationNumber: contract.operationNumber,
+                        value: formatCurrency(contract.value),
+                        balance: formatCurrency(contract.balance),
+                        installments: `${contract.installments}x de ${formatCurrency(contract.installmentValue)}`,
+                        nextPayment: formatDate(contract.nextPaymentDate),
+                        endDate: formatDate(contract.endDate || contract.nextPaymentDate),
+                        status: contract.status,
+                        startDate: formatDate(contract.startDate),
+                        contractUrl: contract.contractUrl || ''
+                      }}
+                      onLiquidar={() => onLiquidar(contract.id)}
+                      onPostergar={() => onPostergar(contract.id)}
+                      onAntecipar={() => onAntecipar(contract.id)}
+                      onReverter={() => onReverter(contract.id)}
+                      onDeletar={() => onDeletar(contract.id)}
+                      onEditar={() => alert('Edição manual desabilitada nesta versão. Favor usar os botões de fluxo primários.')}
+                      onGerarTermo={() => handleGenerateTermForContract(contract)}
+                      onDataChanged={() => {
+                        if (employeeId) fetchEmployeeData(employeeId);
+                        if (onDataChanged) onDataChanged();
+                      }}
+                    />
+                  ))
+                )}
+              </div>
+
+              {/* Histórico Recente - Desativado até ter dados reais no banco */}
+              {/*
+              <div className="space-y-4">
+                <h3 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
+                  <History size={14} className="text-slate-400" />
+                  Histórico Recente
+                </h3>
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-400 italic">Histórico de pagamentos será implementado em breve.</p>
+                </div>
+              </div>
+              */}
+            </div>
+            )}
+
+            <div className="sticky bottom-0 p-6 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-t border-slate-100 mt-auto">
+               <button 
+                 onClick={onClose}
+                 className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-md"
+               >
+                 Fechar Painel
+               </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}

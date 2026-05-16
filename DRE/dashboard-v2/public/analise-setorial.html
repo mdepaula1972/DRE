@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js?v=28.0"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Setorial - Mar Brasil | Gestão Financeira</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css?v=28.0">
+    <link rel="stylesheet" href="custom-fixes.css?v=28.0">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Favicon.png">
+    <script src="version.js?v=28.0"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" class="img-fluid"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+            <!-- Fallback text if image fails -->
+            <span class="fw-bold fs-4 ms-2" style="display:none; color: #F2911B;">Filtros</span>
+            <button class="sidebar-toggle-btn ms-auto" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="upload-section mb-4">
+                <label for="csvFile" class="form-label text-white mb-2"><i class="bi bi-cloud-upload me-2"></i>Carregar
+                    Análise Setorial</label>
+                <input class="form-control form-control-sm" type="file" id="csvFile" accept=".csv">
+                <button class="btn btn-outline-light btn-sm w-100 mt-2" onclick="loadFromSupabase()">
+                    <i class="bi bi-database-fill-down me-2"></i>Sincronizar Supabase
+                </button>
+                <div id="fileStatus" class="form-text text-white-50 mt-2">Aguardando dados...</div>
+            </div>
+            <hr class="border-secondary">
+
+            <div class="filters-section">
+                <h6 class="text-uppercase text-white-50 mb-3"><i class="bi bi-funnel me-2"></i>Filtros</h6>
+
+                <div class="mb-3">
+                    <label for="filterPeriodo" class="form-label">Período</label>
+                    <select id="filterPeriodo" class="form-select" multiple size="6">
+                    </select>
+                    <small class="text-muted">Segure Ctrl para selecionar múltiplos</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Setor</label>
+                    <select class="form-select form-select-sm" id="filterSetor" multiple>
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Categoria</label>
+                    <select class="form-select form-select-sm" id="filterCategoria" multiple>
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
+
+                <button id="btnClearFilters" class="btn btn-outline-light btn-sm w-100 mt-2">
+                    <i class="bi bi-x-circle me-2"></i>Limpar
+                </button>
+
+                <div class="mt-4 pt-4 border-top border-secondary text-white-50 text-center small">
+                    <small>Versão: <span id="appVersionDisplay">v0.0</span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Header -->
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" style="max-height: 120px;">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-0">Análise Setorial</h1>
+                    <p class="text-muted mb-0" id="lastUpdate">Aguardando dados...</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-outline-dark" id="btnPrivacyToggle" onclick="togglePrivacyMode()"
+                    title="Ocultar Valores">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <a href="landing.html" class="btn btn-secondary text-white">
+                    <i class="bi bi-house-door me-1"></i>
+                    <span class="d-none d-md-inline">Voltar ao Início</span>
+                </a>
+                <button class="btn btn-outline-danger" id="btnExportPDF" onclick="exportToPDF()">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>
+                    <span class="d-none d-md-inline">Exportar PDF</span>
+                </button>
+                <button class="btn btn-warning fw-bold" id="btnDataAudit" onclick="runDataAudit()"
+                    title="Auditoria de Dados Omie">
+                    <i class="bi bi-shield-exclamation me-1"></i>
+                    <span class="d-none d-md-inline">Audit</span>
+                </button>
+                <button class="btn btn-primary d-md-none" id="toggleSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Cards Row - Financial -->
+        <h6 class="text-uppercase text-muted mb-3 small fw-bold">Indicadores Financeiros</h6>
+        <div class="row g-3 mb-4" id="kpiRowFinancial">
+            <!-- Cards populated by JS -->
+        </div>
+
+        <!-- KPI Cards Row - People (Credenciados) -->
+        <h6 class="text-uppercase text-muted mb-3 small fw-bold">Métricas de Equipe (Credenciados)</h6>
+        <div class="row g-3 mb-4" id="kpiRowPeople">
+            <!-- Cards populated by JS -->
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Despesas por
+                            Setor (Coluna Empilhada)</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-pie-chart me-2 text-primary"></i>Composição por Setor
+                        </h6>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line Chart for Multiple Months -->
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-graph-up me-2 text-primary"></i>Evolução Temporal
+                            (Linha)</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Categories Chart -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-list-ol me-2 text-primary"></i>Top 10 Categorias</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="topCategoriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-speedometer2 me-2 text-primary"></i>Variação Mensal
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="variationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-table me-2 text-primary"></i>Detalhamento por Setor e Categoria
+                </h6>
+                <button class="btn btn-sm btn-outline-secondary" id="btnExportTable">
+                    <i class="bi bi-download me-1"></i> Exportar
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped align-middle mb-0" id="dataTable">
+                        <thead class="table-light sticky-top">
+                            <!-- Headers populated by JS -->
+                        </thead>
+                        <tbody>
+                            <!-- Rows populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal for Details -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 bg-light">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Detalhes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-primary text-white h-100 border-0">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-white-50">Total</h6>
+                                    <h3 class="display-6 fw-bold mb-0" id="modalTotalValue">R$ 0,00</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light h-100 border-0">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">Média Mensal</h6>
+                                    <h4 class="fw-bold mb-0 text-dark" id="modalAvgValue">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Section in Modal -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold text-muted mb-3"><i class="bi bi-graph-up me-2"></i>Evolução
+                                no Período</h6>
+                            <div style="height: 450px;">
+                                <canvas id="modalChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="fw-bold mb-3">Composição Detalhada</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover" id="modalTable">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-end">Valor Total</th>
+                                    <th class="text-end">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Content populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Auditoria de Dados (Data Health) -->
+    <div class="modal fade" id="auditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 bg-warning bg-opacity-10">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-shield-exclamation me-2"></i>Saúde dos
+                        Dados (Auditoria Omie)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-4">Abaixo estão listados os lançamentos sincronizados do Omie que
+                        possuem inconsistências cadastrais. <strong>Lançamentos sem Conta DRE ou sem
+                            Projeto/Departamento impactam a precisão do seu painel.</strong></p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light p-3">
+                                <h6 class="text-muted small text-uppercase fw-bold"><i
+                                        class="bi bi-x-circle-fill text-danger me-2"></i>Sem Conta DRE (Mapeamento)</h6>
+                                <h4 class="mb-0" id="auditCountNoDre">0</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light p-3">
+                                <h6 class="text-muted small text-uppercase fw-bold"><i
+                                        class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Sem
+                                    Projeto/Departamento</h6>
+                                <h4 class="mb-0" id="auditCountNoProj">0</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive" style="max-height: 500px;">
+                        <table class="table table-sm table-hover align-middle" id="auditTable">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>ID Omie</th>
+                                    <th>Fornecedor/Cliente</th>
+                                    <th>Valor</th>
+                                    <th>Problema</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Content populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-info text-white fw-bold" onclick="exportAuditCSV()">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Exportar Audit
+                        </button>
+                        <button type="button" class="btn btn-dark fw-bold" onclick="exportAllSupabaseCSV()">
+                            <i class="bi bi-download me-2"></i>Dados Brutos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        class="d-none position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex justify-content-center align-items-center"
+        style="z-index: 2000;">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- PDF Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script src="analise-setorial.js?v=28.0"></script>
+    <script>
+        // Sticky KPI Cards - add shadow on scroll
+        window.addEventListener('scroll', () => {
+            const kpiRow = document.getElementById('kpiRow');
+            if (kpiRow) {
+                if (window.scrollY > 50) {
+                    kpiRow.classList.add('scrolled');
+                } else {
+                    kpiRow.classList.remove('scrolled');
+                }
+            }
+        });
+
+        // Version Updater
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION;
+            }
+        });
+    </script>
+    <!-- BrisinhAI Scripts -->
+    <script src="ai.service.v2.js?v=28.0"></script>
+    <script src="brisinhai.js?v=28.0"></script>
+</body>
+
+</html>

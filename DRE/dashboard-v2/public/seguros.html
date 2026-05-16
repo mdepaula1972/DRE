@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="auth-check.js?v=28.0"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Seguros | Mar Brasil</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css?v=28.0">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Favicon.png">
+    <script src="version.js?v=28.0"></script>
+    <style>
+        :root {
+            --smoke-bg: rgba(38, 34, 35, 0.85);
+        }
+
+        /* Insurance Card Grid */
+        #segurosGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .insurance-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 1;
+        }
+
+        .insurance-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .insurance-card .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .insurance-card .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Expanded State with Smoke Effect */
+        .smoke-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--smoke-bg);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .smoke-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .insurance-card.expanded {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 2001;
+            cursor: default;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Animation when expanding */
+        .insurance-card.expanding {
+            transition: all 0.4s ease;
+        }
+
+        .insurance-card .details {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f1f1f1;
+        }
+
+        .insurance-card.expanded .details {
+            display: block;
+        }
+
+        .detail-item {
+            margin-bottom: 1rem;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        /* KPI Highlights */
+        .kpi-red {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        .kpi-red .value,
+        .kpi-red .title,
+        .kpi-red .text-muted,
+        .kpi-red .icon-box i {
+            color: white !important;
+        }
+
+        .kpi-red .icon-box {
+            background: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        .kpi-red .text-muted {
+            opacity: 0.8;
+        }
+
+        .badge-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Ultra-Compact KPI Cards */
+        .metric-card {
+            padding: 0.6rem 0.8rem !important;
+            min-height: 85px;
+            max-height: 90px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .metric-card .value {
+            font-size: 1.15rem !important;
+            margin-bottom: 0 !important;
+            line-height: 1.2;
+        }
+
+        .metric-card .icon-box {
+            width: 26px !important;
+            height: 26px !important;
+            font-size: 0.9rem !important;
+            margin-bottom: 0 !important;
+            position: absolute;
+            top: 0.6rem;
+            right: 0.8rem;
+        }
+
+        .metric-card .title {
+            font-size: 0.65rem !important;
+            margin-bottom: 0.15rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .metric-card .small {
+            font-size: 0.7rem !important;
+            margin-top: 0.2rem !important;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+
+        .close-expanded {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            display: none;
+        }
+
+        .insurance-card.expanded .close-expanded {
+            display: block;
+        }
+
+        .insurance-card .card-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        /* Helper for the grid layout when one is expanded */
+        body.card-expanded {
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Smoke Overlay -->
+    <div class="smoke-overlay" id="smokeOverlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo"
+                style="max-height: 50px; width: auto; object-fit: contain;">
+            <button class="sidebar-toggle-btn ms-auto" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="upload-section mb-4">
+                <label for="csvFileSeguros" class="form-label text-white mb-2">
+                    <i class="bi bi-shield-check me-2"></i>Importar Seguros
+                </label>
+                <input class="form-control form-control-sm" type="file" id="csvFileSeguros" accept=".csv">
+                <div id="fileStatus" class="form-text text-white-50 mt-2">Aguardando arquivo CSV...</div>
+            </div>
+            <hr class="border-secondary">
+
+            <div class="filters-section">
+                <h6 class="text-uppercase text-white-50 mb-3"><i class="bi bi-funnel me-2"></i>Filtros</h6>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Contratante</label>
+                    <select class="form-select form-select-sm" id="filterContratante" multiple size="4"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Tipo de Seguro</label>
+                    <select class="form-select form-select-sm" id="filterTipo" multiple size="4"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Seguradora</label>
+                    <select class="form-select form-select-sm" id="filterSeguradora" multiple size="4"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Corretor</label>
+                    <select class="form-select form-select-sm" id="filterCorretor" multiple size="4"></select>
+                </div>
+
+                <button id="btnClearFilters" class="btn btn-outline-light btn-sm w-100 mt-2">
+                    <i class="bi bi-x-circle me-2"></i>Limpar Filtros
+                </button>
+
+                <div class="mt-4 pt-4 border-top border-secondary text-white-50 text-center small">
+                    <small>Versão: <span id="appVersionDisplay">v0.0</span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Header -->
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" style="max-height: 100px;">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-0">Gestão de Seguros</h1>
+                    <p class="text-muted mb-0" id="lastUpdate">Aguardando dados...</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-outline-dark" id="btnPrivacyToggle" onclick="togglePrivacyMode()"
+                    title="Ocultar Valores">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <a href="landing.html" class="btn btn-secondary text-white">
+                    <i class="bi bi-house-door me-1"></i>
+                    <span class="d-none d-md-inline">Voltar ao Início</span>
+                </a>
+                <button class="btn btn-outline-danger" id="btnExportPDF" onclick="exportToPDF()">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>
+                    <span class="d-none d-md-inline">Exportar PDF</span>
+                </button>
+                <button class="btn btn-primary d-md-none" id="toggleSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Cards Row -->
+        <div class="row g-3 mb-4" id="kpiRow">
+            <div class="col-md-4">
+                <div class="metric-card card-primary h-100" id="kpiMaiorPremio">
+                    <div class="icon-box"><i class="bi bi-trophy"></i></div>
+                    <div class="title">Maior Prêmio</div>
+                    <div class="value" id="valMaiorPremio">R$ 0,00</div>
+                    <div class="small text-muted mt-2" id="infoMaiorPremio">-</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card h-100" id="kpiMaiorParcela">
+                    <div class="icon-box" style="background: rgba(52, 152, 219, 0.1); color: #3498db;"><i
+                            class="bi bi-cash-stack"></i></div>
+                    <div class="title">Maior Parcela</div>
+                    <div class="value" id="valMaiorParcela">R$ 0,00</div>
+                    <div class="small text-muted mt-2" id="infoMaiorParcela">-</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card h-100 kpi-red" id="kpiProximoVencimento">
+                    <div class="icon-box" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c;"><i
+                            class="bi bi-calendar-x"></i></div>
+                    <div class="title">Próximo a Vencer</div>
+                    <div class="value" id="valProximoVencimento">-</div>
+                    <div class="small text-muted mt-2" id="infoProximoVencimento">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seguros Grid -->
+        <div id="segurosGrid">
+            <div class="text-center py-5 w-100 text-muted">
+                <i class="bi bi-file-earmark-spreadsheet display-1 mb-3"></i>
+                <h5>Carregue o arquivo CSV para visualizar os seguros</h5>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="seguros.js?v=28.0"></script>
+
+    <!-- Modal for Charts -->
+    <div class="modal fade" id="chartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="chartModalTitle">Análise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <canvas id="kpiChart" style="max-height: 400px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Version Updater
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION;
+            }
+        });
+
+        // Sidebar Toggle Logic (same as main app)
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('mainContent').classList.toggle('expanded');
+            const icon = document.querySelector('#sidebarToggle i');
+            icon.classList.toggle('bi-chevron-left');
+            icon.classList.toggle('bi-chevron-right');
+        });
+
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+    </script>
+
+    <!-- BrisinhAI Scripts -->
+    <script src="ai.service.v2.js?v=28.0"></script>
+    <script src="brisinhai.js?v=28.0"></script>
+</body>
+
+</html>

@@ -1,0 +1,262 @@
+.pageContainer {
+    font-family: 'Outfit', sans-serif;
+    background-color: #0d0d0d;
+    background-image:
+        radial-gradient(circle at 50% 50%, rgba(242, 145, 27, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 10% 10%, rgba(0, 71, 122, 0.2) 0%, transparent 40%);
+    color: #ffffff;
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 50;
+}
+
+.scene {
+    position: relative;
+    width: 800px;
+    height: 800px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.core {
+    position: relative;
+    z-index: 10;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: coreFloat 4s ease-in-out infinite;
+}
+
+.coreImg {
+    width: 140%;
+    height: 140%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 50px rgba(242, 145, 27, 0.8));
+}
+
+.coreGlow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #F2911B;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.2;
+    animation: pulse 4s infinite alternate;
+}
+
+.satelliteWrapper {
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: orbitalMove 60s linear infinite;
+    z-index: 20;
+}
+
+.satelliteWrapper:hover {
+    animation-play-state: paused;
+    z-index: 100;
+}
+
+.satellite {
+    width: 160px;
+    height: 160px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: white;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    padding: 15px;
+    cursor: pointer;
+}
+
+.satellite:hover {
+    background: #F2911B;
+    border-color: #fff;
+    transform: scale(1.2);
+    box-shadow: 0 0 60px rgba(242, 145, 27, 0.9);
+    color: #000 !important;
+}
+
+/* Lucide icons inside the satellite */
+.satellite svg {
+    margin-bottom: 8px;
+    color: #F2911B;
+    transition: all 0.3s;
+}
+
+.satellite:hover svg {
+    color: #000 !important;
+    transform: translateY(-5px) scale(1.1);
+}
+
+.satellite span {
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    line-height: 1.2;
+}
+
+.satellite p {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 4px;
+    font-weight: 300;
+}
+
+.sat1 { --start-angle: 0deg; animation-duration: 60s; }
+.sat2 { --start-angle: 36deg; animation-duration: 60s; }
+.sat3 { --start-angle: 72deg; animation-duration: 60s; }
+.sat4 { --start-angle: 108deg; animation-duration: 60s; }
+.sat5 { --start-angle: 144deg; animation-duration: 60s; }
+.sat6 { --start-angle: 180deg; animation-duration: 60s; }
+.sat7 { --start-angle: 216deg; animation-duration: 60s; }
+.sat8 { --start-angle: 252deg; animation-duration: 60s; }
+.sat9 { --start-angle: 288deg; animation-duration: 60s; }
+.sat10 { --start-angle: 324deg; animation-duration: 60s; }
+
+.orbitalRing {
+    position: absolute;
+    border: 1px dashed rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.ring1 {
+    width: 550px;
+    height: 550px;
+    border-style: solid;
+    border-color: rgba(242, 145, 27, 0.1);
+}
+
+.ring2 {
+    width: 750px;
+    height: 750px;
+    border-style: dashed;
+    border-color: rgba(242, 145, 27, 0.05);
+}
+
+.hudInfo {
+    position: absolute;
+    bottom: 70px;
+    left: 30px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.5);
+    border-left: 2px solid #F2911B;
+    padding-left: 15px;
+}
+
+.hudVersion {
+    position: absolute;
+    bottom: 70px;
+    right: 30px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes coreFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+    from { opacity: 0.1; transform: scale(0.9); }
+    to { opacity: 0.3; transform: scale(1.1); }
+}
+
+@keyframes orbitalMove {
+    from { transform: rotate(var(--start-angle)) translateY(-275px) rotate(calc(-1 * var(--start-angle))); }
+    to { transform: rotate(calc(var(--start-angle) + 360deg)) translateY(-275px) rotate(calc(-1 * (var(--start-angle) + 360deg))); }
+}
+
+@media (max-width: 850px) {
+    .pageContainer {
+        overflow-y: auto;
+        display: block;
+        padding-top: 50px;
+    }
+    .scene {
+        width: 100%;
+        height: auto;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 50px 0;
+    }
+    .core {
+        margin-bottom: 50px;
+        width: 180px;
+        height: 180px;
+    }
+    .satelliteWrapper {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        animation: none !important;
+        width: 100%;
+        display: block;
+        margin-bottom: 20px;
+    }
+    .satellite {
+        position: relative !important;
+        margin: 0 auto;
+        transform: none !important;
+        width: 80%;
+        height: auto;
+        border-radius: 12px;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 15px 25px;
+        gap: 20px;
+    }
+    .satellite svg {
+        margin-bottom: 0px !important;
+    }
+    .satellite span {
+        font-size: 1rem;
+    }
+    .satellite p {
+        display: none;
+    }
+    .orbitalRing {
+        display: none;
+    }
+    .hudInfo, .hudVersion {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        margin: 20px;
+        text-align: center;
+        border-left: none;
+        padding-left: 0;
+    }
+}

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Mar Brasil | Portal Financeiro</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Bootstrap 5 CSS -->
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Favicon.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="version.js?v=28.0"></script>
+
+    <style>
+        :root {
+            --primary: #F2911B;
+            --dark-bg: #0d0d0d;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--dark-bg);
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(242, 145, 27, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 10% 10%, rgba(0, 71, 122, 0.2) 0%, transparent 40%);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* --- Orbital Scene --- */
+        .scene {
+            position: relative;
+            width: 800px;
+            height: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .core {
+            position: relative;
+            z-index: 10;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: coreFloat 4s ease-in-out infinite;
+        }
+
+        .core img {
+            width: 140%;
+            height: 140%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 50px rgba(242, 145, 27, 0.8));
+        }
+
+        .core-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.2;
+            animation: pulse 4s infinite alternate;
+        }
+
+        /* --- Satellites (Buttons) --- */
+        .satellite-wrapper {
+            position: absolute;
+            width: 0;
+            height: 0;
+            top: 50%;
+            left: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: orbitalMove 60s linear infinite;
+            z-index: 20;
+        }
+
+        .satellite-wrapper:hover {
+            animation-play-state: paused;
+            z-index: 100;
+        }
+
+        .satellite {
+            width: 160px;
+            height: 160px;
+            flex-shrink: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        @keyframes orbitalMove {
+            from {
+                transform: rotate(var(--start-angle)) translateY(-275px) rotate(calc(-1 * var(--start-angle)));
+            }
+
+            to {
+                transform: rotate(calc(var(--start-angle) + 360deg)) translateY(-275px) rotate(calc(-1 * (var(--start-angle) + 360deg)));
+            }
+        }
+
+        .satellite:hover {
+            background: var(--primary);
+            border-color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 60px rgba(242, 145, 27, 0.9);
+            color: #000 !important;
+        }
+
+        .satellite i {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .satellite:hover i {
+            color: #000 !important;
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        .satellite span {
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            line-height: 1.2;
+        }
+
+        .satellite p {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            font-weight: 300;
+        }
+
+        .sat-1 {
+            --start-angle: 0deg;
+            animation-duration: 60s;
+        }
+
+        .sat-2 {
+            --start-angle: 32.7deg;
+            animation-duration: 60s;
+        }
+
+        .sat-3 {
+            --start-angle: 65.4deg;
+            animation-duration: 60s;
+        }
+
+        .sat-4 {
+            --start-angle: 98.1deg;
+            animation-duration: 60s;
+        }
+
+        .sat-5 {
+            --start-angle: 130.9deg;
+            animation-duration: 60s;
+        }
+
+        .sat-6 {
+            --start-angle: 163.6deg;
+            animation-duration: 60s;
+        }
+
+        .sat-7 {
+            --start-angle: 196.3deg;
+            animation-duration: 60s;
+        }
+
+        .sat-8 {
+            --start-angle: 229deg;
+            animation-duration: 60s;
+        }
+
+        .sat-9 {
+            --start-angle: 261.8deg;
+            animation-duration: 60s;
+        }
+
+        .sat-10 {
+            --start-angle: 294.5deg;
+            animation-duration: 60s;
+        }
+
+        .sat-11 {
+            --start-angle: 327.2deg;
+            animation-duration: 60s;
+        }
+
+        /* Decorative Orbits */
+        .orbital-ring {
+            position: absolute;
+            border: 1px dashed rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .ring-1 {
+            width: 550px;
+            height: 550px;
+            border-style: solid;
+            border-color: rgba(242, 145, 27, 0.1);
+        }
+
+        .ring-2 {
+            width: 750px;
+            height: 750px;
+            border-style: dashed;
+            border-color: rgba(242, 145, 27, 0.05);
+        }
+
+        /* --- Footer & HUD --- */
+        .hud-info {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            border-left: 2px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .hud-version {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Keyframes --- */
+        @keyframes coreFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+
+
+        @keyframes pulse {
+            from {
+                opacity: 0.1;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 0.3;
+                transform: scale(1.1);
+            }
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 850px) {
+            .scene {
+                width: 100%;
+                height: 100%;
+                flex-direction: column;
+                overflow-y: auto;
+                padding: 100px 0;
+                justify-content: flex-start;
+            }
+
+            .core {
+                position: relative;
+                margin-bottom: 50px;
+                width: 180px;
+                height: 180px;
+                flex-shrink: 0;
+            }
+
+            .satellite {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                bottom: auto !important;
+                margin-bottom: 20px;
+                transform: none !important;
+                animation: none !important;
+                width: 80%;
+                height: auto;
+                border-radius: 12px;
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 15px 25px;
+                gap: 20px;
+            }
+
+            .satellite i {
+                margin-bottom: 0;
+                font-size: 1.5rem;
+            }
+
+            .satellite span {
+                font-size: 1rem;
+            }
+
+            .satellite p {
+                display: none;
+            }
+
+            .orbital-ring {
+                display: none;
+            }
+
+            .hud-info,
+            .hud-version {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="scene">
+        <div class="orbital-ring ring-1"></div>
+        <div class="orbital-ring ring-2"></div>
+
+        <div class="core">
+            <div class="core-glow"></div>
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Logo Mar Brasil">
+        </div>
+
+        <!-- Orbs -->
+        <div class="satellite-wrapper sat-1">
+            <a href="gestao-integrada.html" class="satellite">
+                <i class="bi bi-receipt-cutoff"></i>
+                <span>Gestão Integrada</span>
+                <p>Faturamento & Impostos</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-2">
+            <a href="dre.html" class="satellite">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>DRE Gerencial</span>
+                <p>Visão Financeira</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-3">
+            <a href="analise-setorial.html" class="satellite">
+                <i class="bi bi-pie-chart-fill"></i>
+                <span>Análise Setorial</span>
+                <p>Custos por Área</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-4">
+            <a href="parcelamentos.html" class="satellite">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>Parcelamentos</span>
+                <p>Controle de Dívidas</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-5">
+            <a href="seguros.html" class="satellite">
+                <i class="bi bi-shield-check"></i>
+                <span>Seguros</span>
+                <p>Gestão de Apólices</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-6">
+            <a href="indicadores_v2.html" class="satellite">
+                <i class="bi bi-speedometer2"></i>
+                <span>Indicadores</span>
+                <p>KPIs Estratégicos</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-7">
+            <a href="contratos.html" class="satellite">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span>Contratos</span>
+                <p>Vínculo Faturamento</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-8">
+            <a href="comissoes.html" class="satellite">
+                <i class="bi bi-person-badge-fill"></i>
+                <span>Comissões</span>
+                <p>Divisão Equipe</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-9">
+            <a href="/peopleboard" class="satellite">
+                <i class="bi bi-people-fill"></i>
+                <span>PeopleBoard</span>
+                <p>Gestão de RH</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-10">
+            <a href="mutuos.html" class="satellite">
+                <i class="bi bi-safe2-fill"></i>
+                <span>Mútuos & Dividendos</span>
+                <p>Transferências</p>
+            </a>
+        </div>
+
+        <div class="satellite-wrapper sat-11">
+            <a href="lancamentos.html" class="satellite">
+                <i class="bi bi-journal-text"></i>
+                <span>Lançamentos</span>
+                <p>Fluxo de Caixa (Omie)</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="hud-info">
+        Mar Brasil<br>
+        Portal de Gestão Inteligente
+    </div>
+
+    <div class="hud-version">
+        v<span class="appVersionText">0.0</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="auth.js?v=28.0"></script>
+
+    <div id="footerVersionDisplay" class="appVersionText"
+        style="position: fixed; bottom: 10px; right: 10px; font-size: 0.65rem; color: rgba(255,255,255,0.3); z-index: 1000;">
+        v0.0
+    </div>
+    <script>
+        // Version Updater
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                document.querySelectorAll('.appVersionText').forEach(el => {
+                    el.textContent = 'v' + window.APP_VERSION;
+                });
+            }
+        });
+    </script>
+
+</body>
+
+</html>

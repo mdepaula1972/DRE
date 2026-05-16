@@ -1,0 +1,542 @@
+/* PeopleBoard Standard CSS - Baseado em styles.css + HUD specifics */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary: #F2911B;
+    --primary-glow: rgba(242, 145, 27, 0.4);
+    --secondary: #00477A;
+    /* Padrão corporativo MarBrasil */
+    --dark-bg: #f8f9fa;
+    /* Fundo claro padrão das internas */
+    --header-bg: #262223;
+    --sidebar-bg: #262223;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--dark-bg);
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Sidebar Standard */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    color: white;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    padding: 20px;
+}
+
+.sidebar.collapsed {
+    left: -280px;
+}
+
+.sidebar-open-btn {
+    position: fixed;
+    top: 20px;
+    left: 10px;
+    z-index: 1001;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: none;
+    /* Só aparece quando sidebar colapsado */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.sidebar.collapsed+.sidebar-open-btn {
+    display: flex;
+}
+
+.main-content {
+    margin-left: 280px;
+    padding: 40px;
+    transition: all 0.3s ease;
+    min-height: 100vh;
+}
+
+.main-content.expanded {
+    margin-left: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-toggle-btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* HUD elements preservation (Inside white layout) */
+.hud-font {
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.people-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.people-item {
+    background: white;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.dynamic-container {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.dynamic-container input,
+.dynamic-container select {
+    background: #000000 !important;
+    border: 1px solid var(--primary) !important;
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.dynamic-container input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.people-item:hover {
+    background: #fff8f0;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(242, 145, 27, 0.1);
+}
+
+.people-item td {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+/* Profile Overlay CSI - Mantido em preto para contraste dramático */
+#profileOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 3000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+/* HUD Profile Typography & Layout - 5 COLUNAS HORIZONTAIS */
+.hud-profile {
+    display: grid;
+    grid-template-columns: 280px 1fr 1fr 1fr 1fr;
+    /* Foto | Empresa | Datas | Histórico | Pessoais */
+    gap: 15px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.profile-sidebar {
+    padding: 15px;
+    background: rgba(242, 145, 27, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(242, 145, 27, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+}
+
+/* Colunas de dados */
+.profile-column {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    border: 1px solid rgba(242, 145, 27, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: calc(90vh - 40px);
+}
+
+/* Títulos das colunas */
+.column-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(242, 145, 27, 0.3);
+}
+
+.profile-photo-container {
+    width: 280px;
+    height: 280px;
+    margin-bottom: 20px;
+    border: 3px solid var(--primary);
+    box-shadow: 0 0 20px var(--primary-glow);
+    position: relative;
+    border-radius: 50%;
+    background: #000;
+    /* overflow: hidden removido para não cortar o radar externo */
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: transform 0.8s ease;
+    display: block;
+    overflow: hidden;
+    /* O overflow fica apenas na imagem propriamente dita */
+}
+
+/* Moldura rotativa (Radar) */
+.profile-photo-container::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    border: 2px dashed var(--primary);
+    border-radius: 50%;
+    animation: rotate-radar 15s linear infinite, radar-pulse 4s ease-in-out infinite;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+@keyframes rotate-radar {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes radar-pulse {
+
+    0%,
+    100% {
+        transform: rotate(var(--rotation, 0deg)) scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: rotate(var(--rotation, 0deg)) scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+#profileEmail {
+    font-size: 0.75rem !important;
+    word-break: break-all;
+    max-width: 280px;
+    line-height: 1.2;
+}
+
+#profileName {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+    letter-spacing: -1px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+#profileID {
+    font-size: 1rem;
+    color: var(--primary);
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Grid layout for data rows - respecting Bootstrap structure */
+.profile-main-data .row {
+    margin-bottom: 0;
+}
+
+/* Compact data rows */
+.data-row {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.data-row:hover {
+    background: rgba(242, 145, 27, 0.08);
+    border-left-color: var(--primary);
+}
+
+.label {
+    font-size: 0.7rem;
+    color: rgba(242, 145, 27, 0.8);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.value {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: 500;
+    display: block;
+    line-height: 1.2;
+}
+
+/* Section headers */
+.profile-main-data>.row::before {
+    content: '⚡ DADOS PRINCIPAIS';
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(242, 145, 27, 0.3);
+}
+
+/* Highlight financial data */
+#profileRemuneration,
+#profileConsignable {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+}
+
+#profileDebtBalance {
+    font-size: 0.95rem !important;
+}
+
+/* Compact status badge */
+#profileStatus {
+    font-size: 0.75rem !important;
+    padding: 4px 10px !important;
+}
+
+.profile-history-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 5px;
+    background: transparent;
+    border: none;
+}
+
+/* Remove section title from history */
+.profile-history-container::before {
+    display: none;
+}
+
+/* Compact additive items */
+.additive-item {
+    padding: 8px 10px !important;
+    margin-bottom: 6px !important;
+    font-size: 0.85rem !important;
+}
+
+.additive-item strong {
+    font-size: 0.75rem !important;
+    display: inline-block;
+    min-width: 100px;
+}
+
+.additive-item:hover {
+    background: rgba(242, 145, 27, 0.12) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 15px rgba(242, 145, 27, 0.3);
+}
+
+.additive-hover-info {
+    display: none;
+    margin-top: 12px;
+    padding: 15px;
+    background: #0d0d0d !important;
+    border: 2px solid var(--primary) !important;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 1);
+    position: relative;
+    z-index: 9999 !important;
+    color: #ffffff !important;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    animation: fadeIn 0.25s ease-out;
+    pointer-events: none;
+    /* Não atrapalhar o scroll */
+}
+
+.additive-item:hover .additive-hover-info {
+    display: block !important;
+}
+
+.compare-val-old {
+    color: #ff8787;
+    font-size: 0.8rem;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.compare-val-new {
+    color: #69db7c;
+    font-size: 0.8rem;
+    font-family: 'Orbitron', sans-serif;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Forçar Visibilidade de Notas */
+#profileHistory .italic {
+    color: var(--primary) !important;
+    font-weight: 600;
+    opacity: 1 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    display: block;
+    margin-top: 5px;
+    background: rgba(242, 145, 27, 0.1);
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+/* Garantir que modais de aditivos fiquem sobre o overlay do perfil */
+.modal {
+    z-index: 4000 !important;
+}
+
+.modal-backdrop {
+    z-index: 3990 !important;
+}
+
+.btn-close-hud {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 5px 15px;
+    cursor: pointer;
+}
+
+/* Forms Standard */
+.form-label {
+    color: #666;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(242, 145, 27, 0.25);
+}
+
+/* Privacy Mode */
+.privacy-text {
+    filter: blur(5px);
+    transition: filter 0.3s ease;
+    user-select: none;
+    /* pointer-events: none REMOVIDO para permitir clique em botões dentro da linha */
+}
+
+/* Botões com Destaque Premium (Blindagem v27.70) */
+.btn-warning,
+.btn-outline-warning,
+.btn-info {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-warning:hover,
+.btn-outline-warning:hover,
+.btn-info:hover {
+    transform: translateY(-5px) scale(1.1) !important;
+    box-shadow: 0 0 30px var(--primary-glow), 0 0 60px rgba(242, 145, 27, 0.6) !important;
+    filter: brightness(1.3) !important;
+    border-color: #ffffff !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    z-index: 1000 !important;
+}
+
+.btn-warning:active,
+.btn-outline-warning:active,
+.btn-info:active {
+    transform: translateY(1px) scale(0.95) !important;
+    box-shadow: 0 0 10px var(--primary-glow) !important;
+}
+
+/* Cursor e Interatividade */
+button,
+.btn,
+.people-item,
+[onclick] {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+
+.privacy-text:hover {
+    filter: blur(0);
+}
+
+.btn-warning i {
+    color: #000 !important;
+}

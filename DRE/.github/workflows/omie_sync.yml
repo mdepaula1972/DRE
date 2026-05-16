@@ -1,0 +1,40 @@
+name: Omie Supabase Sync (v30.0)
+
+on:
+  schedule:
+    # Rodar 2 vezes ao dia: 09:00 e 21:00 UTC (06:00 e 18:00 Horário Brasília)
+    - cron: '0 9,21 * * *'
+  workflow_dispatch: # Permite rodar manualmente pelo painel do GitHub
+
+jobs:
+  sync_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Sync Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          OMIE_APP_1_KEY: ${{ secrets.OMIE_APP_1_KEY }}
+          OMIE_APP_1_SECRET: ${{ secrets.OMIE_APP_1_SECRET }}
+          OMIE_APP_1_EMPRESA_ID: ${{ secrets.OMIE_APP_1_EMPRESA_ID }}
+          OMIE_APP_1_EMPRESA_NOME: ${{ secrets.OMIE_APP_1_EMPRESA_NOME }}
+          OMIE_APP_2_KEY: ${{ secrets.OMIE_APP_2_KEY }}
+          OMIE_APP_2_SECRET: ${{ secrets.OMIE_APP_2_SECRET }}
+          OMIE_APP_2_EMPRESA_ID: ${{ secrets.OMIE_APP_2_EMPRESA_ID }}
+          OMIE_APP_2_EMPRESA_NOME: ${{ secrets.OMIE_APP_2_EMPRESA_NOME }}
+        run: |
+            # Rodar a partir de 01/06/2025 para ambas as empresas
+            python omie_supabase_ingest.py --modo registro --de 01/06/2025 --empresa all --verbose --persist-supabase --include-movimentos-saida

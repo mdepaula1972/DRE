@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeopleBoard - Mar Brasil | Gestão de Pessoal</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css?v=27.88">
+    <link rel="stylesheet" href="custom-fixes.css?v=27.88">
+    <link rel="stylesheet" href="people.css?v=27.88">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Favicon.png">
+    <script src="version.js?v=27.88"></script>
+
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar de Filtros -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Logo" class="img-fluid" style="max-height: 40px;">
+            <button class="sidebar-toggle-btn" id="sidebarToggleClose">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-content mt-4">
+            <h6 class="text-uppercase text-white-50 small mb-3"><i class="bi bi-funnel me-2"></i>Filtros de RH</h6>
+
+            <div class="mb-3">
+                <label class="form-label text-white-50">Localizar</label>
+                <input type="text" id="filterName"
+                    class="form-control form-control-sm bg-dark text-white border-secondary"
+                    placeholder="Nome ou Documento...">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-white-50">Empresa</label>
+                <select id="filterCompany" class="form-select form-select-sm bg-dark text-white border-secondary">
+                    <option value="">Todas</option>
+                    <option value="MarBR">MarBR</option>
+                    <option value="DZM">DZM</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-white-50">Vínculo</label>
+                <select id="filterType" class="form-select form-select-sm bg-dark text-white border-secondary">
+                    <option value="">Todos</option>
+                    <option value="CLT">CLT</option>
+                    <option value="Estagiário">Estagiário</option>
+                    <option value="PJ">PJ</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-white-50">Status</label>
+                <select id="filterStatus" class="form-select form-select-sm bg-dark text-white border-secondary">
+                    <option value="">Todos</option>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Inativo">Inativo</option>
+                    <option value="Férias">Férias</option>
+                </select>
+            </div>
+
+            <div class="group-filters-extra">
+                <div class="mb-3">
+                    <label class="form-label text-white-50">Setor</label>
+                    <select id="filterDept" class="form-select form-select-sm bg-dark text-white border-secondary">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white-50">Função</label>
+                    <select id="filterRole" class="form-select form-select-sm bg-dark text-white border-secondary">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white-50">Visão Especial</label>
+                    <select id="filterFinancial" class="form-select form-select-sm bg-dark text-white border-warning">
+                        <option value="">Padrão</option>
+                        <option value="loans">Só Empréstimos</option>
+                        <option value="additives">Só Aditivos</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="btnClearFilters" class="btn btn-outline-light btn-sm w-100 mt-2">
+                <i class="bi bi-x-circle me-2"></i>Limpar Filtros
+            </button>
+            <div class="mt-4 pt-4 border-top border-secondary text-white-50 text-center small">
+                <small>Versão: <span class="appVersionText">v0.0</span></small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão para reabrir quando recolhido (sibling do sidebar) -->
+    <button id="sidebarToggleOpen" class="sidebar-open-btn">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Header Padrão -->
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" style="max-height: 120px;">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-0">PeopleBoard <span class="appVersionText text-muted fw-normal" style="font-size: 0.8rem; vertical-align: middle; margin-left: 8px;"></span></h1>
+                    <p class="text-muted mb-0">Gestão de Pessoal e Cadastros</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <button id="btnPrivacy" class="btn btn-outline-dark" title="Ocultar Valores">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-outline-secondary" onclick="showExportOptions()">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>
+                    <span class="d-none d-md-inline">Exportar PDF</span>
+                </button>
+                <button class="btn btn-primary" id="btnAddEmployee">
+                    <i class="bi bi-person-plus me-1"></i>
+                    <span class="d-none d-md-inline">Registrar Pessoal</span>
+                </button>
+                <a href="emprestimos.html" class="btn btn-outline-warning">
+                    <i class="bi bi-bank me-1"></i>
+                    <span class="d-none d-md-inline">Empréstimos</span>
+                </a>
+                <a href="landing.html" class="btn btn-secondary text-white">
+                    <i class="bi bi-house-door me-1"></i>
+                    <span class="d-none d-md-inline">Voltar ao Início</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Registros -->
+        <div class="table-responsive">
+            <table class="people-table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">COLABORADOR</th>
+                        <th>VÍNCULO</th>
+                        <th>CHAVE PIX</th>
+                        <th>ADMISSÃO</th>
+                        <th>SETOR / FUNÇÃO</th>
+                        <th>REMUNERAÇÃO</th>
+                        <th class="text-warning">MARGEM</th>
+                        <th class="text-warning">TOMADO</th>
+                        <th>STATUS</th>
+                        <th class="text-center">ADIT.</th>
+                        <th class="text-center">AÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody id="employeesList">
+                    <!-- Carregado via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+
+    <!-- Overlay de Detalhes (5 COLUNAS HORIZONTAIS) -->
+    <div id="profileOverlay">
+        <div class="hud-profile shadow-lg">
+            <button class="btn-close-hud hud-font small" onclick="closeProfile()">CLOSE_X</button>
+
+            <!-- COLUNA 1: Foto e Resumo -->
+            <div class="profile-sidebar">
+                <div class="profile-photo-container">
+                    <img id="profilePhoto" src="" class="profile-photo">
+                    <div class="photo-scanline"></div>
+                    <button id="btnPrivacyProfile"
+                        class="btn btn-sm btn-outline-warning position-absolute bottom-0 end-0 m-1"
+                        onclick="setupPrivacy().onclick()" title="Alternar Visibilidade">
+                        <i class="bi bi-eye-fill"></i>
+                    </button>
+                </div>
+                <h2 id="profileName" class="hud-font">...</h2>
+                <div id="profileID" class="small opacity-50 mb-3">...</div>
+
+                <div id="profilePJSection" style="display:none;" class="w-100 mb-3">
+                    <div class="data-row mb-2">
+                        <span class="label small">RAZÃO SOCIAL</span>
+                        <span id="profileCorporate" class="value small text-warning text-uppercase">...</span>
+                    </div>
+                </div>
+
+                <div class="data-row w-100 mb-4">
+                    <span class="label small">RESPONSÁVEL</span>
+                    <span id="profileResponsible" class="value small text-white-50">...</span>
+                </div>
+
+                <div class="mt-auto w-100">
+                    <button class="btn btn-warning w-100 mb-2" onclick="editEmployee()">
+                        <i class="bi bi-pencil-square me-2"></i>ALTERAR CADASTRO
+                    </button>
+                    <button class="btn btn-outline-info w-100 mb-2" onclick="newAdditive()">
+                        <i class="bi bi-plus-circle me-2"></i>NOVO ADITIVO
+                    </button>
+                    <button id="btnDocuments" class="btn btn-outline-info w-100 mb-2" onclick="openDocsModal()">
+                        <i class="bi bi-collection-play me-2"></i>DOCUMENTOS
+                    </button>
+                </div>
+            </div>
+
+            <!-- COLUNA 2: Dados na Empresa -->
+            <div class="profile-column">
+                <h6 class="column-title">🏢 DADOS NA EMPRESA</h6>
+                <div class="data-row"><span class="label">EMPRESA</span><span id="profileCompany"
+                        class="value">...</span></div>
+                <div class="data-row"><span class="label">VÍNCULO</span><span id="profileType" class="value">...</span>
+                </div>
+                <div class="data-row"><span class="label">SETOR</span><span id="profileDept" class="value">...</span>
+                </div>
+                <div class="data-row"><span class="label">FUNÇÃO</span><span id="profileRole" class="value">...</span>
+                </div>
+                <div class="data-row"><span class="label">TELEFONE PROFISSIONAL</span><span id="profilePhonePro"
+                        class="value small">...</span></div>
+                <div class="data-row"><span class="label">E-MAIL PROFISSIONAL</span><span id="profileEmailPro"
+                        class="value small text-lowercase">...</span></div>
+            </div>
+
+            <!-- COLUNA 3: Datas e Valores -->
+            <div class="profile-column">
+                <h6 class="column-title">💰 DATAS E VALORES</h6>
+                <div class="data-row"><span class="label">ADMISSÃO</span><span id="profileStart"
+                        class="value">...</span></div>
+                <div class="data-row"><span class="label">REMUNERAÇÃO</span><span id="profileRemuneration"
+                        class="value fw-bold text-success font-monospace">...</span></div>
+                <div class="data-row"><span class="label">CONSIGNÁVEL</span><span id="profileConsignable"
+                        class="value fw-bold text-warning font-monospace">R$ 0,00</span></div>
+                <div class="data-row"><span class="label">SALDO DEVEDOR</span><span id="profileDebtBalance"
+                        class="value small font-monospace">R$ 0,00</span></div>
+                <div class="data-row"><span class="label">STATUS</span><span id="profileStatus"
+                        class="value badge bg-success">...</span></div>
+                <div class="data-row"><span class="label">REGISTRO</span><span id="profileCreated"
+                        class="value small">...</span></div>
+            </div>
+
+            <!-- COLUNA 4: Histórico -->
+            <div class="profile-column">
+                <h6 class="column-title">📜 HISTÓRICO</h6>
+                <div id="profileHistory" class="profile-history-container">
+                    <!-- Histórico injetado aqui -->
+                </div>
+            </div>
+
+            <!-- COLUNA 5: Dados Pessoais -->
+            <div class="profile-column">
+                <h6 class="column-title">👤 DADOS PESSOAIS</h6>
+                <div class="data-row"><span class="label">DOCUMENTO</span><span id="profileDoc"
+                        class="value font-monospace">...</span></div>
+                <div class="data-row"><span class="label">TELEFONE PESSOAL</span><span id="profilePhone"
+                        class="value small">...</span></div>
+                <div class="data-row"><span class="label">E-MAIL PESSOAL</span><span id="profileEmail"
+                        class="value small text-lowercase">...</span></div>
+                <div class="data-row"><span class="label">PIX</span><span id="profilePix"
+                        class="value small font-monospace">...</span></div>
+
+                <h6 class="column-title mt-3">🚨 EMERGÊNCIA</h6>
+                <div class="data-row"><span class="label">CONTATO</span><span id="profileEmergencyName"
+                        class="value small">...</span></div>
+                <div class="data-row"><span class="label">TELEFONE</span><span id="profileEmergencyPhone"
+                        class="value small">...</span></div>
+                <div class="data-row"><span class="label">VÍNCULO</span><span id="profileEmergencyRelation"
+                        class="value small">...</span></div>
+
+                <div class="mt-auto">
+                    <button class="btn btn-sm btn-outline-light w-100" onclick="exportPDF('ia')">
+                        <i class="bi bi-journal-text me-2"></i>GERAR DOSSIÊ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal OPÇÕES DE EXPORTAÇÃO -->
+    <div class="modal fade" id="exportOptionsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white border-warning">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title hud-font text-warning">Opções de Exportação</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-white-50 mb-3">Selecione os dados que deseja incluir no relatório PDF:</p>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="NOME" checked> <label class="small">Nome</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="VÍNCULO" checked> <label class="small">Vínculo</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="SETOR" checked> <label class="small">Setor</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="FUNÇÃO" checked> <label class="small">Função</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="SALÁRIO" checked> <label class="small">Salário</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="STATUS" checked> <label class="small">Status</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="INÍCIO" checked> <label class="small">Admissão</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="DOC"> <label class="small">Documento</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="ESCOLARIDADE"> <label class="small">Escolaridade</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="FILHOS"> <label class="small">Filhos</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="ADITIVOS"> <label class="small">Aditivos</label></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check"><input class="form-check-input export-field" type="checkbox"
+                                    value="EMPRESA" checked> <label class="small">Empresa</label></div>
+                        </div>
+                        <div class="col-12">
+                            <h6 class="hud-font text-primary mb-3">CONTEÚDO DO RELATÓRIO</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button class="btn btn-outline-info w-100 mb-2" onclick="exportPDF('ia')">RELATÓRIO ESTRATÉGICO
+                        IA</button>
+                    <button class="btn btn-warning w-100" onclick="exportPDF('list')">BAIXAR TABELA SELECIONADA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form (Padronizado) -->
+    <div class="modal fade" id="employeeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg border-warning">
+            <div class="modal-content border-warning">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title hud-font" id="modalTitle">REGISTRO DE PESSOAL</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="employeeForm">
+                        <input type="hidden" id="empId">
+                        <div class="row g-3">
+                            <!-- Prioridade: Vínculo -->
+                            <div class="col-md-3">
+                                <label class="form-label">Tipo de Vínculo</label>
+                                <select id="empType" class="form-select" onchange="togglePJFields()">
+                                    <option value="CLT">CLT</option>
+                                    <option value="Estagiário">Estagiário</option>
+                                    <option value="PJ">PJ</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Sexo</label>
+                                <select id="empGender" class="form-select">
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                    <option value="O">Outro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Estado Civil</label>
+                                <select id="empMaritalStatus" class="form-select">
+                                    <option value="Solteiro">Solteiro(a)</option>
+                                    <option value="Casado">Casado(a)</option>
+                                    <option value="Divorciado">Divorciado(a)</option>
+                                    <option value="Viúvo">Viúvo(a)</option>
+                                    <option value="União Estável">União Estável</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3" id="groupPJType" style="display: none;">
+                                <label class="form-label">Modelo PJ</label>
+                                <select id="empPJType" class="form-select">
+                                    <option value="MEI">MEI</option>
+                                    <option value="SIMPLES">SIMPLES</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4" id="groupCorporateName" style="display: none;">
+                                <label class="form-label">Razão Social</label>
+                                <input type="text" id="empCorporateName" class="form-control">
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Nome Completo / Fantasia</label>
+                                <input type="text" id="empName" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Responsável (Representante Legal)</label>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-text text-muted">Nome Completo</label>
+                                        <input type="text" id="empResponsible" class="form-control"
+                                            placeholder="Nome do Responsável">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-text text-muted">CPF</label>
+                                        <input type="text" id="empResponsibleCPF" class="form-control"
+                                            placeholder="000.000.000-00" oninput="maskDoc(this)">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-text text-muted">RG</label>
+                                        <input type="text" id="empResponsibleRG" class="form-control"
+                                            placeholder="00.000.000-0" oninput="maskRG(this)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Empresa Mar Brasil</label>
+                                <select id="empCompany" class="form-select">
+                                    <option value="MarBR">MarBR</option>
+                                    <option value="DZM" selected>DZM</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">CPF / CNPJ do Colaborador</label>
+                                <div class="input-group">
+                                    <input type="text" id="empDoc" class="form-control" oninput="maskDoc(this)"
+                                        maxlength="18">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        onclick="copyDocToPix()" title="Copiar para PIX">
+                                        <i class="bi bi-clipboard-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Telefone Pessoal</label>
+                                <input type="text" id="empPhone" class="form-control" oninput="maskPhone(this)"
+                                    placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">E-mail Pessoal</label>
+                                <input type="email" id="empEmail" class="form-control" placeholder="usuario@email.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Telefone Profissional</label>
+                                <input type="text" id="empPhonePro" class="form-control" oninput="maskPhone(this)"
+                                    placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">E-mail Profissional</label>
+                                <input type="email" id="empEmailPro" class="form-control"
+                                    placeholder="usuario@empresa.com">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Chave PIX</label>
+                                <input type="text" id="empPix" class="form-control">
+                            </div>
+
+                            <!-- Endereço Estruturado -->
+                            <div class="col-md-4">
+                                <label class="form-label">CEP (Busca Automática)</label>
+                                <div class="input-group">
+                                    <input type="text" id="empZip" class="form-control" oninput="maskCEP(this)"
+                                        maxlength="9">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="searchCEP()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Logradouro / Rua</label>
+                                <input type="text" id="empStreet" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Número</label>
+                                <input type="text" id="empNumber" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Complemento</label>
+                                <input type="text" id="empComplement" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Bairro</label>
+                                <input type="text" id="empNeighborhood" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Cidade</label>
+                                <input type="text" id="empCity" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Estado (UF)</label>
+                                <input type="text" id="empState" class="form-control" readonly>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Setor</label>
+                                <input type="text" id="empDept" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Função</label>
+                                <input type="text" id="empRole" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Remuneração (R$)</label>
+                                <input type="number" id="empRemuneration" class="form-control" step="0.01">
+                            </div>
+
+                            <!-- Status e Gestão -->
+                            <div class="col-md-4">
+                                <label class="form-label">Status Atual</label>
+                                <select id="empStatus" class="form-select" onchange="toggleStatusDates()">
+                                    <option value="Ativo">Ativo</option>
+                                    <option value="Inativo">Inativo</option>
+                                    <option value="Férias">Férias</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 group-status-date" style="display: none;">
+                                <label class="form-label">Início Status</label>
+                                <input type="date" id="empStatusStart" class="form-control">
+                            </div>
+                            <div class="col-md-4 group-status-date" style="display: none;">
+                                <label class="form-label">Fim Status</label>
+                                <input type="date" id="empStatusEnd" class="form-control">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Instagram (Opcional)</label>
+                                <input type="text" id="empInstagram" class="form-control" placeholder="@usuario ou URL">
+                            </div>
+
+                            <!-- Novos Campos Dinâmicos -->
+                            <div class="col-md-6">
+                                <label class="form-label d-flex justify-content-between">
+                                    Filhos <button type="button"
+                                        class="btn btn-sm btn-outline-primary border-0 p-0 px-2"
+                                        onclick="addChildRow()">+ ADD</button>
+                                </label>
+                                <div id="childrenContainer" class="dynamic-container"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-flex justify-content-between">
+                                    Formação <button type="button"
+                                        class="btn btn-sm btn-outline-primary border-0 p-0 px-2"
+                                        onclick="addEducationRow()">+ ADD</button>
+                                </label>
+                                <div id="educationContainer" class="dynamic-container"></div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Foto do Colaborador (Upload Direto)</label>
+                                <div class="input-group">
+                                    <input type="file" id="empPhotoFile" class="form-control" accept="image/*"
+                                        onchange="handlePhotoUpload(this)">
+                                    <input type="hidden" id="empPhotoBase64">
+                                </div>
+                                <div id="photoPreview" class="mt-2 small text-muted">A imagem será salva no banco de
+                                    dados.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Data de Admissão</label>
+                                <input type="date" id="empStart" class="form-control">
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <hr class="my-4">
+                                <div class="alert alert-info d-flex align-items-center gap-2 py-2">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                    <small>Empréstimos são gerenciados na página <a href="emprestimos.html"
+                                            class="alert-link fw-bold">Empréstimos</a>.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <h6 class="text-uppercase small fw-bold text-muted border-bottom pb-2">Contato de
+                                Emergência</h6>
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <label class="form-text">Nome do Contato</label>
+                                    <input type="text" id="empEmergencyName" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-text">Telefone</label>
+                                    <input type="text" id="empEmergencyPhone" class="form-control form-control-sm"
+                                        oninput="maskPhone(this)">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-text">Vínculo</label>
+                                    <input type="text" id="empEmergencyRelation" class="form-control form-control-sm"
+                                        placeholder="Ex: Pai, Esposa">
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" id="btnSaveEmployee" class="btn btn-warning px-4" onclick="saveEmployee()">SALVAR
+                    REGISTRO</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal Novo Aditivo -->
+    <div class="modal fade" id="additiveModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-info">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title hud-font small">NOVO ADITIVO CONTRATUAL</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Tipo de Aditivo</label>
+                        <select id="adtType" class="form-select" onchange="toggleAdditiveFields()">
+                            <option value="Cargo">Mudança de Função/Cargo</option>
+                            <option value="Setor">Mudança de Setor</option>
+                            <option value="Remuneração">Mudança de Remuneração</option>
+                            <option value="Outro">Outras Alterações</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Data de Início do Aditivo</label>
+                        <input type="date" id="adtDate" class="form-control" required>
+                    </div>
+
+                    <div id="adtFields" class="p-3 border rounded bg-light">
+                        <!-- Campos Dinâmicos -->
+                    </div>
+
+                    <div class="mt-3">
+                        <label class="form-label small text-muted">Observações Adicionais</label>
+                        <textarea id="adtNote" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-info" onclick="saveAdditive()">APLICAR
+                        ADITIVO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Documentos -->
+    <div class="modal fade" id="modalDocumentos" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-dark rounded-4 shadow-lg border-0">
+                <div class="modal-header border-bottom border-white border-opacity-10 p-4">
+                    <h5 class="modal-title fw-bold text-info"><i class="bi bi-folder2-open me-2"></i>CENTRAL DE
+                        DOCUMENTOS</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-white-50 small mb-4">Insira os links dos documentos hospedados (Google Drive,
+                        Dropbox, etc.)</p>
+
+                    <div class="mb-4">
+                        <label class="form-label small text-info text-uppercase fw-bold opacity-75">Link do Contrato
+                            Principal</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-info"><i
+                                    class="bi bi-file-earmark-text"></i></span>
+                            <input type="url" class="form-control form-control-dark" id="docLinkContratos"
+                                placeholder="https://drive.google.com/...">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label small text-info text-uppercase fw-bold opacity-75 mb-0">Links de
+                                Aditivos</label>
+                            <button type="button" class="btn btn-sm btn-outline-info p-1 px-2 py-0 border-0"
+                                onclick="addDocRow('listAditivos')"><i class="bi bi-plus-lg"></i> ADITIVO</button>
+                        </div>
+                        <div id="listAditivos" class="d-flex flex-column gap-2">
+                            <!-- Inseridos via JS -->
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label small text-info text-uppercase fw-bold opacity-75 mb-0">Links de
+                                Empréstimos</label>
+                            <button type="button" class="btn btn-sm btn-outline-info p-1 px-2 py-0 border-0"
+                                onclick="addDocRow('listEmprestimos')"><i class="bi bi-plus-lg"></i> EMPRÉSTIMO</button>
+                        </div>
+                        <div id="listEmprestimos" class="d-flex flex-column gap-2">
+                            <!-- Inseridos via JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-white border-opacity-10 p-4">
+                    <button type="button" class="btn btn-outline-secondary rounded-3"
+                        data-bs-dismiss="modal">CANCELAR</button>
+                    <button type="button" class="btn btn-info px-4 rounded-3 fw-bold text-dark"
+                        onclick="saveDocsLinks()">SALVAR LINKS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="timbrado_b64.js"></script>
+    <script src="people.js?v=28.10"></script>
+
+    <!-- BrisinhAI Scripts Oficial -->
+    <script src="ai.service.v2.js?v=28.10"></script>
+    <script src="brisinhai.js?v=28.10"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                // Atualizar título da aba
+                document.title = `PeopleBoard v${window.APP_VERSION} - Mar Brasil | Gestão de Pessoal`;
+                
+                // Atualizar todos os elementos com a classe appVersionText (ex: cabeçalho e sidebar)
+                document.querySelectorAll('.appVersionText').forEach(el => {
+                    el.textContent = 'v' + window.APP_VERSION;
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

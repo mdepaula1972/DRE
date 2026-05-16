@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="auth-check.js?v=28.0"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Contratos | Mar Brasil v26.3</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Puxando o CSS oficial para manter o padrão -->
+    <link rel="stylesheet" href="styles.css?v=28.0">
+    <script src="version.js?v=28.0"></script>
+
+    <style>
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+
+        .status-pago {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            border-color: #2ecc71;
+        }
+
+        .status-pendente {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border-color: #e74c3c;
+        }
+
+        .status-info {
+            background: rgba(52, 152, 219, 0.15);
+            color: #3498db;
+            border-color: #3498db;
+        }
+
+        .status-neutral {
+            background: rgba(149, 165, 166, 0.15);
+            color: #95a5a6;
+            border-color: #95a5a6;
+        }
+
+        .table-matrix thead th {
+            position: sticky;
+            top: 0;
+            background: #1a1a1a !important;
+            color: #fff !important;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 10;
+            border-bottom: none !important;
+            padding: 12px 8px !important;
+        }
+
+        .table-matrix tbody td {
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+            color: #eee;
+        }
+
+        .val-cell {
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .contract-cell {
+            min-width: 200px;
+            font-weight: 700;
+            color: #fff !important;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        #mainContent.expanded {
+            margin-left: 80px;
+            width: calc(100% - 80px);
+        }
+
+        .chart-container-large {
+            height: 350px;
+        }
+
+        /* Sticky Header e KPI v21 */
+        header.sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(245, 245, 245, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            margin: -2rem -2rem 2rem -2rem;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        #kpiRow1.sticky-row {
+            position: sticky;
+            top: 110px;
+            /* Abaixo do header */
+            z-index: 990;
+            transition: all 0.3s ease;
+        }
+
+        #kpiRow1.scrolled {
+            background: rgba(245, 245, 245, 0.9);
+            backdrop-filter: blur(10px);
+            margin: 0 -2rem;
+            padding: 1rem 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Privacidade na Matriz */
+        body.privacy-active .privacy-mask {
+            filter: blur(8px);
+            pointer-events: none;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="Mar-Brasil-sem-fundo-preto.png" alt="Logo" style="max-height: 50px;">
+            <button id="sidebarToggle" class="sidebar-toggle-btn ms-auto"><i class="bi bi-chevron-left"></i></button>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="p-3">
+                <h6 class="text-uppercase text-white-50 small mb-3">Filtros Avançados</h6>
+                <div class="mb-3">
+                    <label class="text-white-50 small d-block mb-1">Empresa</label>
+                    <select id="filterEmpresa" class="form-select form-select-sm bg-dark text-white" multiple
+                        size="3"></select>
+                </div>
+                <div class="mb-3">
+                    <label class="text-white-50 small d-block mb-1">Mês (Ciclo)</label>
+                    <select id="filterCiclo" class="form-select form-select-sm bg-dark text-white" multiple
+                        size="4"></select>
+                </div>
+                <!-- Visão de Valor Removida na v25.0 -->
+                <div class="mb-3">
+                    <label class="text-white-50 small d-block mb-1">Contrato</label>
+                    <select id="filterContrato" class="form-select form-select-sm bg-dark text-white" multiple
+                        size="4"></select>
+                </div>
+                <div class="mb-3">
+                    <label class="text-white-50 small d-block mb-1">Status</label>
+                    <select id="filterStatus" class="form-select form-select-sm bg-dark text-white" multiple
+                        size="2"></select>
+                </div>
+                <button id="btnClearFilters" class="btn btn-outline-warning btn-sm w-100 mt-2">Limpar Filtros</button>
+            </div>
+
+            <div class="mt-auto p-3 text-center border-top border-secondary">
+                <small class="text-white-50" id="appVersionDisplay">v0.0 Matrix</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <header class="d-flex justify-content-between align-items-center mb-4 sticky-header">
+            <div class="d-flex align-items-center gap-3">
+                <img src="Mar-Brasil-sem-fundo-preto.png" alt="Mar Brasil Logo" style="max-height: 80px;">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-0">Contratos & Faturamento</h1>
+                    <p class="text-muted mb-0 small" id="lastUpdate">Sincronizado: Consolidado Faturamento.csv</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-outline-dark" id="btnPrivacyToggle" onclick="togglePrivacyMode()"
+                    title="Ocultar Valores">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <a href="landing.html" class="btn btn-secondary text-white">
+                    <i class="bi bi-house-door me-1"></i>
+                    <span class="d-none d-md-inline">Voltar ao Início</span>
+                </a>
+                <button class="btn btn-outline-danger" id="btnExportPDF" onclick="exportToPDF()">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>
+                    <span class="d-none d-md-inline">Exportar PDF</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Row -->
+        <div class="row g-3 mb-4 sticky-row" id="kpiRow1">
+            <div class="col-md-3">
+                <div class="metric-card card-primary">
+                    <div class="title">Total Faturado</div>
+                    <div class="value privacy-mask" id="valTotalFaturado">R$ 0,00</div>
+                    <div class="small opacity-50">Competência Bruta</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card card-success">
+                    <div class="title">Valor Líquido</div>
+                    <div class="value privacy-mask" id="valTotalRecebido">R$ 0,00</div>
+                    <div class="small opacity-50">Liquidez Projetada</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card card-info">
+                    <div class="title">Total Impostos</div>
+                    <div class="value privacy-mask" id="valTotalComissao">R$ 0,00</div>
+                    <div class="small opacity-50">Retenções Totais</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card card-danger">
+                    <div class="title">Itens Abertos</div>
+                    <div class="value" id="valComissaoPendente">0</div>
+                    <div class="small opacity-50">Aguardando Recebimento</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="chart-card p-4 h-100">
+                    <h6 class="text-uppercase small fw-bold mb-4 opacity-50">Evolução Cronológica de Faturamento</h6>
+                    <div class="chart-container-large">
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-card p-4 h-100">
+                    <h6 class="text-uppercase small fw-bold mb-4 opacity-50">Share por Empresa</h6>
+                    <div class="chart-container-large">
+                        <canvas id="contractCompareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matrix Table -->
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="chart-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h6 class="text-uppercase small fw-bold mb-0 opacity-50">Matriz de Faturamento por Contrato
+                            (v20)</h6>
+                        <div class="small text-muted">Meses organizados cronologicamente &rarr;</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover table-matrix align-middle" id="matrixTable">
+                            <thead>
+                                <tr id="matrixHeader">
+                                    <th class="contract-cell">Contrato</th>
+                                    <!-- Dinâmico: Meses -->
+                                </tr>
+                            </thead>
+                            <tbody id="matrixBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        class="d-none position-fixed top-0 start-0 w-100 h-100 bg-black bg-opacity-75 d-flex justify-content-center align-items-center"
+        style="z-index: 2000;">
+        <div class="spinner-border text-warning" role="status" style="width: 3rem; height: 3rem;"><span
+                class="visually-hidden">...</span></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script src="contratos.js?v=28.0"></script>
+
+    <script>
+        // Version Updater
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.APP_VERSION) {
+                document.getElementById('appVersionDisplay').textContent = 'v' + window.APP_VERSION + ' Matrix';
+            }
+        });
+        // Sidebar Toggle Logic
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const icon = document.querySelector('#sidebarToggle i');
+
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+
+            icon.classList.toggle('bi-chevron-left');
+            icon.classList.toggle('bi-chevron-right');
+        });
+
+        // Privacy Mode
+        function togglePrivacyMode() {
+            document.body.classList.toggle('privacy-active');
+            const icon = document.querySelector('#btnPrivacyToggle i');
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        }
+
+        // Export PDF standard function
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            const content = document.getElementById('mainContent');
+
+            showLoading(true);
+            try {
+                // Solicitar análise da IA antes de gerar o PDF
+                let iaAnalysis = "Análise estratégica não disponível no momento.";
+                if (window.getBrisinhAIAnalysis) {
+                    iaAnalysis = await window.getBrisinhAIAnalysis();
+                }
+
+                const canvas = await html2canvas(content, { scale: 2, useCORS: true });
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = doc.getImageProperties(imgData);
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+                // Adicionar página extra com análise da IA
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.setTextColor(242, 145, 27); // Laranja Mar Brasil
+                doc.text("Análise Estratégica BrisinhAI", 10, 20);
+
+                doc.setFontSize(10);
+                doc.setTextColor(50, 50, 50);
+                const splitText = doc.splitTextToSize(iaAnalysis.replace(/<[^>]*>/g, ''), pdfWidth - 20);
+                doc.text(splitText, 10, 30);
+
+                doc.save(`Mar_Brasil_Contratos_v21_${new Date().getTime()}.pdf`);
+            } catch (err) {
+                console.error("PDF Export Error:", err);
+            } finally {
+                showLoading(false);
+            }
+        }
+    </script>
+
+    <!-- BrisinhAI Integrado -->
+    <div id="aiContainer"></div>
+    <script src="ai.service.v2.js?v=28.0"></script>
+    <script src="brisinhai.js?v=28.0"></script>
+</body>
+
+</html>

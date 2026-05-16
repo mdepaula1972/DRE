@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Validations
+*.log
+.vercel
+.env*.local
+
+# Data & Logs (V30.6 Faxina)
+output/
+backups/
+backup/
+*.json
+*.csv
+!package.json
+!vercel.json
+!tsconfig.json
+!package-lock.json

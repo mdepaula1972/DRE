@@ -1,0 +1,126 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-space), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+}
+
+:root {
+  --background: #f5f5f5;
+  --foreground: #262223;
+
+  /* Owner Typography Tokens */
+  --font-inter-size: 16px;
+  --font-space-tracking: 0.02em;
+
+  /* Mar Brasil Brand Palette */
+  --primary: #F2911B;
+  --primary-foreground: #ffffff;
+  --secondary: #262223;
+  --secondary-foreground: #ffffff;
+
+  /* Semantic Colors */
+  --border: rgba(38, 34, 35, 0.1);
+  --input: rgba(38, 34, 35, 0.1);
+  --ring: var(--primary);
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #262223;
+
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  --radius: 0.625rem;
+  --sidebar-width: 16rem;
+
+  --sidebar-background: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: var(--primary);
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: var(--primary);
+  --sidebar-border: rgba(15, 23, 42, 0.08);
+}
+
+/* === THEME: AURA LIGHT (Premium Clarity) === */
+.theme-cockpit {
+  --background: #f8fafc; /* Slate-50 */
+  --foreground: #0f172a; /* Slate-900 */
+  --card: #ffffff;
+  --primary: #f97316; /* Ember */
+  --primary-foreground: #ffffff;
+  --border: rgba(15, 23, 42, 0.08); /* Soft slate border */
+  --input: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  
+  --ember-gradient: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  --ember-glow: 0 10px 25px -5px rgba(249, 115, 22, 0.15);
+}
+
+.theme-cockpit h1, 
+.theme-cockpit h2, 
+.theme-cockpit h3 {
+  @apply font-heading font-bold uppercase tracking-[0.03em];
+}
+
+.theme-cockpit .font-metric {
+  @apply font-mono font-bold tracking-tighter;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+/* Utility Classes for Cockpit */
+.bg-ember { background: var(--ember-gradient); }
+.text-ember {
+  background: var(--ember-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.glow-ember { box-shadow: var(--ember-glow); }
