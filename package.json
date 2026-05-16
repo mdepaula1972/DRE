@@ -1,0 +1,17 @@
+{
+    "name": "dashboard-financeiro-mar-brasil",
+    "version": "1.0.0",
+    "type": "module",
+    "engines": {
+        "node": "20.x"
+    },
+    "scripts": {
+        "build": "cd dashboard-v2 && npm install && npm run build && cp -r .next ../.next && cp -r public ../public"
+    },
+    "dependencies": {
+        "@supabase/ssr": "^0.10.3",
+        "@supabase/supabase-js": "^2.95.3",
+        "iconv-lite": "^0.7.2",
+        "stripe": "^22.1.1"
+    }
+}
