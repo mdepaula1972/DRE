@@ -18,7 +18,7 @@ import { DreExportModal, ExportSelections } from '@/components/dre/DreExportModa
 import { DrePrintCharts } from '@/components/dre/DrePrintCharts';
 import { TableIcon, ChevronDown, ChevronUp } from 'lucide-react';
 
-export default function DrePage() {
+export function DrePageClient({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
@@ -183,7 +183,7 @@ export default function DrePage() {
       />
 
       {/* Conteúdo Principal + Painel Direito */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className={`flex-1 flex overflow-hidden relative ${!hasActiveSubscription ? 'blur-sm pointer-events-none select-none' : ''}`}>
 
         {/* Coluna Central: Dashboard */}
         <div id="dre-dashboard-content" className={`flex-1 overflow-y-auto p-6 md:p-8 transition-all duration-300 ${isExportingPdf ? 'opacity-50' : ''}`}>
@@ -298,6 +298,35 @@ export default function DrePage() {
             includeTable: false
           }}
         />
+      )}
+      {/* Paywall Overlay */}
+      {!hasActiveSubscription && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md text-center animate-in zoom-in-95 duration-300 border border-slate-100">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <TableIcon size={32} />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Sua assinatura expirou</h2>
+            <p className="text-slate-500 mb-8">
+              Para continuar analisando suas demonstrações financeiras e utilizando nossos recursos premium, por favor renove sua assinatura.
+            </p>
+            
+            <button 
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/checkout', { method: 'POST' });
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                } catch (e) {
+                  alert('Erro ao redirecionar para o pagamento.');
+                }
+              }}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors shadow-lg shadow-emerald-600/20"
+            >
+              Renovar Assinatura Agora
+            </button>
+          </div>
+        </div>
       )}
     </main>
   );
